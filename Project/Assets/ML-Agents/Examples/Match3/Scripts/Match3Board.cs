@@ -1,0 +1,382 @@
+using System;
+using System.Collections.Generic;
+using Unity.MLAgents.Integrations.Match3;
+using UnityEngine;
+using UnityEngine.Serialization;
+
+namespace Unity.MLAgentsExamples
+{
+
+
+    public class Match3Board : AbstractBoard
+    {
+        public int MinRows;
+        [FormerlySerializedAs("Rows")]
+        public int MaxRows;
+
+        public int MinColumns;
+        [FormerlySerializedAs("Columns")]
+        public int MaxColumns;
+
+        public int NumCellTypes;
+        // public int NumSpecialTypes;
+
+        public const int k_EmptyCell = -1;
+        //[Tooltip("Points earned for clearing a basic cell (cube)")]
+        //public int BasicCellPoints = 1;
+
+        //[Tooltip("Points earned for clearing a special cell (sphere)")]
+        //public int SpecialCell1Points = 2;
+        
+        //[Tooltip("Points earned for clearing an extra special cell (plus)")]
+        //public int SpecialCell2Points = 3;
+
+
+
+
+
+
+
+
+        /// <summary>
+        /// Seed to initialize the <see cref="System.Random"/> object.
+        /// </summary>
+        public int RandomSeed;
+
+        (int CellType, int PieceType)[,] m_Cells;
+
+        // PCG에서 새로 생성된 블럭들을 보관하기 위한 공간
+        (int CellType, int PieceType)[,] m_GeneratedCells;
+        bool[,] m_Matched;
+
+        private BoardSize m_CurrentBoardSize;
+
+        System.Random m_Random;
+
+
+
+        public enum PieceType : int
+        {
+            Empty = 0,
+            NormalPiece = 1,
+            HorizontalPiece = 2,
+            VerticalPiece = 3,
+            CrossPiece = 4,
+            BombPiece = 5,
+            RocketPiece = 6,
+            RainbowPiece = 7
+        }
+
+        public static Dictionary<PieceType, int> m_MatchingScore = new Dictionary<PieceType, int>()
+        {
+            { PieceType.Empty, 0 },
+            { PieceType.NormalPiece, 10 },
+            { PieceType.HorizontalPiece, 20 },
+            { PieceType.VerticalPiece, 30 },
+            { PieceType.CrossPiece, 40 },
+            { PieceType.RocketPiece, 50 },
+            { PieceType.RainbowPiece, 60 }
+        };
+
+        public static Dictionary<PieceType, int> m_DestroyScore = new Dictionary<PieceType, int>()
+        {
+            { PieceType.Empty, 0 },
+            { PieceType.NormalPiece, 100 },
+            { PieceType.HorizontalPiece, 200 },
+            { PieceType.VerticalPiece, 300 },
+            { PieceType.CrossPiece, 400 },
+            { PieceType.RocketPiece, 500 },
+            { PieceType.RainbowPiece, 600 }
+        };
+
+
+
+        void Awake()
+        {
+            m_Cells = new (int, int)[MaxColumns, MaxRows];
+            m_Matched = new bool[MaxColumns, MaxRows];
+
+            // Start using the max rows and columns, but we'll update the current size at the start of each episode.
+            m_CurrentBoardSize = new BoardSize
+            {
+                Rows = MaxRows,
+                Columns = MaxColumns,
+                NumCellTypes = NumCellTypes,
+            };
+        }
+
+        void Start()
+        {
+            m_Random = new System.Random(RandomSeed == -1 ? gameObject.GetInstanceID() : RandomSeed);
+            InitRandom();
+        }
+
+        public override BoardSize GetMaxBoardSize()
+        {
+            return new BoardSize
+            {
+                Rows = MaxRows,
+                Columns = MaxColumns,
+                NumCellTypes = NumCellTypes,
+            };
+        }
+
+        public override BoardSize GetCurrentBoardSize()
+        {
+            return m_CurrentBoardSize;
+        }
+
+        /// <summary>
+        /// Change the board size to a random size between the min and max rows and columns. This is
+        /// cached so that the size is consistent until it is updated.
+        /// This is just for an example; you can change your board size however you want.
+        /// </summary>
+        public void UpdateCurrentBoardSize()
+        {
+            var newRows = m_Random.Next(MinRows, MaxRows + 1);
+            var newCols = m_Random.Next(MinColumns, MaxColumns + 1);
+            m_CurrentBoardSize.Rows = newRows;
+            m_CurrentBoardSize.Columns = newCols;
+        }
+
+        public override bool MakeMove(Move move)
+        {
+            if (!IsMoveValid(move))
+            {
+                return false;
+            }
+            var originalValue = m_Cells[move.Column, move.Row];
+            var (otherRow, otherCol) = move.OtherCell();
+            var destinationValue = m_Cells[otherCol, otherRow];
+
+            m_Cells[move.Column, move.Row] = destinationValue;
+            m_Cells[otherCol, otherRow] = originalValue;
+            return true;
+        }
+
+        public override int GetCellType(int row, int col)
+        {
+            if (row >= m_CurrentBoardSize.Rows || col >= m_CurrentBoardSize.Columns)
+            {
+                throw new IndexOutOfRangeException();
+            }
+            return m_Cells[col, row].CellType;
+        }
+
+        public override int GetSpecialType(int row, int col)
+        {
+            if (row >= m_CurrentBoardSize.Rows || col >= m_CurrentBoardSize.Columns)
+            {
+                throw new IndexOutOfRangeException();
+            }
+            return m_Cells[col, row].PieceType;
+        }
+
+        public override bool IsMoveValid(Move m)
+        {
+            if (m_Cells == null)
+            {
+                return false;
+            }
+
+            return SimpleIsMoveValid(m);
+        }
+
+        public bool MarkMatchedCells(int[,] cells = null)
+        {
+            ClearMarked();
+            bool madeMatch = false;
+            for (var i = 0; i < m_CurrentBoardSize.Rows; i++)
+            {
+                for (var j = 0; j < m_CurrentBoardSize.Columns; j++)
+                {
+                    // Check vertically
+                    var matchedRows = 0;
+                    for (var iOffset = i; iOffset < m_CurrentBoardSize.Rows; iOffset++)
+                    {
+                        if (m_Cells[j, i].CellType != m_Cells[j, iOffset].CellType)
+                        {
+                            break;
+                        }
+
+                        matchedRows++;
+                    }
+
+                    if (matchedRows >= 3)
+                    {
+                        madeMatch = true;
+                        for (var k = 0; k < matchedRows; k++)
+                        {
+                            m_Matched[j, i + k] = true;
+                        }
+                    }
+
+                    // Check vertically
+                    var matchedCols = 0;
+                    for (var jOffset = j; jOffset < m_CurrentBoardSize.Columns; jOffset++)
+                    {
+                        if (m_Cells[j, i].CellType != m_Cells[jOffset, i].CellType)
+                        {
+                            break;
+                        }
+
+                        matchedCols++;
+                    }
+
+                    if (matchedCols >= 3)
+                    {
+                        madeMatch = true;
+                        for (var k = 0; k < matchedCols; k++)
+                        {
+                            m_Matched[j + k, i] = true;
+                        }
+                    }
+                }
+            }
+
+            return madeMatch;
+        }
+
+        /// <summary>
+        /// Sets cells that are matched to the empty cell, and returns the score earned.
+        /// </summary>
+        /// <returns></returns>
+        public int ClearMatchedCells()
+        {
+            var pointsByType = new[] {
+                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
+                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
+                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
+                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
+                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
+                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
+                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece]
+            };
+            int pointsEarned = 0;
+            for (var i = 0; i < m_CurrentBoardSize.Rows; i++)
+            {
+                for (var j = 0; j < m_CurrentBoardSize.Columns; j++)
+                {
+                    if (m_Matched[j, i])
+                    {
+                        var speciaType = GetSpecialType(i, j);
+                        pointsEarned += pointsByType[speciaType];
+                        m_Cells[j, i] = (k_EmptyCell, 0);
+                    }
+                }
+            }
+
+            ClearMarked(); // TODO clear here or at start of matching?
+            return pointsEarned;
+        }
+
+        public bool DropCells()
+        {
+            var madeChanges = false;
+            // Gravity is applied in the negative row direction
+            for (var j = 0; j < m_CurrentBoardSize.Columns; j++)
+            {
+                var writeIndex = 0;
+                for (var readIndex = 0; readIndex < m_CurrentBoardSize.Rows; readIndex++)
+                {
+                    m_Cells[j, writeIndex] = m_Cells[j, readIndex];
+                    if (m_Cells[j, readIndex].CellType != k_EmptyCell)
+                    {
+                        writeIndex++;
+                    }
+                }
+
+                // Fill in empties at the end
+                for (; writeIndex < m_CurrentBoardSize.Rows; writeIndex++)
+                {
+                    madeChanges = true;
+                    m_Cells[j, writeIndex] = (k_EmptyCell, 0);
+                }
+            }
+
+            return madeChanges;
+        }
+
+        public bool FillFromAbove()
+        {
+            bool madeChanges = false;
+            for (var i = 0; i < m_CurrentBoardSize.Rows; i++)
+            {
+                for (var j = 0; j < m_CurrentBoardSize.Columns; j++)
+                {
+                    if (m_Cells[j, i].CellType == k_EmptyCell)
+                    {
+                        madeChanges = true;
+                        m_Cells[j, i] = (GetRandomCellType(), (int)PieceType.NormalPiece);
+                    }
+                }
+            }
+
+            return madeChanges;
+        }
+
+        public (int, int)[,] Cells
+        {
+            get { return m_Cells; }
+        }
+
+        public bool[,] Matched
+        {
+            get { return m_Matched; }
+        }
+
+        // Initialize the board to random values.
+        public void InitRandom()
+        {
+            for (var i = 0; i < MaxRows; i++)
+            {
+                for (var j = 0; j < MaxColumns; j++)
+                {
+                    m_Cells[j, i] = (GetRandomCellType(), (int)PieceType.NormalPiece);
+                }
+            }
+        }
+
+        public void InitSettled()
+        {
+            InitRandom();
+            while (true)
+            {
+                var anyMatched = MarkMatchedCells();
+                if (!anyMatched)
+                {
+                    return;
+                }
+                ClearMatchedCells();
+                DropCells();
+                FillFromAbove();
+            }
+        }
+
+        void ClearMarked()
+        {
+            for (var i = 0; i < MaxRows; i++)
+            {
+                for (var j = 0; j < MaxColumns; j++)
+                {
+                    m_Matched[j, i] = false;
+                }
+            }
+        }
+
+        int GetRandomCellType()
+        {
+            return m_Random.Next(0, NumCellTypes);
+        }
+
+        int GetRandomSpecialType()
+        {
+            return m_Random.Next((int)PieceType.NormalPiece, (int)PieceType.RainbowPiece);
+        }
+
+
+    }
+
+
+
+}
