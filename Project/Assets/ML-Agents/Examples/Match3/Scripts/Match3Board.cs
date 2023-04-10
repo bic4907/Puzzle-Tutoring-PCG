@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.MLAgents.Integrations.Match3;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEditor;
 
 namespace Unity.MLAgentsExamples
 {
@@ -139,55 +140,77 @@ namespace Unity.MLAgentsExamples
             return SimpleIsMoveValid(m);
         }
 
+
+        private bool IsCellInBounds(int col, int row)
+        {
+            return (row >= 0 && row < m_CurrentBoardSize.Rows) && (col >= 0 && col < m_CurrentBoardSize.Columns);
+        }
+
         public bool MarkMatchedCells(int[,] cells = null)
         {
             ClearMarked();
+
+
             bool madeMatch = false;
             for (var i = 0; i < m_CurrentBoardSize.Rows; i++)
             {
                 for (var j = 0; j < m_CurrentBoardSize.Columns; j++)
                 {
-                    // Check vertically
-                    var matchedRows = 0;
-                    for (var iOffset = i; iOffset < m_CurrentBoardSize.Rows; iOffset++)
-                    {
-                        if (m_Cells[j, i].CellType != m_Cells[j, iOffset].CellType)
-                        {
-                            break;
-                        }
+                    int cellType = m_Cells[j, i].CellType;
+                    int specialType = m_Cells[j, i].SpecialType;
 
-                        matchedRows++;
+                    foreach(KeyValuePair<PieceType, List<int[,]>> matchCase in SpecialMatch.GetInstance().MatchCases)
+                    {
+                        PieceType pieceType = matchCase.Key;
+                        List<int[,]> matchShapes = matchCase.Value;
+
+                        List<int[]> matchedPositions = new List<int[]>(); // matched positions
+
+                        foreach(int[,] shape in matchShapes)
+                        {
+
+                            PieceType matchedType = pieceType;
+                            for (var k = 0; k < shape.GetLength(0); k++)
+                            {
+                                for (var l = 0; l < shape.GetLength(1); l++)
+                                {
+                                    // Check for the exception
+                                    if(!IsCellInBounds(j + l, i + k)) {
+                                        matchedType = PieceType.None;
+                                        break;
+                                    }
+
+
+                                    matchedPositions.Add(new int[] {j + l, i + k});
+
+                                    // Exception for different cell type
+                                    if(m_Cells[j + l, i + k].CellType != cellType || m_Cells[j + l, i + k].SpecialType != (int)PieceType.NormalPiece)
+                                    {
+                                        matchedType = PieceType.None; 
+                                        break;
+                                    }
+
+                                }
+
+                                if(matchedType == PieceType.None) break;
+                            }
+
+                            if(matchedType != PieceType.None) {
+                                Debug.Log("Matched " + matchedType + " at " + j + ", " + i);
+                                // TODO 생성된 블럭 Created에 넣기
+
+                                foreach(int[] position in matchedPositions)
+                                {
+                                    m_Matched[position[0], position[1]] = true;
+                                    madeMatch = true;
+                                }
+                            }
+                           
+
+                        }
                     }
 
-                    if (matchedRows >= 3)
-                    {
-                        madeMatch = true;
-                        for (var k = 0; k < matchedRows; k++)
-                        {
-                            m_Matched[j, i + k] = true;
-                        }
-                    }
 
-                    // Check vertically
-                    var matchedCols = 0;
-                    for (var jOffset = j; jOffset < m_CurrentBoardSize.Columns; jOffset++)
-                    {
-                        if (m_Cells[j, i].CellType != m_Cells[jOffset, i].CellType)
-                        {
-                            break;
-                        }
-
-                        matchedCols++;
-                    }
-
-                    if (matchedCols >= 3)
-                    {
-                        madeMatch = true;
-                        for (var k = 0; k < matchedCols; k++)
-                        {
-                            m_Matched[j + k, i] = true;
-                        }
-                    }
                 }
             }
 
@@ -209,6 +232,7 @@ namespace Unity.MLAgentsExamples
                 SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
                 SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece]
             };
+
             int pointsEarned = 0;
             for (var i = 0; i < m_CurrentBoardSize.Rows; i++)
             {
@@ -305,6 +329,11 @@ namespace Unity.MLAgentsExamples
                     return;
                 }
                 ClearMatchedCells();
+
+                // Create the spcial blocks to the board (before dropping)
+
+
+
                 DropCells();
                 FillFromAbove();
             }

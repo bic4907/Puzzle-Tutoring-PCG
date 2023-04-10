@@ -16,7 +16,6 @@ public class Match3TileSelector : MonoBehaviour
         {
             tileDict.Add(i, tileTypes[i].GetComponent<MeshRenderer>());
         }
-        Debug.Log(tileTypes.Length);
 
         SetActiveTile(0, 0);
     }
