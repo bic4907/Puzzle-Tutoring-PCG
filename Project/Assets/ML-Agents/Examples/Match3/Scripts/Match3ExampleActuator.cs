@@ -21,13 +21,13 @@ namespace Unity.MLAgentsExamples
         protected override int EvalMovePoints(Move move)
         {
             var pointsByType = new[] {
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece]
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece]
             };
             // Counts the expected points for making the move.
             var moveVal = Board.GetCellType(move.Row, move.Column);

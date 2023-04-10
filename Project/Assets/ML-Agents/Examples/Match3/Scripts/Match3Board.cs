@@ -33,63 +33,20 @@ namespace Unity.MLAgentsExamples
 
 
 
-
-
-
-
-
         /// <summary>
         /// Seed to initialize the <see cref="System.Random"/> object.
         /// </summary>
         public int RandomSeed;
 
-        (int CellType, int PieceType)[,] m_Cells;
+        (int CellType, int SpecialType)[,] m_Cells;
 
         // PCG에서 새로 생성된 블럭들을 보관하기 위한 공간
-        (int CellType, int PieceType)[,] m_GeneratedCells;
+        (int CellType, int SpecialType)[,] m_GeneratedCells;
         bool[,] m_Matched;
 
         private BoardSize m_CurrentBoardSize;
 
         System.Random m_Random;
-
-
-
-        public enum PieceType : int
-        {
-            Empty = 0,
-            NormalPiece = 1,
-            HorizontalPiece = 2,
-            VerticalPiece = 3,
-            CrossPiece = 4,
-            BombPiece = 5,
-            RocketPiece = 6,
-            RainbowPiece = 7
-        }
-
-        public static Dictionary<PieceType, int> m_MatchingScore = new Dictionary<PieceType, int>()
-        {
-            { PieceType.Empty, 0 },
-            { PieceType.NormalPiece, 10 },
-            { PieceType.HorizontalPiece, 20 },
-            { PieceType.VerticalPiece, 30 },
-            { PieceType.CrossPiece, 40 },
-            { PieceType.RocketPiece, 50 },
-            { PieceType.RainbowPiece, 60 }
-        };
-
-        public static Dictionary<PieceType, int> m_DestroyScore = new Dictionary<PieceType, int>()
-        {
-            { PieceType.Empty, 0 },
-            { PieceType.NormalPiece, 100 },
-            { PieceType.HorizontalPiece, 200 },
-            { PieceType.VerticalPiece, 300 },
-            { PieceType.CrossPiece, 400 },
-            { PieceType.RocketPiece, 500 },
-            { PieceType.RainbowPiece, 600 }
-        };
-
-
 
         void Awake()
         {
@@ -169,7 +126,7 @@ namespace Unity.MLAgentsExamples
             {
                 throw new IndexOutOfRangeException();
             }
-            return m_Cells[col, row].PieceType;
+            return m_Cells[col, row].SpecialType;
         }
 
         public override bool IsMoveValid(Move m)
@@ -244,13 +201,13 @@ namespace Unity.MLAgentsExamples
         public int ClearMatchedCells()
         {
             var pointsByType = new[] {
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece],
-                Match3Board.m_MatchingScore[Match3Board.PieceType.NormalPiece]
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece]
             };
             int pointsEarned = 0;
             for (var i = 0; i < m_CurrentBoardSize.Rows; i++)
