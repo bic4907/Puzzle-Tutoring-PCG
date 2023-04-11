@@ -41,8 +41,12 @@ namespace Unity.MLAgentsExamples
 
         (int CellType, int SpecialType)[,] m_Cells;
 
+        // Created special blocks in the board
+        (int CellType, int SpecialType)[,] m_CreatedCells;
+
+
         // PCG에서 새로 생성된 블럭들을 보관하기 위한 공간
-        (int CellType, int SpecialType)[,] m_GeneratedCells;
+        (int CellType, int SpecialType)[,] m_ReadyCells;
         bool[,] m_Matched;
 
         private BoardSize m_CurrentBoardSize;
@@ -52,6 +56,7 @@ namespace Unity.MLAgentsExamples
         void Awake()
         {
             m_Cells = new (int, int)[MaxColumns, MaxRows];
+            m_CreatedCells = new (int, int)[MaxColumns, MaxRows];
             m_Matched = new bool[MaxColumns, MaxRows];
 
             // Start using the max rows and columns, but we'll update the current size at the start of each episode.
@@ -146,9 +151,35 @@ namespace Unity.MLAgentsExamples
             return (row >= 0 && row < m_CurrentBoardSize.Rows) && (col >= 0 && col < m_CurrentBoardSize.Columns);
         }
 
+        public int[] GetMidPosition(List<int[]> positions)
+        {
+            int[] midPosition = new int[2];
+            int minRow = 100;
+            int maxRow = 0;
+            int minCol = 100;
+            int maxCol = 0;
+
+            foreach(int[] position in positions)
+            {
+                int row = position[1];
+                int col = position[0];
+
+                if(row < minRow) minRow = row;
+                if(row > maxRow) maxRow = row;
+                if(col < minCol) minCol = col;
+                if(col > maxCol) maxCol = col;
+            }
+
+            midPosition[0] = (minCol + maxCol) / 2;
+            midPosition[1] = (minRow + maxRow) / 2;
+
+            return midPosition;
+        }
+
         public bool MarkMatchedCells(int[,] cells = null)
         {
             ClearMarked();
+            ClearCreatedCell();
 
 
             bool madeMatch = false;
@@ -199,8 +230,16 @@ namespace Unity.MLAgentsExamples
                                 Debug.Log("Matched " + matchedType + " at " + j + ", " + i);
                                 // TODO 생성된 블럭 Created에 넣기
 
+
                                 foreach(int[] position in matchedPositions)
                                 {
+                                    // Create special blocks
+                                    if (matchedType != PieceType.NormalPiece)
+                                    {
+                                        int[] midPosition = GetMidPosition(matchedPositions);
+                                        m_CreatedCells[midPosition[0], midPosition[1]] = (cellType, (int)matchedType);
+                                    }
+
                                     m_Matched[position[0], position[1]] = true;
                                     madeMatch = true;
                                 }
@@ -249,6 +288,20 @@ namespace Unity.MLAgentsExamples
 
             ClearMarked(); // TODO clear here or at start of matching?
             return pointsEarned;
+        }
+
+        public void SpawnSpecialCells()
+        {
+            for (var i = 0; i < m_CurrentBoardSize.Rows; i++)
+            {
+                for (var j = 0; j < m_CurrentBoardSize.Columns; j++)
+                {
+                    if (m_CreatedCells[j, i].CellType != k_EmptyCell)
+                    {
+                        m_Cells[j, i] = m_CreatedCells[j, i];
+                    }
+                }
+            }
         }
 
         public bool DropCells()
@@ -331,7 +384,7 @@ namespace Unity.MLAgentsExamples
                 ClearMatchedCells();
 
                 // Create the spcial blocks to the board (before dropping)
-
+                SpawnSpecialCells();
 
 
                 DropCells();
@@ -346,6 +399,18 @@ namespace Unity.MLAgentsExamples
                 for (var j = 0; j < MaxColumns; j++)
                 {
                     m_Matched[j, i] = false;
+                }
+            }
+        }
+
+        
+        void ClearCreatedCell()
+        {
+            for (var i = 0; i < MaxRows; i++)
+            {
+                for (var j = 0; j < MaxColumns; j++)
+                {
+                    m_CreatedCells[j, i] = (-1, (int)PieceType.None);;
                 }
             }
         }
