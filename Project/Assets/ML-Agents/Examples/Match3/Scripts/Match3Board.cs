@@ -331,6 +331,20 @@ namespace Unity.MLAgentsExamples
             return m_Random.Next((int)PieceType.NormalPiece, (int)PieceType.RainbowPiece);
         }
 
+        public Match3Board DeepCopy()
+        {
+            Match3Board board = new Match3Board();
+            board.m_Cells = this.m_Cells;
+            board.m_Matched = this.m_Matched;
+            var boardsize = this.GetCurrentBoardSize();
+            board.m_CurrentBoardSize = new BoardSize
+            {
+                Rows = boardsize.Rows,
+                Columns = boardsize.Columns,
+                NumCellTypes = boardsize.NumCellTypes,
+            };
+            return board;
+        }
 
     }
 
