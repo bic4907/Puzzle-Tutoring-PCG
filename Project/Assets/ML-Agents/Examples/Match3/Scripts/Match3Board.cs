@@ -334,6 +334,15 @@ namespace Unity.MLAgentsExamples
         public Match3Board DeepCopy()
         {
             Match3Board board = new Match3Board();
+            board.MaxColumns = this.MaxColumns;
+            board.MaxRows = this.MaxRows;
+            board.MinColumns = this.MinColumns;
+            board.MinRows = this.MinRows;
+            board.RandomSeed = this.RandomSeed;
+            board.NumCellTypes = this.NumCellTypes;
+            board.m_Random = new System.Random(RandomSeed == -1 ? gameObject.GetInstanceID() : this.RandomSeed);
+            board.Awake();
+            
             board.m_Cells = this.m_Cells;
             board.m_Matched = this.m_Matched;
             var boardsize = this.GetCurrentBoardSize();
@@ -343,6 +352,7 @@ namespace Unity.MLAgentsExamples
                 Columns = boardsize.Columns,
                 NumCellTypes = boardsize.NumCellTypes,
             };
+            
             return board;
         }
 
