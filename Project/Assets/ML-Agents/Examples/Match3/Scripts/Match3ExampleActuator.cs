@@ -20,54 +20,70 @@ namespace Unity.MLAgentsExamples
 
         protected override int EvalMovePoints(Move move)
         {
-            var pointsByType = new[] {
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece]
-            };
-
-            // Counts the expected points for making the move.
-            var moveVal = Board.GetCellType(move.Row, move.Column);
-            var moveSpecial = Board.GetSpecialType(move.Row, move.Column);
-            var (otherRow, otherCol) = move.OtherCell();
-            var oppositeVal = Board.GetCellType(otherRow, otherCol);
-            var oppositeSpecial = Board.GetSpecialType(otherRow, otherCol);
+            return m_Board.EvalMovePoints(move);
 
 
-            int movePoints = EvalHalfMove(
-                otherRow, otherCol, moveVal, moveSpecial, move.Direction, pointsByType
-            );
-            int otherPoints = EvalHalfMove(
-                move.Row, move.Column, oppositeVal, oppositeSpecial, move.OtherDirection(), pointsByType
-            );
-            return movePoints + otherPoints;
+            
+
+            // var pointsByType = new[] {
+            //     SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+            //     SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+            //     SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+            //     SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+            //     SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+            //     SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
+            //     SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece]
+            // };
+
+            
+
+            // // Counts the expected points for making the move.
+            // var moveVal = Board.GetCellType(move.Row, move.Column);
+            // var moveSpecial = Board.GetSpecialType(move.Row, move.Column);
+            // var (otherRow, otherCol) = move.OtherCell();
+            // var oppositeVal = Board.GetCellType(otherRow, otherCol);
+            // var oppositeSpecial = Board.GetSpecialType(otherRow, otherCol);
+
+
+
+            // int movePoints = EvalHalfMove(
+            //     otherRow, otherCol, moveVal, moveSpecial, move.Direction, pointsByType
+            // );
+            // int otherPoints = EvalHalfMove(
+            //     move.Row, move.Column, oppositeVal, oppositeSpecial, move.OtherDirection(), pointsByType
+            // );
+
+
+
+            // return movePoints + otherPoints;
         }
 
         int EvalHalfMove(int newRow, int newCol, int newValue, int newSpecial, Direction incomingDirection, int[] pointsByType)
         {
             // This is a essentially a duplicate of AbstractBoard.CheckHalfMove but also counts the points for the move.
-            var currentBoardSize = Board.GetCurrentBoardSize();
-            int matchedLeft = 0, matchedRight = 0, matchedUp = 0, matchedDown = 0;
-            int scoreLeft = 0, scoreRight = 0, scoreUp = 0, scoreDown = 0;
+            // var currentBoardSize = Board.GetCurrentBoardSize();
+            // int matchedLeft = 0, matchedRight = 0, matchedUp = 0, matchedDown = 0;
+            // int scoreLeft = 0, scoreRight = 0, scoreUp = 0, scoreDown = 0;
 
             // Check if the special block is used (rocket or rainbow)
             //   - Then, simulation the board if the special block is used
 
             if (Board.GetSpecialType(newRow, newCol) == (int)PieceType.RocketPiece)
             {
-                
+                    
             }
             else if (Board.GetSpecialType(newRow, newCol) == (int)PieceType.RainbowPiece)
             {
                 
             }
 
+
             
+
+
+
             
+
 
 
             /// End of the special matching

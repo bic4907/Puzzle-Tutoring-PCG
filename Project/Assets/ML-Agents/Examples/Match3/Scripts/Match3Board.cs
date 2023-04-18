@@ -47,6 +47,10 @@ namespace Unity.MLAgentsExamples
 
         // PCG에서 새로 생성된 블럭들을 보관하기 위한 공간
         (int CellType, int SpecialType)[,] m_ReadyCells;
+
+        private List<(int CellType, int SpecialType)> m_LastCreatedPiece;
+        private List<(int CellType, int SpecialType)> m_LastDestroyedPiece;
+
         bool[,] m_Matched;
 
         private BoardSize m_CurrentBoardSize;
@@ -66,12 +70,32 @@ namespace Unity.MLAgentsExamples
                 Columns = MaxColumns,
                 NumCellTypes = NumCellTypes,
             };
+
+            m_LastCreatedPiece = new List<(int CellType, int SpecialType)>();
+            m_LastDestroyedPiece = new List<(int CellType, int SpecialType)>();
         }
 
         void Start()
         {
             m_Random = new System.Random(RandomSeed == -1 ? gameObject.GetInstanceID() : RandomSeed);
             InitRandom();
+        }
+
+        public List<(int CellType, int SpecialType)> GetLastCreatedPiece()
+        {
+            return m_LastCreatedPiece;
+        }
+
+        public List<(int CellType, int SpecialType)> GetLastDestroyedPiece()
+        {
+            return m_LastDestroyedPiece;
+        }
+
+
+        public void ClearLastPieceLog()
+        {
+            m_LastCreatedPiece.Clear();
+            m_LastDestroyedPiece.Clear();
         }
 
         public override BoardSize GetMaxBoardSize()
@@ -104,10 +128,16 @@ namespace Unity.MLAgentsExamples
 
         public override bool MakeMove(Move move)
         {
+            ClearLastPieceLog();
+
             if (!IsMoveValid(move))
             {
                 return false;
             }
+
+            // Check if the move is a special match
+
+
             var originalValue = m_Cells[move.Column, move.Row];
             var (otherRow, otherCol) = move.OtherCell();
             var destinationValue = m_Cells[otherCol, otherRow];
@@ -211,7 +241,6 @@ namespace Unity.MLAgentsExamples
                                         break;
                                     }
 
-
                                     matchedPositions.Add(new int[] {j + l, i + k});
 
                                     // Exception for different cell type
@@ -227,7 +256,7 @@ namespace Unity.MLAgentsExamples
                             }
 
                             if(matchedType != PieceType.None) {
-                                Debug.Log("Matched " + matchedType + " at " + j + ", " + i);
+                                // Debug.Log("Matched " + matchedType + " at " + j + ", " + i);
                                 // TODO 생성된 블럭 Created에 넣기
 
 
@@ -264,12 +293,12 @@ namespace Unity.MLAgentsExamples
         {
             var pointsByType = new[] {
                 SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece]
+                SpecialMatch.GetInstance().CreateScores[PieceType.HorizontalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.VerticalPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.CrossPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.BombPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.RocketPiece],
+                SpecialMatch.GetInstance().CreateScores[PieceType.RainbowPiece]
             };
 
             int pointsEarned = 0;
@@ -286,7 +315,7 @@ namespace Unity.MLAgentsExamples
                 }
             }
 
-            ClearMarked(); // TODO clear here or at start of matching?
+            ClearMarked();
             return pointsEarned;
         }
 
@@ -298,6 +327,7 @@ namespace Unity.MLAgentsExamples
                 {
                     if (m_CreatedCells[j, i].CellType != k_EmptyCell)
                     {
+                        m_LastCreatedPiece.Add((m_CreatedCells[j, i].CellType, m_CreatedCells[j, i].SpecialType));
                         m_Cells[j, i] = m_CreatedCells[j, i];
                     }
                 }
@@ -404,6 +434,15 @@ namespace Unity.MLAgentsExamples
         }
 
         
+        // TODO 가로 특수 효과 (위치)
+        // TODO 세로 특수 효과 (위치)
+        // TODO 대각선 특수 효과 (위치)
+        // TODO 로켓 특수 효과 (위치, 대상 색상)
+        // TODO 폭탄 특수 효과 (위치)
+        // TODO 무지개 특수 효과 (위치, 대상 색상)
+
+
+
         void ClearCreatedCell()
         {
             for (var i = 0; i < MaxRows; i++)
@@ -425,9 +464,11 @@ namespace Unity.MLAgentsExamples
             return m_Random.Next((int)PieceType.NormalPiece, (int)PieceType.RainbowPiece);
         }
 
-        public Match3Board DeepCopy()
+        public Match3Board DeepCopy(GameObject parent)
         {
-            Match3Board board = new Match3Board();
+            // Turn off the monobehaviour error
+            var board = parent.AddComponent<Match3Board>();
+
             board.MaxColumns = this.MaxColumns;
             board.MaxRows = this.MaxRows;
             board.MinColumns = this.MinColumns;
@@ -450,8 +491,47 @@ namespace Unity.MLAgentsExamples
             return board;
         }
 
-    }
+        public int EvalMovePoints(Move move)
+        {
 
+            
+            // Deepcopy and simulate the board
+            var _board = this.DeepCopy(this.gameObject);
+            
+            if (!_board.IsMoveValid(move)) return 0;
+
+            _board.MakeMove(move);
+            _board.MarkMatchedCells();
+            _board.ClearMatchedCells();
+
+            // Create the spcial blocks to the board (before dropping)
+            _board.SpawnSpecialCells();
+            
+            // Get lastly created and destroyed pieces
+            var createdPieces = _board.GetLastCreatedPiece();
+            var destroyedPieces = _board.GetLastDestroyedPiece();
+
+            // Count the points
+            int points = 0;
+            foreach (var piece in createdPieces)
+            {
+                PieceType type = (PieceType)piece.SpecialType;              
+                points += SpecialMatch.GetInstance().CreateScores[type];
+            }
+            foreach (var piece in destroyedPieces)
+            {
+                PieceType type = (PieceType)piece.SpecialType;              
+                points += SpecialMatch.GetInstance().DestroyScores[type];
+            }
+
+            // Remove board component
+            Destroy(_board);
+
+            Debug.Log("Points: " + points);
+
+            return points;
+        }
+    }
 
 
 }
