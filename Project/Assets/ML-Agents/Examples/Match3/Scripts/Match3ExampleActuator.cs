@@ -29,6 +29,7 @@ namespace Unity.MLAgentsExamples
                 SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
                 SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece]
             };
+
             // Counts the expected points for making the move.
             var moveVal = Board.GetCellType(move.Row, move.Column);
             var moveSpecial = Board.GetSpecialType(move.Row, move.Column);
@@ -53,77 +54,100 @@ namespace Unity.MLAgentsExamples
             int matchedLeft = 0, matchedRight = 0, matchedUp = 0, matchedDown = 0;
             int scoreLeft = 0, scoreRight = 0, scoreUp = 0, scoreDown = 0;
 
-            if (incomingDirection != Direction.Right)
+            // Check if the special block is used (rocket or rainbow)
+            //   - Then, simulation the board if the special block is used
+
+            if (Board.GetSpecialType(newRow, newCol) == (int)PieceType.RocketPiece)
             {
-                for (var c = newCol - 1; c >= 0; c--)
-                {
-                    if (Board.GetCellType(newRow, c) == newValue)
-                    {
-                        matchedLeft++;
-                        scoreLeft += pointsByType[Board.GetSpecialType(newRow, c)];
-                    }
-                    else
-                        break;
-                }
+                
+            }
+            else if (Board.GetSpecialType(newRow, newCol) == (int)PieceType.RainbowPiece)
+            {
+                
             }
 
-            if (incomingDirection != Direction.Left)
-            {
-                for (var c = newCol + 1; c < currentBoardSize.Columns; c++)
-                {
-                    if (Board.GetCellType(newRow, c) == newValue)
-                    {
-                        matchedRight++;
-                        scoreRight += pointsByType[Board.GetSpecialType(newRow, c)];
-                    }
-                    else
-                        break;
-                }
-            }
+            
+            
 
-            if (incomingDirection != Direction.Down)
-            {
-                for (var r = newRow + 1; r < currentBoardSize.Rows; r++)
-                {
-                    if (Board.GetCellType(r, newCol) == newValue)
-                    {
-                        matchedUp++;
-                        scoreUp += pointsByType[Board.GetSpecialType(r, newCol)];
-                    }
-                    else
-                        break;
-                }
-            }
 
-            if (incomingDirection != Direction.Up)
-            {
-                for (var r = newRow - 1; r >= 0; r--)
-                {
-                    if (Board.GetCellType(r, newCol) == newValue)
-                    {
-                        matchedDown++;
-                        scoreDown += pointsByType[Board.GetSpecialType(r, newCol)];
-                    }
-                    else
-                        break;
-                }
-            }
+            /// End of the special matching
 
-            if ((matchedUp + matchedDown >= 2) || (matchedLeft + matchedRight >= 2))
-            {
-                // It's a match. Start from counting the piece being moved
-                var totalScore = pointsByType[newSpecial];
-                if (matchedUp + matchedDown >= 2)
-                {
-                    totalScore += scoreUp + scoreDown;
-                }
 
-                if (matchedLeft + matchedRight >= 2)
-                {
-                    totalScore += scoreLeft + scoreRight;
-                }
-                return totalScore;
-            }
+
+            // if (incomingDirection != Direction.Right)
+            // {
+            //     for (var c = newCol - 1; c >= 0; c--)
+            //     {
+            //         if (Board.GetCellType(newRow, c) == newValue)
+            //         {
+            //             matchedLeft++;
+            //             scoreLeft += pointsByType[Board.GetSpecialType(newRow, c)];
+            //         }
+            //         else
+            //             break;
+            //     }
+            // }
+
+            // if (incomingDirection != Direction.Left)
+            // {
+            //     for (var c = newCol + 1; c < currentBoardSize.Columns; c++)
+            //     {
+            //         if (Board.GetCellType(newRow, c) == newValue)
+            //         {
+            //             matchedRight++;
+            //             scoreRight += pointsByType[Board.GetSpecialType(newRow, c)];
+            //         }
+            //         else
+            //             break;
+            //     }
+            // }
+
+
+
+
+            // if (incomingDirection != Direction.Down)
+            // {
+            //     for (var r = newRow + 1; r < currentBoardSize.Rows; r++)
+            //     {
+            //         if (Board.GetCellType(r, newCol) == newValue)
+            //         {
+            //             matchedUp++;
+            //             scoreUp += pointsByType[Board.GetSpecialType(r, newCol)];
+            //         }
+            //         else
+            //             break;
+            //     }
+            // }
+
+            // if (incomingDirection != Direction.Up)
+            // {
+            //     for (var r = newRow - 1; r >= 0; r--)
+            //     {
+            //         if (Board.GetCellType(r, newCol) == newValue)
+            //         {
+            //             matchedDown++;
+            //             scoreDown += pointsByType[Board.GetSpecialType(r, newCol)];
+            //         }
+            //         else
+            //             break;
+            //     }
+            // }
+
+            // if ((matchedUp + matchedDown >= 2) || (matchedLeft + matchedRight >= 2))
+            // {
+            //     // It's a match. Start from counting the piece being moved
+            //     var totalScore = pointsByType[newSpecial];
+            //     if (matchedUp + matchedDown >= 2)
+            //     {
+            //         totalScore += scoreUp + scoreDown;
+            //     }
+
+            //     if (matchedLeft + matchedRight >= 2)
+            //     {
+            //         totalScore += scoreLeft + scoreRight;
+            //     }
+            //     return totalScore;
+            // }
 
             return 0;
         }
