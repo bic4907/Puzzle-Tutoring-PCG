@@ -273,17 +273,18 @@ namespace Unity.MLAgentsExamples
                         {
 
                             PieceType matchedType = pieceType;
+                            matchedPositions.Clear();
                             for (var k = 0; k < shape.GetLength(0); k++)
                             {
                                 for (var l = 0; l < shape.GetLength(1); l++)
                                 {
                                     // Check for the exception
-                                    if(!IsCellInBounds(j + l, i + k)) {
+                                    if(!IsCellInBounds(j + l, i + k) || m_Matched[j + l, i + k] == true) {
                                         matchedType = PieceType.None;
                                         break;
                                     }
+                                    if (shape[k, l] == 0) continue;
 
-    
                                     // Exception for different cell type
                                     if(m_Cells[j + l, i + k].CellType != cellType || 
                                         m_Cells[j + l, i + k].SpecialType != (int)PieceType.NormalPiece)
