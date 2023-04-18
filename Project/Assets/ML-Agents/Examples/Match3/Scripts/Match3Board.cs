@@ -39,6 +39,8 @@ namespace Unity.MLAgentsExamples
         /// </summary>
         public int RandomSeed;
 
+        GameObject m_DummyBoard;
+
         (int CellType, int SpecialType)[,] m_Cells;
 
         // Created special blocks in the board
@@ -73,6 +75,10 @@ namespace Unity.MLAgentsExamples
 
             m_LastCreatedPiece = new List<(int CellType, int SpecialType)>();
             m_LastDestroyedPiece = new List<(int CellType, int SpecialType)>();
+        
+            // Set Dummyboard children game object
+            m_DummyBoard = GameObject.Find("DummyBoard").gameObject;
+      
         }
 
         void Start()
@@ -165,14 +171,49 @@ namespace Unity.MLAgentsExamples
             return m_Cells[col, row].SpecialType;
         }
 
-        public override bool IsMoveValid(Move m)
+        public override bool IsMoveValid(Move move)
         {
+
+            // var _board = this.DeepCopy(m_DummyBoard);
+            
+            // _board.MakeMove(move);
+            // _board.MarkMatchedCells();
+            // _board.ClearMatchedCells();
+
+            // // Create the spcial blocks to the board (before dropping)
+            // _board.SpawnSpecialCells();
+            
+            // // Get lastly created and destroyed pieces
+            // var createdPieces = _board.GetLastCreatedPiece();
+            // var destroyedPieces = _board.GetLastDestroyedPiece();
+
+            // // Print board with grid with for loop
+            // // _board.PrintBoardWithGrid();
+
+            // // Remove board component
+            // Destroy(_board);
+
+            // return false;
+
+            // var originalValue = m_Cells[move.Column, move.Row];
+            // var (otherRow, otherCol) = move.OtherCell();
+            // var destinationValue = m_Cells[otherCol, otherRow];
+
+            // if ((PieceType)originalValue.SpecialType == PieceType.NormalPiece && 
+            //     (PieceType)destinationValue.SpecialType == PieceType.NormalPiece)
+            // {
+            //     return true;
+            // }
+
+            // return false;
+        
+
             if (m_Cells == null)
             {
                 return false;
             }
 
-            return SimpleIsMoveValid(m);
+            return SimpleIsMoveValid(move);
         }
 
 
@@ -211,6 +252,7 @@ namespace Unity.MLAgentsExamples
             ClearMarked();
             ClearCreatedCell();
 
+            // 세로매칭에 버그가 있음
 
             bool madeMatch = false;
             for (var i = 0; i < m_CurrentBoardSize.Rows; i++)
@@ -241,14 +283,17 @@ namespace Unity.MLAgentsExamples
                                         break;
                                     }
 
-                                    matchedPositions.Add(new int[] {j + l, i + k});
-
+    
                                     // Exception for different cell type
-                                    if(m_Cells[j + l, i + k].CellType != cellType || m_Cells[j + l, i + k].SpecialType != (int)PieceType.NormalPiece)
+                                    if(m_Cells[j + l, i + k].CellType != cellType || 
+                                        m_Cells[j + l, i + k].SpecialType != (int)PieceType.NormalPiece)
                                     {
                                         matchedType = PieceType.None; 
                                         break;
                                     }
+
+                                    matchedPositions.Add(new int[] {j + l, i + k});
+
 
                                 }
 
@@ -262,16 +307,21 @@ namespace Unity.MLAgentsExamples
 
                                 foreach(int[] position in matchedPositions)
                                 {
+                                    Debug.Log(matchedType);
                                     // Create special blocks
                                     if (matchedType != PieceType.NormalPiece)
                                     {
                                         int[] midPosition = GetMidPosition(matchedPositions);
                                         m_CreatedCells[midPosition[0], midPosition[1]] = (cellType, (int)matchedType);
+                                    } 
+                                    else {
+                                        m_LastDestroyedPiece.Add((cellType, (int)matchedType));
                                     }
 
                                     m_Matched[position[0], position[1]] = true;
                                     madeMatch = true;
                                 }
+                                Debug.Log(matchedPositions.Count);
                             }
                            
 
@@ -291,15 +341,7 @@ namespace Unity.MLAgentsExamples
         /// <returns></returns>
         public int ClearMatchedCells()
         {
-            var pointsByType = new[] {
-                SpecialMatch.GetInstance().CreateScores[PieceType.NormalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.HorizontalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.VerticalPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.CrossPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.BombPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.RocketPiece],
-                SpecialMatch.GetInstance().CreateScores[PieceType.RainbowPiece]
-            };
+
 
             int pointsEarned = 0;
             for (var i = 0; i < m_CurrentBoardSize.Rows; i++)
@@ -308,8 +350,8 @@ namespace Unity.MLAgentsExamples
                 {
                     if (m_Matched[j, i])
                     {
-                        var speciaType = GetSpecialType(i, j);
-                        pointsEarned += pointsByType[speciaType];
+                        var specialType = GetSpecialType(i, j);
+                        pointsEarned += SpecialMatch.GetInstance().GetCreateScore((PieceType)specialType);
                         m_Cells[j, i] = (k_EmptyCell, 0);
                     }
                 }
@@ -467,7 +509,7 @@ namespace Unity.MLAgentsExamples
         public Match3Board DeepCopy(GameObject parent)
         {
             // Turn off the monobehaviour error
-            var board = parent.AddComponent<Match3Board>();
+            Match3Board board = parent.AddComponent<Match3Board>();
 
             board.MaxColumns = this.MaxColumns;
             board.MaxRows = this.MaxRows;
@@ -480,6 +522,7 @@ namespace Unity.MLAgentsExamples
             
             board.m_Cells = this.m_Cells;
             board.m_Matched = this.m_Matched;
+
             var boardsize = this.GetCurrentBoardSize();
             board.m_CurrentBoardSize = new BoardSize
             {
@@ -493,43 +536,49 @@ namespace Unity.MLAgentsExamples
 
         public int EvalMovePoints(Move move)
         {
-
-            
+            return 0;
             // Deepcopy and simulate the board
-            var _board = this.DeepCopy(this.gameObject);
+            // var _board = this.DeepCopy(m_DummyBoard);
             
-            if (!_board.IsMoveValid(move)) return 0;
+            // if (!_board.IsMoveValid(move)) return 0;
 
-            _board.MakeMove(move);
-            _board.MarkMatchedCells();
-            _board.ClearMatchedCells();
+            // _board.MakeMove(move);
+            // _board.MarkMatchedCells();
+            // _board.ClearMatchedCells();
 
-            // Create the spcial blocks to the board (before dropping)
-            _board.SpawnSpecialCells();
+            // // Create the spcial blocks to the board (before dropping)
+            // _board.SpawnSpecialCells();
             
-            // Get lastly created and destroyed pieces
-            var createdPieces = _board.GetLastCreatedPiece();
-            var destroyedPieces = _board.GetLastDestroyedPiece();
+            // // Get lastly created and destroyed pieces
+            // var createdPieces = _board.GetLastCreatedPiece();
+            // var destroyedPieces = _board.GetLastDestroyedPiece();
 
-            // Count the points
-            int points = 0;
-            foreach (var piece in createdPieces)
-            {
-                PieceType type = (PieceType)piece.SpecialType;              
-                points += SpecialMatch.GetInstance().CreateScores[type];
-            }
-            foreach (var piece in destroyedPieces)
-            {
-                PieceType type = (PieceType)piece.SpecialType;              
-                points += SpecialMatch.GetInstance().DestroyScores[type];
-            }
+            // // Count the points
+            // int createdPoints = 0, destroyedPoints = 0;
+            // foreach (var piece in createdPieces)
+            // {
+            //     PieceType type = (PieceType)piece.SpecialType;              
+            //     createdPoints += SpecialMatch.GetInstance().CreateScores[type];
 
-            // Remove board component
-            Destroy(_board);
 
-            Debug.Log("Points: " + points);
+            // }
 
-            return points;
+            // foreach (var piece in destroyedPieces)
+            // {
+            //     PieceType type = (PieceType)piece.SpecialType;              
+            //     destroyedPoints += SpecialMatch.GetInstance().DestroyScores[type];
+            // }
+
+            // // Print board with grid with for loop
+            // // _board.PrintBoardWithGrid();
+
+            // // Remove board component
+            // // Destroy(_board);
+
+            // Debug.Log("Created Points : " + createdPoints + " Destroyed Points : " + destroyedPoints);
+            // int points = createdPoints + destroyedPoints;
+            
+            // return points;
         }
     }
 
