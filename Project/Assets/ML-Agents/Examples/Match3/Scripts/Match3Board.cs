@@ -50,6 +50,7 @@ namespace Unity.MLAgentsExamples
         // PCG에서 새로 생성된 블럭들을 보관하기 위한 공간
         (int CellType, int SpecialType)[,] m_ReadyCells;
 
+        private List<SpecialEffect> m_SpecialEffects;
         private List<(int CellType, int SpecialType)> m_LastCreatedPiece;
         private List<(int CellType, int SpecialType)> m_LastDestroyedPiece;
 
@@ -75,6 +76,7 @@ namespace Unity.MLAgentsExamples
 
             m_LastCreatedPiece = new List<(int CellType, int SpecialType)>();
             m_LastDestroyedPiece = new List<(int CellType, int SpecialType)>();
+            m_SpecialEffects = new List<SpecialEffect>();
         
             // Set Dummyboard children game object
             m_DummyBoard = GameObject.Find("DummyBoard").gameObject;
@@ -102,6 +104,11 @@ namespace Unity.MLAgentsExamples
         {
             m_LastCreatedPiece.Clear();
             m_LastDestroyedPiece.Clear();
+        }
+
+        public void ClearSpecialEffects()
+        {
+            m_SpecialEffects.Clear();
         }
 
         public override BoardSize GetMaxBoardSize()
@@ -247,10 +254,20 @@ namespace Unity.MLAgentsExamples
             return midPosition;
         }
 
+        
+
         public bool MarkMatchedCells(int[,] cells = null)
         {
             ClearMarked();
             ClearCreatedCell();
+            ClearSpecialEffects();
+
+            PieceType[] matchableBlocks = { 
+                PieceType.NormalPiece, 
+                PieceType.HorizontalPiece,
+                PieceType.VerticalPiece
+            };
+
 
             // 세로매칭에 버그가 있음
 
@@ -285,11 +302,13 @@ namespace Unity.MLAgentsExamples
                                     }
                                     if (shape[k, l] == 0) continue;
 
-                                    // Exception for different cell type
-                                    if(m_Cells[j + l, i + k].CellType != cellType || 
-                                        m_Cells[j + l, i + k].SpecialType != (int)PieceType.NormalPiece)
+
+                                    // Check if the special blocks is in matchableBlocks 
+                                    if (m_Cells[j + l, i + k].CellType != cellType
+                                        && Array.IndexOf(matchableBlocks, (PieceType)m_Cells[j + l, i + k].SpecialType) != -1
+                                    )
                                     {
-                                        matchedType = PieceType.None; 
+                                        matchedType = PieceType.None;
                                         break;
                                     }
 
@@ -305,31 +324,42 @@ namespace Unity.MLAgentsExamples
                                 // Debug.Log("Matched " + matchedType + " at " + j + ", " + i);
                                 // TODO 생성된 블럭 Created에 넣기
 
+                                // Print the matchedType and the count
+                                Debug.Log("Matched " + matchedType + " and #items "+ matchedPositions.Count);
 
                                 foreach(int[] position in matchedPositions)
                                 {
-                                    Debug.Log(matchedType);
-                                    // Create special blocks
+                                    // Get SpecialType
+                                    PieceType _pieceType = (PieceType)m_Cells[position[0], position[1]].SpecialType;
+                                    int _cellType = m_Cells[position[0], position[1]].CellType;
+
+                                    // Create special block matchings
                                     if (matchedType != PieceType.NormalPiece)
                                     {
                                         int[] midPosition = GetMidPosition(matchedPositions);
                                         m_CreatedCells[midPosition[0], midPosition[1]] = (cellType, (int)matchedType);
-                                    } 
-                                    else {
-                                        m_LastDestroyedPiece.Add((cellType, (int)matchedType));
                                     }
+                                    else
+                                    {
+                                        // If horizontal block breaks
+                                        if (_pieceType == PieceType.HorizontalPiece)
+                                        {
+                                            m_SpecialEffects.Add(new SpecialEffect(position[0], position[1], (PieceType)_pieceType, _cellType));
+                                        }
+                                    }
+
+
+
+    
+                                    m_LastDestroyedPiece.Add((cellType, (int)matchedType));
 
                                     m_Matched[position[0], position[1]] = true;
                                     madeMatch = true;
                                 }
-                                Debug.Log(matchedPositions.Count);
-                            }
-                           
 
+                            }
                         }
                     }
-
-
                 }
             }
 
@@ -444,6 +474,41 @@ namespace Unity.MLAgentsExamples
             }
         }
 
+        public void ExecuteSpecialEffect()
+        {
+            foreach (SpecialEffect specialEffect in m_SpecialEffects)
+            {
+                switch(specialEffect.SpecialType)
+                {
+                    case PieceType.HorizontalPiece:
+                        for (var i = 0; i < MaxColumns; i++)
+                        {
+                            m_Cells[i, specialEffect.Row] = (k_EmptyCell, 0);
+                        }
+                        break;
+                    case PieceType.VerticalPiece:
+                        for (var i = 0; i < MaxRows; i++)
+                        {
+                            m_Cells[specialEffect.Column, i] = (k_EmptyCell, 0);
+                        }
+                        break;
+                    case PieceType.CrossPiece:
+                        break;
+                    case PieceType.BombPiece:
+                        break;
+                    case PieceType.RocketPiece:
+                        break;
+                    case PieceType.RainbowPiece:
+                        break;
+                    default:
+                        throw new Exception("Invalid Special Type");
+                }
+
+                Debug.Log("Special Effect " + specialEffect.SpecialType + " at " + specialEffect.Column + ", " + specialEffect.Row);
+            }
+            m_SpecialEffects.Clear();
+        }
+
         public void InitSettled()
         {
             InitRandom();
@@ -456,6 +521,7 @@ namespace Unity.MLAgentsExamples
                 }
                 ClearMatchedCells();
 
+                ExecuteSpecialEffect();
                 // Create the spcial blocks to the board (before dropping)
                 SpawnSpecialCells();
 
