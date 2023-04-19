@@ -54,6 +54,7 @@ namespace Unity.MLAgents.Integrations.Match3
             var moveIndex = actions.DiscreteActions[0];
 
             Move move = Move.FromMoveIndex(moveIndex, m_MaxBoardSize);
+            
             m_Board.MakeMove(move);
         }
 

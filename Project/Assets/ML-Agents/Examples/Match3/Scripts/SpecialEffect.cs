@@ -7,7 +7,7 @@ namespace Unity.MLAgentsExamples
 {
     public class SpecialEffect
     {
-        
+        public SpecialEffect() {  }
         public SpecialEffect(int column, int row, PieceType specialType, int cellType)
         {
             Column = column;

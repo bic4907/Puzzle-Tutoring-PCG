@@ -143,17 +143,47 @@ namespace Unity.MLAgentsExamples
         {
             ClearLastPieceLog();
 
-            if (!IsMoveValid(move))
-            {
-                return false;
-            }
+            // if (!IsMoveValid(move))
+            // {
+            //     return false;
+            // }
 
-            // Check if the move is a special match
 
 
             var originalValue = m_Cells[move.Column, move.Row];
             var (otherRow, otherCol) = move.OtherCell();
             var destinationValue = m_Cells[otherCol, otherRow];
+
+            // Check if the move is a special match
+            if ((PieceType)destinationValue.SpecialType == PieceType.RainbowPiece)
+            {
+                m_Cells[move.Column, move.Row] = (k_EmptyCell, 0);
+
+                m_SpecialEffects.Add(new SpecialEffect
+                {
+                    CellType = originalValue.CellType,
+                    SpecialType = (PieceType)destinationValue.SpecialType,
+                    Row = otherRow,
+                    Column = otherCol
+                });
+
+                return true;
+            }
+            else if ((PieceType)destinationValue.SpecialType == PieceType.BombPiece)
+            {
+                m_Cells[move.Column, move.Row] = (k_EmptyCell, 0);
+
+                m_SpecialEffects.Add(new SpecialEffect
+                {
+                    CellType = destinationValue.CellType,
+                    SpecialType = (PieceType)destinationValue.SpecialType,
+                    Row = otherRow,
+                    Column = otherCol
+                });
+
+                return true;
+            }
+            
 
             m_Cells[move.Column, move.Row] = destinationValue;
             m_Cells[otherCol, otherRow] = originalValue;
@@ -265,11 +295,11 @@ namespace Unity.MLAgentsExamples
             PieceType[] matchableBlocks = { 
                 PieceType.NormalPiece, 
                 PieceType.HorizontalPiece,
-                PieceType.VerticalPiece
+                PieceType.VerticalPiece,
+                PieceType.BombPiece,
+                PieceType.CrossPiece,
+                PieceType.RainbowPiece
             };
-
-
-            // 세로매칭에 버그가 있음
 
             bool madeMatch = false;
             for (var i = 0; i < m_CurrentBoardSize.Rows; i++)
@@ -279,6 +309,7 @@ namespace Unity.MLAgentsExamples
                     int cellType = m_Cells[j, i].CellType;
                     int specialType = m_Cells[j, i].SpecialType;
 
+                    // Find the matchable positions
                     foreach(KeyValuePair<PieceType, List<int[,]>> matchCase in SpecialMatch.GetInstance().MatchCases)
                     {
                         PieceType pieceType = matchCase.Key;
@@ -342,10 +373,15 @@ namespace Unity.MLAgentsExamples
                                     else
                                     {
                                         // If horizontal block breaks
-                                        if (_pieceType == PieceType.HorizontalPiece)
+                                        if (_pieceType == PieceType.HorizontalPiece || 
+                                            _pieceType == PieceType.VerticalPiece ||
+                                            _pieceType == PieceType.CrossPiece || 
+                                            _pieceType == PieceType.BombPiece ||
+                                            _pieceType == PieceType.RocketPiece)
                                         {
                                             m_SpecialEffects.Add(new SpecialEffect(position[0], position[1], (PieceType)_pieceType, _cellType));
                                         }
+                                
                                     }
 
 
@@ -409,6 +445,7 @@ namespace Unity.MLAgentsExamples
 
         public bool DropCells()
         {
+            int generatedCellCount = 0;
             var madeChanges = false;
             // Gravity is applied in the negative row direction
             for (var j = 0; j < m_CurrentBoardSize.Columns; j++)
@@ -427,6 +464,7 @@ namespace Unity.MLAgentsExamples
                 for (; writeIndex < m_CurrentBoardSize.Rows; writeIndex++)
                 {
                     madeChanges = true;
+                    generatedCellCount++;
                     m_Cells[j, writeIndex] = (k_EmptyCell, 0);
                 }
             }
@@ -478,6 +516,10 @@ namespace Unity.MLAgentsExamples
         {
             foreach (SpecialEffect specialEffect in m_SpecialEffects)
             {
+                int row = specialEffect.Row;
+                int column = specialEffect.Column;
+                int cellType = specialEffect.CellType;
+
                 switch(specialEffect.SpecialType)
                 {
                     case PieceType.HorizontalPiece:
@@ -493,12 +535,68 @@ namespace Unity.MLAgentsExamples
                         }
                         break;
                     case PieceType.CrossPiece:
+
+                        // Break the diagonal blocks from the row and columnts
+                        for (var i = 0; i < Math.Max(MaxColumns, MaxRows); i++)
+                        {
+                            if (IsCellInBounds(column - i, row - i))
+                            {
+                                m_Cells[column - i, row - i] = (k_EmptyCell, 0);
+                            }
+                            if (IsCellInBounds(column + i, row + i))
+                            {
+                                m_Cells[column + i, row + i] = (k_EmptyCell, 0);
+                            }
+                            if (IsCellInBounds(column + i, row - i))
+                            {
+                                m_Cells[column + i, row - i] = (k_EmptyCell, 0);
+                            }
+                            if (IsCellInBounds(column - i, row + i))
+                            {
+                                m_Cells[column - i, row + i] = (k_EmptyCell, 0);
+                            }
+                        }
+                        
                         break;
                     case PieceType.BombPiece:
+
+                        // Remove around 9 blocks from the original position
+                        for (var i = -1; i <= 1; i++)
+                        {
+                            for (var j = -1; j <= 1; j++)
+                            {
+                                if (IsCellInBounds(column + i, row + j))
+                                {
+                                    m_Cells[column + i, row + j] = (k_EmptyCell, 0);
+                                }
+                            }
+                        }
+
                         break;
                     case PieceType.RocketPiece:
+
+                        // Remove one same-cell type random block same with the original block
+                        List<int[]> sameCellTypePositions = GetCellTypePosition(cellType, true);
+                        if (sameCellTypePositions.Count > 0)
+                        {
+                            int randomIndex = UnityEngine.Random.Range(0, sameCellTypePositions.Count);
+                            int[] randomPosition = sameCellTypePositions[randomIndex];
+                            m_Cells[randomPosition[0], randomPosition[1]] = (k_EmptyCell, 0);
+                        }
+
                         break;
                     case PieceType.RainbowPiece:
+
+                        // Remove all same-cell type random block same with the original block
+                        List<int[]> sameCellTypePositionsRainbow = GetCellTypePosition(cellType, true);
+                        if (sameCellTypePositionsRainbow.Count > 0)
+                        {
+                            foreach (int[] position in sameCellTypePositionsRainbow)
+                            {
+                                m_Cells[position[0], position[1]] = (k_EmptyCell, 0);
+                            }
+                        }
+
                         break;
                     default:
                         throw new Exception("Invalid Special Type");
@@ -507,6 +605,35 @@ namespace Unity.MLAgentsExamples
                 Debug.Log("Special Effect " + specialEffect.SpecialType + " at " + specialEffect.Column + ", " + specialEffect.Row);
             }
             m_SpecialEffects.Clear();
+        }
+
+        // Get the list of the posititons of the same cell type
+        public List<int[]> GetCellTypePosition(int cellType, bool checkMatched = false)
+        {
+            List<int[]> sameCellTypePositions = new List<int[]>();
+    
+            for (var i = 0; i < MaxRows; i++)
+            {
+                for (var j = 0; j < MaxColumns; j++)
+                {
+                    if (m_Cells[j, i].CellType == cellType)
+                    {
+                        if (checkMatched)
+                        {
+                            if (m_Matched[j, i])
+                            {
+                                sameCellTypePositions.Add(new int[] { j, i });
+                            }
+                        }
+                        else
+                        {
+                            sameCellTypePositions.Add(new int[] { j, i });
+                        }
+                    }
+                }
+            }
+            
+            return sameCellTypePositions;
         }
 
         public void InitSettled()
@@ -525,7 +652,6 @@ namespace Unity.MLAgentsExamples
                 // Create the spcial blocks to the board (before dropping)
                 SpawnSpecialCells();
 
-
                 DropCells();
                 FillFromAbove();
             }
@@ -543,9 +669,7 @@ namespace Unity.MLAgentsExamples
         }
 
         
-        // TODO 가로 특수 효과 (위치)
-        // TODO 세로 특수 효과 (위치)
-        // TODO 대각선 특수 효과 (위치)
+
         // TODO 로켓 특수 효과 (위치, 대상 색상)
         // TODO 폭탄 특수 효과 (위치)
         // TODO 무지개 특수 효과 (위치, 대상 색상)

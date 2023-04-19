@@ -138,13 +138,13 @@ namespace Unity.MLAgentsExamples
 
                     if (specialType == 2)
                     {
-                        Gizmos.DrawCube(transform.TransformPoint(pos), cubeSize * new Vector3(1f, .5f, .5f));
-                        Gizmos.DrawCube(transform.TransformPoint(pos), cubeSize * new Vector3(.5f, 1f, .5f));
-                        Gizmos.DrawCube(transform.TransformPoint(pos), cubeSize * new Vector3(.5f, .5f, 1f));
+                        // Gizmos.DrawCube(transform.TransformPoint(pos), cubeSize * new Vector3(1f, .5f, .5f));
+                        // Gizmos.DrawCube(transform.TransformPoint(pos), cubeSize * new Vector3(.5f, 1f, .5f));
+                        // Gizmos.DrawCube(transform.TransformPoint(pos), cubeSize * new Vector3(.5f, .5f, 1f));
                     }
                     else if (specialType == 1)
                     {
-                        Gizmos.DrawSphere(transform.TransformPoint(pos), .5f * cubeSize);
+                        // Gizmos.DrawSphere(transform.TransformPoint(pos), .5f * cubeSize);
                     }
                     else
                     {

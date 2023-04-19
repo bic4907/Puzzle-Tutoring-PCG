@@ -38,14 +38,14 @@ namespace Unity.MLAgentsExamples
         {
             MatchCases = new Dictionary<PieceType, List<int[,]>>();
 
+            MatchCases.Add(PieceType.RainbowPiece, new List<int[,]>());
+            MatchCases.Add(PieceType.BombPiece, new List<int[,]>());
+            MatchCases.Add(PieceType.RocketPiece, new List<int[,]>());
+            MatchCases.Add(PieceType.CrossPiece, new List<int[,]>());
             MatchCases.Add(PieceType.VerticalPiece, new List<int[,]>());
             MatchCases.Add(PieceType.HorizontalPiece, new List<int[,]>());
             MatchCases.Add(PieceType.NormalPiece, new List<int[,]>());
 
-            MatchCases.Add(PieceType.RocketPiece, new List<int[,]>());
-            MatchCases.Add(PieceType.CrossPiece, new List<int[,]>());
-            MatchCases.Add(PieceType.BombPiece, new List<int[,]>());
-            MatchCases.Add(PieceType.RainbowPiece, new List<int[,]>());
 
 
             MatchCases[PieceType.NormalPiece].Add(new int[1, 3] { { 1, 1, 1 } });
@@ -54,17 +54,16 @@ namespace Unity.MLAgentsExamples
             MatchCases[PieceType.HorizontalPiece].Add(new int[1, 4] { { 1, 1, 1, 1 } });
             MatchCases[PieceType.VerticalPiece].Add(new int[4, 1] { { 1 }, { 1 }, { 1 }, { 1 } });
 
+            MatchCases[PieceType.RocketPiece].Add(new int[2, 2] { { 1, 1 }, { 1, 1 } });
 
-            // MatchCases[PieceType.RocketPiece].Add(new int[2, 2] { { 1, 1 }, { 1, 1 } });
+            MatchCases[PieceType.CrossPiece].Add(new int[3, 3] { { 1, 1, 1 }, { 0, 1, 0 }, { 0, 1, 0 } });
+            MatchCases[PieceType.CrossPiece].Add(new int[3, 3] { { 1, 0, 0 }, { 1, 1, 1 }, { 1, 0, 0 } });
 
-            // MatchCases[PieceType.CrossPiece].Add(new int[3, 3] { { 1, 1, 1 }, { 0, 1, 0 }, { 0, 1, 0 } });
-            // MatchCases[PieceType.CrossPiece].Add(new int[3, 3] { { 1, 0, 0 }, { 1, 1, 1 }, { 1, 0, 0 } });
+            MatchCases[PieceType.BombPiece].Add(new int[3, 3] { { 1, 1, 1 }, { 1, 0, 0 }, { 1, 0, 0 } });
+            MatchCases[PieceType.BombPiece].Add(new int[3, 3] { { 1, 1, 1 }, { 0, 0, 1 }, { 0, 0, 1 } });
 
-            // MatchCases[PieceType.BombPiece].Add(new int[3, 3] { { 1, 1, 1 }, { 1, 0, 0 }, { 1, 0, 0 } });
-            // MatchCases[PieceType.BombPiece].Add(new int[3, 3] { { 1, 1, 1 }, { 0, 0, 1 }, { 0, 0, 1 } });
-
-            // MatchCases[PieceType.RainbowPiece].Add(new int[1, 5] { { 1, 1, 1, 1, 1 } });
-            // MatchCases[PieceType.RainbowPiece].Add(new int[5, 1] { { 1 }, { 1 }, { 1 }, { 1 }, { 1 } });
+            MatchCases[PieceType.RainbowPiece].Add(new int[1, 5] { { 1, 1, 1, 1, 1 } });
+            MatchCases[PieceType.RainbowPiece].Add(new int[5, 1] { { 1 }, { 1 }, { 1 }, { 1 }, { 1 } });
         }
 
         private void InitializeCreateScore()
