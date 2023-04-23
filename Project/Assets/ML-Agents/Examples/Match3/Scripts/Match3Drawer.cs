@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
+using UnityEditor;
 
 namespace Unity.MLAgentsExamples
 {
@@ -111,57 +112,14 @@ namespace Unity.MLAgentsExamples
                 }
             }
 
-            var currentSize = m_Board.GetCurrentBoardSize();
-            for (var i = 0; i < m_Board.MaxRows; i++)
-            {
-                for (var j = 0; j < m_Board.MaxColumns; j++)
-                {
-                    int value = Match3Board.k_EmptyCell;
-                    int specialType = 0;
-                    if (m_Board.Cells != null && i < currentSize.Rows && j < currentSize.Columns)
-                    {
-                        value = m_Board.GetCellType(i, j);
-                        specialType = m_Board.GetSpecialType(i, j);
-                    }
+            int moveCount = 0;
+            int availableCount = 0;
 
-                    if (value >= 0 && value < s_Colors.Length)
-                    {
-                        Gizmos.color = s_Colors[value];
-                    }
-                    else
-                    {
-                        Gizmos.color = s_EmptyColor;
-                    }
-
-                    var pos = new Vector3(j, i, 0);
-                    pos *= CubeSpacing;
-
-                    if (specialType == 2)
-                    {
-                        // Gizmos.DrawCube(transform.TransformPoint(pos), cubeSize * new Vector3(1f, .5f, .5f));
-                        // Gizmos.DrawCube(transform.TransformPoint(pos), cubeSize * new Vector3(.5f, 1f, .5f));
-                        // Gizmos.DrawCube(transform.TransformPoint(pos), cubeSize * new Vector3(.5f, .5f, 1f));
-                    }
-                    else if (specialType == 1)
-                    {
-                        // Gizmos.DrawSphere(transform.TransformPoint(pos), .5f * cubeSize);
-                    }
-                    else
-                    {
-                        Gizmos.DrawCube(transform.TransformPoint(pos), cubeSize * Vector3.one);
-                    }
-
-                    Gizmos.color = Color.yellow;
-                    if (m_Board.Matched != null && m_Board.Matched[j, i])
-                    {
-                        Gizmos.DrawWireCube(transform.TransformPoint(pos), matchedWireframeSize * Vector3.one);
-                    }
-                }
-            }
-
-            // Draw valid moves
             foreach (var move in m_Board.AllMoves())
             {
+                moveCount++;
+                
+
                 if (DebugMoveIndex >= 0 && move.MoveIndex != DebugMoveIndex)
                 {
                     continue;
@@ -179,7 +137,15 @@ namespace Unity.MLAgentsExamples
                 var oneQuarter = Vector3.Lerp(pos, otherPos, .25f);
                 var threeQuarters = Vector3.Lerp(pos, otherPos, .75f);
                 Gizmos.DrawLine(transform.TransformPoint(oneQuarter), transform.TransformPoint(threeQuarters));
+
+                availableCount++;
             }
+
+            // Debug.Log($"Move count: {moveCount}, available: {availableCount}");
+
+            // Pause the unity player
+            // EditorApplication.isPaused = true;
+
 
             Profiler.EndSample();
         }

@@ -321,6 +321,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3508723250470608011, guid: 2fafdcd0587684641b03b11f04454f1b,
         type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3508723250470608011, guid: 2fafdcd0587684641b03b11f04454f1b,
+        type: 3}
       propertyPath: cubeSpacing
       value: 1.25
       objectReference: {fileID: 0}
@@ -332,7 +337,7 @@ PrefabInstance:
     - target: {fileID: 3508723250470608012, guid: 2fafdcd0587684641b03b11f04454f1b,
         type: 3}
       propertyPath: MoveTime
-      value: 0
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 3508723250470608012, guid: 2fafdcd0587684641b03b11f04454f1b,
         type: 3}

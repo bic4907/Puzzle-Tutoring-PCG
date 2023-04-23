@@ -141,13 +141,8 @@ namespace Unity.MLAgentsExamples
 
         public override bool MakeMove(Move move)
         {
+
             ClearLastPieceLog();
-
-            // if (!IsMoveValid(move))
-            // {
-            //     return false;
-            // }
-
 
 
             var originalValue = m_Cells[move.Column, move.Row];
@@ -158,6 +153,8 @@ namespace Unity.MLAgentsExamples
             if ((PieceType)destinationValue.SpecialType == PieceType.RainbowPiece)
             {
                 m_Cells[move.Column, move.Row] = (k_EmptyCell, 0);
+                m_Cells[otherCol, otherRow] = (k_EmptyCell, 0);
+                // m_Matched[move.Column, move.Row] = true;
 
                 m_SpecialEffects.Add(new SpecialEffect
                 {
@@ -169,9 +166,12 @@ namespace Unity.MLAgentsExamples
 
                 return true;
             }
-            else if ((PieceType)destinationValue.SpecialType == PieceType.BombPiece)
+            else if ((PieceType)destinationValue.SpecialType == PieceType.RocketPiece)
             {
                 m_Cells[move.Column, move.Row] = (k_EmptyCell, 0);
+                m_Cells[otherCol, otherRow] = (k_EmptyCell, 0);
+
+                // m_Matched[move.Column, move.Row] = true;
 
                 m_SpecialEffects.Add(new SpecialEffect
                 {
@@ -187,6 +187,7 @@ namespace Unity.MLAgentsExamples
 
             m_Cells[move.Column, move.Row] = destinationValue;
             m_Cells[otherCol, otherRow] = originalValue;
+
             return true;
         }
 
@@ -211,48 +212,56 @@ namespace Unity.MLAgentsExamples
         public override bool IsMoveValid(Move move)
         {
 
-            // var _board = this.DeepCopy(m_DummyBoard);
-            
-            // _board.MakeMove(move);
-            // _board.MarkMatchedCells();
-            // _board.ClearMatchedCells();
-
-            // // Create the spcial blocks to the board (before dropping)
-            // _board.SpawnSpecialCells();
-            
-            // // Get lastly created and destroyed pieces
-            // var createdPieces = _board.GetLastCreatedPiece();
-            // var destroyedPieces = _board.GetLastDestroyedPiece();
-
-            // // Print board with grid with for loop
-            // // _board.PrintBoardWithGrid();
-
-            // // Remove board component
-            // Destroy(_board);
-
-            // return false;
-
-            // var originalValue = m_Cells[move.Column, move.Row];
-            // var (otherRow, otherCol) = move.OtherCell();
-            // var destinationValue = m_Cells[otherCol, otherRow];
-
-            // if ((PieceType)originalValue.SpecialType == PieceType.NormalPiece && 
-            //     (PieceType)destinationValue.SpecialType == PieceType.NormalPiece)
-            // {
-            //     return true;
-            // }
-
-            // return false;
+            var originalValue = m_Cells[move.Column, move.Row];
+            var (otherRow, otherCol) = move.OtherCell();
+            var destinationValue = m_Cells[otherCol, otherRow];
         
-
-            if (m_Cells == null)
+            if (originalValue.CellType == k_EmptyCell || destinationValue.CellType == k_EmptyCell)
             {
                 return false;
             }
 
-            return SimpleIsMoveValid(move);
+            // Check if the move is a special match (rainbow or rocket)
+            if ((PieceType)destinationValue.SpecialType == PieceType.RainbowPiece ||
+                (PieceType)destinationValue.SpecialType == PieceType.RocketPiece)
+            {
+                return true;
+            }
+
+
+            // Check if there is a matchable piece when swap the board
+            var _board = this.DeepCopy(this.gameObject);
+            
+            _board.MakeMove(move);
+            bool isMatched =  _board.MarkMatchedCells();
+            Destroy(_board);
+
+            if (isMatched)
+            {
+                return true;
+            }
+ 
+
+            return false;
         }
 
+        public List<int[]> GetMatchedCells()
+        {
+            List<int[]> matchedCells = new List<int[]>();
+
+            for (int row = 0; row < m_CurrentBoardSize.Rows; row++)
+            {
+                for (int col = 0; col < m_CurrentBoardSize.Columns; col++)
+                {
+                    if(m_Matched[col, row])
+                    {
+                        matchedCells.Add(new int[] { col, row });
+                    }
+                }
+            }
+
+            return matchedCells;
+        }
 
         private bool IsCellInBounds(int col, int row)
         {
@@ -290,7 +299,6 @@ namespace Unity.MLAgentsExamples
         {
             ClearMarked();
             ClearCreatedCell();
-            ClearSpecialEffects();
 
             PieceType[] matchableBlocks = { 
                 PieceType.NormalPiece, 
@@ -356,7 +364,7 @@ namespace Unity.MLAgentsExamples
                                 // TODO 생성된 블럭 Created에 넣기
 
                                 // Print the matchedType and the count
-                                Debug.Log("Matched " + matchedType + " and #items "+ matchedPositions.Count);
+                                // Debug.Log("Matched " + matchedType + " and #items "+ matchedPositions.Count);
 
                                 foreach(int[] position in matchedPositions)
                                 {
@@ -604,7 +612,7 @@ namespace Unity.MLAgentsExamples
 
                 Debug.Log("Special Effect " + specialEffect.SpecialType + " at " + specialEffect.Column + ", " + specialEffect.Row);
             }
-            m_SpecialEffects.Clear();
+            ClearSpecialEffects();
         }
 
         // Get the list of the posititons of the same cell type
@@ -620,7 +628,7 @@ namespace Unity.MLAgentsExamples
                     {
                         if (checkMatched)
                         {
-                            if (m_Matched[j, i])
+                            if (!m_Matched[j, i])
                             {
                                 sameCellTypePositions.Add(new int[] { j, i });
                             }
@@ -638,6 +646,7 @@ namespace Unity.MLAgentsExamples
 
         public void InitSettled()
         {
+            Debug.Log("InitSettled()");
             InitRandom();
             while (true)
             {
@@ -701,6 +710,7 @@ namespace Unity.MLAgentsExamples
         {
             // Turn off the monobehaviour error
             Match3Board board = parent.AddComponent<Match3Board>();
+            // Match3Board board = new Match3Board();
 
             board.MaxColumns = this.MaxColumns;
             board.MaxRows = this.MaxRows;
@@ -711,8 +721,8 @@ namespace Unity.MLAgentsExamples
             board.m_Random = new System.Random(RandomSeed == -1 ? gameObject.GetInstanceID() : this.RandomSeed);
             board.Awake();
             
-            board.m_Cells = this.m_Cells;
-            board.m_Matched = this.m_Matched;
+            board.m_Cells = ((int CellType, int SpecialType)[,])m_Cells.Clone();
+            board.m_Matched = (bool[,])m_Matched.Clone();
 
             var boardsize = this.GetCurrentBoardSize();
             board.m_CurrentBoardSize = new BoardSize
