@@ -79,7 +79,7 @@ namespace Unity.MLAgentsExamples
 
                 // TODO Fill here with MCTS or random
                 // Board.FillFromAbove();
-                
+                MCTS.Search(Board);
 
             }
 
