@@ -137,7 +137,7 @@ namespace Unity.MLAgentsExamples
                     Board.FillFromAbove();
                     // TODO Fill here with MCTS or random
                     
-                    
+
                     nextState = State.FindMatches;
                     break;
                 case State.WaitForMove:
