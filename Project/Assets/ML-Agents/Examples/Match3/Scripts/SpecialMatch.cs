@@ -38,20 +38,21 @@ namespace Unity.MLAgentsExamples
         {
             MatchCases = new Dictionary<PieceType, List<int[,]>>();
 
-            MatchCases.Add(PieceType.NormalPiece, new List<int[,]>());
-            MatchCases.Add(PieceType.HorizontalPiece, new List<int[,]>());
-            MatchCases.Add(PieceType.VerticalPiece, new List<int[,]>());
+            MatchCases.Add(PieceType.RainbowPiece, new List<int[,]>());
+            MatchCases.Add(PieceType.BombPiece, new List<int[,]>());
             MatchCases.Add(PieceType.RocketPiece, new List<int[,]>());
             MatchCases.Add(PieceType.CrossPiece, new List<int[,]>());
-            MatchCases.Add(PieceType.BombPiece, new List<int[,]>());
-            MatchCases.Add(PieceType.RainbowPiece, new List<int[,]>());
+            MatchCases.Add(PieceType.VerticalPiece, new List<int[,]>());
+            MatchCases.Add(PieceType.HorizontalPiece, new List<int[,]>());
+            MatchCases.Add(PieceType.NormalPiece, new List<int[,]>());
+
+
 
             MatchCases[PieceType.NormalPiece].Add(new int[1, 3] { { 1, 1, 1 } });
             MatchCases[PieceType.NormalPiece].Add(new int[3, 1] { { 1 }, { 1 }, { 1 } });
 
-            MatchCases[PieceType.VerticalPiece].Add(new int[1, 4] { { 1, 1, 1, 1 } });
-
-            MatchCases[PieceType.HorizontalPiece].Add(new int[4, 1] { { 1 }, { 1 }, { 1 }, { 1 } });
+            MatchCases[PieceType.HorizontalPiece].Add(new int[1, 4] { { 1, 1, 1, 1 } });
+            MatchCases[PieceType.VerticalPiece].Add(new int[4, 1] { { 1 }, { 1 }, { 1 }, { 1 } });
 
             MatchCases[PieceType.RocketPiece].Add(new int[2, 2] { { 1, 1 }, { 1, 1 } });
 
@@ -71,12 +72,13 @@ namespace Unity.MLAgentsExamples
 
 
             CreateScores.Add(PieceType.Empty, 0);
-            CreateScores.Add(PieceType.NormalPiece, 10);
+            CreateScores.Add(PieceType.NormalPiece, 0);
             CreateScores.Add(PieceType.HorizontalPiece, 20);
             CreateScores.Add(PieceType.VerticalPiece, 30);
             CreateScores.Add(PieceType.CrossPiece, 40);
-            CreateScores.Add(PieceType.RocketPiece, 50);
-            CreateScores.Add(PieceType.RainbowPiece, 60);
+            CreateScores.Add(PieceType.BombPiece, 50);
+            CreateScores.Add(PieceType.RocketPiece, 60);
+            CreateScores.Add(PieceType.RainbowPiece, 70);
         }
 
         private void InitializeDestroyScore()
@@ -84,12 +86,23 @@ namespace Unity.MLAgentsExamples
             DestroyScores = new Dictionary<PieceType, int>();
         
             DestroyScores.Add(PieceType.Empty, 0);
-            DestroyScores.Add(PieceType.NormalPiece, 100);
-            DestroyScores.Add(PieceType.HorizontalPiece, 200);
-            DestroyScores.Add(PieceType.VerticalPiece, 300);
-            DestroyScores.Add(PieceType.CrossPiece, 400);
-            DestroyScores.Add(PieceType.RocketPiece, 500);
-            DestroyScores.Add(PieceType.RainbowPiece, 600);
+            DestroyScores.Add(PieceType.NormalPiece, 10);
+            DestroyScores.Add(PieceType.HorizontalPiece, 20);
+            DestroyScores.Add(PieceType.VerticalPiece, 30);
+            DestroyScores.Add(PieceType.CrossPiece, 40);
+            DestroyScores.Add(PieceType.BombPiece, 50);
+            DestroyScores.Add(PieceType.RocketPiece, 60);
+            DestroyScores.Add(PieceType.RainbowPiece, 70);
+        }
+
+        public int GetCreateScore(PieceType pieceType)
+        {
+            return CreateScores[pieceType];
+        }
+
+        public int GetDestroyScore(PieceType pieceType)
+        {
+            return DestroyScores[pieceType];
         }
 
     }

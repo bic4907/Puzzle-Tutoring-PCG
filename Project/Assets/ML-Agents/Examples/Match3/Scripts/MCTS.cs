@@ -108,7 +108,7 @@ public class MCTS : MonoBehaviour
         {
             var move = node.boardState.ValidMoves().ToArray()[i];
 
-            var tmpBoard = node.boardState.DeepCopy();
+            var tmpBoard = node.boardState.DeepCopy(this.gameObject);
             tmpBoard.MakeMove(move);
 
             var tmpChild = new Node(node.depth, 0, 0f, new List<Node>(), node, tmpBoard);

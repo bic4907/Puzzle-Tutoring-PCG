@@ -127,6 +127,8 @@ namespace Unity.MLAgentsExamples
                 }
                 var pointsEarned = Board.ClearMatchedCells();
                 AddReward(k_RewardMultiplier * pointsEarned);
+                Board.ExecuteSpecialEffect();
+                Board.SpawnSpecialCells();
                 Board.DropCells();
                 Board.FillFromAbove();
             }
@@ -164,6 +166,8 @@ namespace Unity.MLAgentsExamples
                 case State.ClearMatched:
                     var pointsEarned = Board.ClearMatchedCells();
                     AddReward(k_RewardMultiplier * pointsEarned);
+                    Board.ExecuteSpecialEffect();
+                    Board.SpawnSpecialCells();
                     nextState = State.Drop;
                     break;
                 case State.Drop:

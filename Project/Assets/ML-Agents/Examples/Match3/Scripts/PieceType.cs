@@ -7,6 +7,7 @@ namespace Unity.MLAgentsExamples
 
     public enum PieceType: int
     {
+        None = -1,
         Empty = 0,
         NormalPiece = 1,
         HorizontalPiece = 2,
