@@ -694,6 +694,31 @@ namespace Unity.MLAgentsExamples
             return m_Random.Next((int)PieceType.NormalPiece, (int)PieceType.RainbowPiece);
         }
 
+        // Get EmptyBlock spaces in the board
+        public List<int[]> GetEmptyBlockPositions()
+        {
+            List<int[]> emptyBlockPositions = new List<int[]>();
+    
+            for (var i = 0; i < MaxRows; i++)
+            {
+                for (var j = 0; j < MaxColumns; j++)
+                {
+                    if (m_Cells[j, i].CellType == k_EmptyCell)
+                    {
+                        emptyBlockPositions.Add(new int[] { j, i });
+                    }
+                }
+            }
+            
+            return emptyBlockPositions;
+        }
+
+        // Get Number of empty space using the predefined method
+        public int GetEmptyBlockCount()
+        {
+            return GetEmptyBlockPositions().Count;
+        }
+
         public Match3Board DeepCopy(GameObject parent)
         {
             // Turn off the monobehaviour error
