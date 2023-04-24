@@ -98,9 +98,6 @@ namespace Unity.MLAgentsExamples
         {
             // Make a move every step if we're training, or we're overriding models in CI.
             var useFast = Academy.Instance.IsCommunicatorOn || (m_ModelOverrider != null && m_ModelOverrider.HasOverrides);
-            
-            // Debug.Log($"Agent Status: {m_CurrentState}");
-
             if (useFast)
             {
                 FastUpdate();
@@ -159,16 +156,12 @@ namespace Unity.MLAgentsExamples
             switch (m_CurrentState)
             {
                 case State.FindMatches:
-
                     var hasMatched = Board.MarkMatchedCells();
-
-
                     nextState = hasMatched ? State.ClearMatched : State.WaitForMove;
                     if (nextState == State.WaitForMove)
                     {
                         m_MovesMade++;
                     }
-
                     break;
                 case State.ClearMatched:
                     var pointsEarned = Board.ClearMatchedCells();
@@ -196,7 +189,6 @@ namespace Unity.MLAgentsExamples
                         }
                         Board.InitSettled();
                     }
-
                     RequestDecision();
 
                     nextState = State.FindMatches;

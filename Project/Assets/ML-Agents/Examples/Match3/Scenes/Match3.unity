@@ -331,13 +331,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3508723250470608012, guid: 2fafdcd0587684641b03b11f04454f1b,
         type: 3}
-      propertyPath: MaxMoves
-      value: 1000
-      objectReference: {fileID: 0}
-    - target: {fileID: 3508723250470608012, guid: 2fafdcd0587684641b03b11f04454f1b,
-        type: 3}
       propertyPath: MoveTime
-      value: 0.2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3508723250470608012, guid: 2fafdcd0587684641b03b11f04454f1b,
         type: 3}
