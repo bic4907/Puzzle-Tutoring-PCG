@@ -649,7 +649,7 @@ GameObject:
   - component: {fileID: 1540485852}
   - component: {fileID: 1540485851}
   m_Layer: 0
-  m_Name: Match3 Agent (1)
+  m_Name: Match3 PCG Agent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

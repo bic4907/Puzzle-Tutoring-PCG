@@ -46,7 +46,7 @@ public class MCTS : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Search();
+
     }
     public void PrepareRootNode()
     {
@@ -135,6 +135,10 @@ public class MCTS : MonoBehaviour
             
             var move = node.boardState.ValidMoves().ToArray()[0];
             node.boardState.MakeMove(move);
+
+
+
+
             cnt += 1;
         }
 

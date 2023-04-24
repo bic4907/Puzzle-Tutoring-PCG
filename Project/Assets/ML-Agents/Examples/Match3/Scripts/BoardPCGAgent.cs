@@ -79,7 +79,7 @@ namespace Unity.MLAgentsExamples
 
                 // TODO Fill here with MCTS or random
                 // Board.FillFromAbove();
-
+                
 
             }
 
@@ -121,6 +121,9 @@ namespace Unity.MLAgentsExamples
                 case State.ClearMatched:
                     var pointsEarned = Board.ClearMatchedCells();
                     AddReward(k_RewardMultiplier * pointsEarned);
+
+                    // 
+
                     Board.ExecuteSpecialEffect();
                     Board.SpawnSpecialCells();
                     nextState = State.Drop;
