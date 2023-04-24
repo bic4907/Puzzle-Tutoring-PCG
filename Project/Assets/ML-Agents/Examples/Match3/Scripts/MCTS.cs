@@ -7,7 +7,8 @@ using System.Linq;
 using UnityEngine;
 
 
-public class Node {
+public class Node
+{
     public int visits;
     public int depth;
     public float score;
@@ -53,7 +54,8 @@ public class MCTS : MonoBehaviour
         currentNode = rootNode;
     }
 
-    public void Search() {
+    public void Search()
+    {
         currentNode = rootNode;
         // Select
         while (currentNode.children.Count > 0) {
