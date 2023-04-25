@@ -41,7 +41,7 @@ namespace Unity.MLAgentsExamples
 
         GameObject m_DummyBoard;
 
-        (int CellType, int SpecialType)[,] m_Cells;
+        public (int CellType, int SpecialType)[,] m_Cells;
 
         // Created special blocks in the board
         (int CellType, int SpecialType)[,] m_CreatedCells;
@@ -230,7 +230,7 @@ namespace Unity.MLAgentsExamples
 
 
             // Check if there is a matchable piece when swap the board
-            var _board = this.DeepCopy(this.gameObject);
+            var _board = this.DeepCopy(m_DummyBoard);
             
             _board.MakeMove(move);
             bool isMatched =  _board.MarkMatchedCells();
@@ -709,10 +709,8 @@ namespace Unity.MLAgentsExamples
 
         public Match3Board DeepCopy(GameObject parent)
         {
-            // Turn off the monobehaviour error
             Match3Board board = parent.AddComponent<Match3Board>();
-            //Match3Board board = new Match3Board();
-
+            
             board.MaxColumns = this.MaxColumns;
             board.MaxRows = this.MaxRows;
             board.MinColumns = this.MinColumns;
@@ -755,6 +753,22 @@ namespace Unity.MLAgentsExamples
                 }
             }
             return null;
+        }
+
+        public int GetEmptyCellCount()
+        {
+            int count = 0;
+            for (var i = 0; i < MaxRows; i++)
+            {
+                for (var j = 0; j < MaxColumns; j++)
+                {
+                    if (m_Cells[j, i].CellType == k_EmptyCell)
+                    {
+                        count++;
+                    }
+                }
+            }
+            return count;
         }
 
         public void SpawnRandomBlock()

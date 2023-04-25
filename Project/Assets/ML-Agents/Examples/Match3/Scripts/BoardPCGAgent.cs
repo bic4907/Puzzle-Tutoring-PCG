@@ -96,15 +96,10 @@ namespace Unity.MLAgentsExamples
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                // TODO Fill here with MCTS or random
-                // Board.FillFromAbove();
-                // MCTS.Search(Board);
-
             }
 
             while (!HasValidMoves())
             {
-                // Shuffle the board until we have a valid move.
                 Board.InitSettled();
             }
 
@@ -141,7 +136,7 @@ namespace Unity.MLAgentsExamples
                 case State.ClearMatched:
                     var pointsEarned = Board.ClearMatchedCells();
                     AddReward(k_RewardMultiplier * pointsEarned);
-                    
+
 
                     Board.ExecuteSpecialEffect();
                     Board.SpawnSpecialCells();
@@ -160,6 +155,7 @@ namespace Unity.MLAgentsExamples
                             break;
                         case GeneratorType.MCTS:
                             MCTS.Instance.FillEmpty(Board);
+                            
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
