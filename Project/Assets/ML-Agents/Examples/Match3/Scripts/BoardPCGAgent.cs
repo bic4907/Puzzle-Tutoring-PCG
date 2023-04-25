@@ -7,6 +7,12 @@ using Unity.MLAgents.Integrations.Match3;
 namespace Unity.MLAgentsExamples
 {
 
+    public enum GeneratorType
+    {
+        Random = 0,
+        MCTS = 1,
+    }
+
     public class BoardPCGAgent : Agent
     {
         [HideInInspector]
@@ -20,6 +26,8 @@ namespace Unity.MLAgentsExamples
         float m_TimeUntilMove;
         private int m_MovesMade;
         private ModelOverrider m_ModelOverrider;
+
+        public GeneratorType generatorType = GeneratorType.MCTS;
 
         private const float k_RewardMultiplier = 0.01f;
         protected override void Awake()
@@ -77,9 +85,20 @@ namespace Unity.MLAgentsExamples
                 Board.SpawnSpecialCells();
                 Board.DropCells();
 
+                switch(generatorType)
+                {
+                    case GeneratorType.Random:
+                        Board.FillFromAbove();
+                        break;
+                    case GeneratorType.MCTS:
+                        MCTS.Instance.FillEmpty(Board);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
                 // TODO Fill here with MCTS or random
                 // Board.FillFromAbove();
-                MCTS.Search(Board);
+                // MCTS.Search(Board);
 
             }
 
@@ -108,6 +127,7 @@ namespace Unity.MLAgentsExamples
             m_TimeUntilMove = MoveTime;
 
             State nextState;
+
             switch (m_CurrentState)
             {
                 case State.FindMatches:
@@ -134,9 +154,17 @@ namespace Unity.MLAgentsExamples
                     break;
                 case State.FillEmpty:
 
-                    Board.FillFromAbove();
-                    // TODO Fill here with MCTS or random
-                    
+                    switch(generatorType)
+                    {
+                        case GeneratorType.Random:
+                            Board.FillFromAbove();
+                            break;
+                        case GeneratorType.MCTS:
+                            MCTS.Instance.FillEmpty(Board);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
 
                     nextState = State.FindMatches;
                     break;

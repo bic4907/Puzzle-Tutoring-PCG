@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.MLAgentsExamples;
@@ -8,7 +9,7 @@ using UnityEngine;
 
 namespace Unity.MLAgentsExamples
 {
-    enum NodeState
+    public enum SimulationType
     {
         Generator = 0,
         Solver = 1,
@@ -22,45 +23,65 @@ namespace Unity.MLAgentsExamples
         public float score;
         public List<Node> children;
         public Node parent;
-        public Match3Board boardState;
+        public Match3Board board;
+
+        public SimulationType simulationType;
         
-        public Node(int depth, int visits, float score, List<Node> children, Node parent, Match3Board boardState)
+        public Node(int depth, 
+                    int visits,
+                    float score,
+                    List<Node> children,
+                    Node parent,
+                    Match3Board board,
+                    SimulationType simulationType)
         {
             this.depth = depth + 1;
             this.visits = visits;
             this.score = score;
             this.children = children;
             this.parent = parent;
-            this.boardState = boardState;
+            this.board = board;
+            this.simulationType = simulationType;
         }
     }
 
-    public class MCTS : MonoBehaviour
+    public class MCTS
     {
-        private Match3Board board;
+        private static MCTS _Instance = null;
+
+        public static MCTS Instance { get {
+            if (_Instance == null)
+            {
+                _Instance = new MCTS();
+            }
+            return _Instance;
+        }}
+
+        private Match3Board simulator;
         private Node rootNode;
         private Node currentNode;
         public int numberOfChild;
         public int depthLimit = 2;
         public int simulationStepLimit = 100;
 
-        // Start is called before the first frame update
-        void Start()
+        GameObject m_DummyBoard;
+
+        public MCTS()
         {
-            board = GetComponent<Match3Board>();
-            numberOfChild = 1;
-            PrepareRootNode();
+            m_DummyBoard = GameObject.Find("DummyBoard").gameObject;
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
         public void PrepareRootNode()
         {
             ResetRootNode();
             currentNode = rootNode;
+        }
+
+        private void ResetRootNode()
+        {  
+            // TODO Check
+            rootNode = new Node(0, 0, 0f, new List<Node>(), null, simulator, SimulationType.Generator);
+            Expand(rootNode);
         }
 
         public void Search()
@@ -90,11 +111,18 @@ namespace Unity.MLAgentsExamples
                 currentNode = currentNode.parent;
             }
         }
-        private void ResetRootNode()
+
+        public void FillEmpty(Match3Board board)
         {
-            rootNode = new Node(0, 0, 0f, new List<Node>(), null, simulator);
-            Expand(rootNode);
+            var _board = board.DeepCopy(m_DummyBoard);
+
+            // Fill Empty cells
+            simulator = _board;
+            ResetRootNode();
+            Search();
         }
+
+
         private Node SelectBestChild(Node node) {
             float bestScore = float.MinValue;
             Node bestChild = null;
@@ -115,34 +143,69 @@ namespace Unity.MLAgentsExamples
         }
 
         private void Expand(Node node) {
-            for(int i = 0; i<numberOfChild; i++)
-            {
-                var move = node.boardState.ValidMoves().ToArray()[i];
 
-                var tmpBoard = node.boardState.DeepCopy(this.gameObject);
+            for(int i = 0; i < numberOfChild; i++)
+            {
+                var move = node.board.ValidMoves().ToArray()[i];
+
+                var tmpBoard = node.board.DeepCopy(m_DummyBoard);
                 tmpBoard.MakeMove(move);
 
-                var tmpChild = new Node(node.depth, 0, 0f, new List<Node>(), node, tmpBoard);
+                var tmpChild = new Node(node.depth, 0, 0f, new List<Node>(), node, tmpBoard, SimulationType.Solver);
                 node.children.Add(tmpChild);
+
             }
         }
 
         private float Simulate(Node node) {
             
-            // TODO Switch on PCG and Solver Mode
-            switch (node.boardState.state)
-            {
-                case NodeState.Generator:
-                    
-                    return SimulateGenerator(node);
-                case NodeState.Solver:
+            int score = 0;
 
-                    return SimulateSolver(node);
+            switch (node.simulationType)
+            {
+                case SimulationType.Generator:
+
+                    // TODO Place a random block in the board
+                    
+
+                    break; 
+                case SimulationType.Solver:
+                    Move move = GreedyMatch3Solver.GetAction(node.board);
+                    node.board.MakeMove(move);
+
+                    while (true)
+                    {
+                        var hasMatched = node.board.MarkMatchedCells();
+                        if (!hasMatched)
+                        {
+                            break;
+                        }
+                        var pointsEarned = node.board.ClearMatchedCells();
+                        node.board.ExecuteSpecialEffect();
+                        node.board.SpawnSpecialCells();
+                        node.board.DropCells();
+                    }
+
+                    while (!HasValidMoves())
+                    {
+                        // Shuffle the board until we have a valid move.
+
+                        // Backpropagate null
+                        Board.InitSettled();
+                    }
+
+                    // TODO calculate the score
+                    score =  1;
+
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
+
             }
 
 
+
+            /*
             int cnt = 0;
 
             while(HasValidMoves(node.boardState.ValidMoves()) && simulationStepLimit > cnt)
@@ -163,9 +226,12 @@ namespace Unity.MLAgentsExamples
 
                 cnt += 1;
             }
+            */
 
-            return 1;
+            return score;
         }
+
+        /*        
         bool HasValidMoves(IEnumerable<Move> board)
         {
             foreach (var unused in board)
@@ -175,5 +241,6 @@ namespace Unity.MLAgentsExamples
 
             return false;
         }
+        */
     }
 }
