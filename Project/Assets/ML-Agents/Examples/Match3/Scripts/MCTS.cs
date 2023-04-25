@@ -144,23 +144,29 @@ namespace Unity.MLAgentsExamples
         private void Expand(Node node) {
 
             
-            var tmpBoard = node.board.DeepCopy(m_DummyBoard);
             SimulationType simType = node.board.HasEmptyCell() ? SimulationType.Generator : SimulationType.Solver;
             Node tmpChild = null;
+            Match3Board tmpBoard = null;
 
             switch(simType)
             {
                 case SimulationType.Generator:
                     
-                    // Spawn a block in the random position
-                    tmpBoard.SpawnRandomBlock();
+                    // Make the children with spawning a colored block in the empty space
+                    // TODO random sequence
+                    for (int i = 0; i < node.board.NumCellTypes; i++)
+                    {
+                        tmpBoard = node.board.DeepCopy(m_DummyBoard);
+                        tmpBoard.SpawnColoredBlock(i);
 
-                    tmpChild = new Node(node.depth, 0, 0f, new List<Node>(), node, tmpBoard, SimulationType.Generator);
-                    node.children.Add(tmpChild);
+                        tmpChild = new Node(node.depth, 0, 0f, new List<Node>(), node, tmpBoard, SimulationType.Generator);
+                        node.children.Add(tmpChild);
+                    }
 
                     break;
                 case SimulationType.Solver:
 
+                    tmpBoard = node.board.DeepCopy(m_DummyBoard);
                     // Append a child node with heuristic decision
                     Move move = GreedyMatch3Solver.GetAction(tmpBoard);
                     tmpBoard.MakeMove(move);
@@ -177,18 +183,22 @@ namespace Unity.MLAgentsExamples
 
         private float Simulate(Node node) {
             
-            int score = 0;
-
+            float score = 0f;
+            bool hasMatched;
             switch (node.simulationType)
             {
                 case SimulationType.Generator:
-                    
+                    hasMatched = node.board.MarkMatchedCells();
+                    if (hasMatched)
+                    {
+                        score = -1.0f;
+                    }
                     break; 
                 case SimulationType.Solver:
 
                     // TODO Player learning score
 
-                    var hasMatched = node.board.MarkMatchedCells();
+                    hasMatched = node.board.MarkMatchedCells();
                     node.board.SpawnSpecialCells();
 
                     var createdPieces = node.board.GetLastCreatedPiece();
@@ -198,7 +208,7 @@ namespace Unity.MLAgentsExamples
                         Debug.Log("Special Piece: " + type);
                     }
 
-                    score =  1;
+                    score = 1.0f;
 
                     break;
                 default:

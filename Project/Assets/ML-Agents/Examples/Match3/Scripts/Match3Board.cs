@@ -701,6 +701,7 @@ namespace Unity.MLAgentsExamples
             return m_Random.Next(0, NumCellTypes);
         }
 
+
         int GetRandomSpecialType()
         {
             return m_Random.Next((int)PieceType.NormalPiece, (int)PieceType.RainbowPiece);
@@ -764,6 +765,15 @@ namespace Unity.MLAgentsExamples
             int cellType = GetRandomCellType();
             m_Cells[emptyCell[0], emptyCell[1]] = (cellType, (int)PieceType.NormalPiece);
         }
+
+        public void SpawnColoredBlock(int cellType)
+        {
+            int[] emptyCell = GetEmptyCell();
+            if (emptyCell == null) return;
+
+            m_Cells[emptyCell[0], emptyCell[1]] = (cellType, (int)PieceType.NormalPiece);
+        }
+
 
         public int EvalMovePoints(Move move)
         {
