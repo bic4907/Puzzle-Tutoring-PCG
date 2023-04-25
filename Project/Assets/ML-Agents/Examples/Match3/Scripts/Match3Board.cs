@@ -41,7 +41,7 @@ namespace Unity.MLAgentsExamples
 
         GameObject m_DummyBoard;
 
-        (int CellType, int SpecialType)[,] m_Cells;
+        public (int CellType, int SpecialType)[,] m_Cells;
 
         // Created special blocks in the board
         (int CellType, int SpecialType)[,] m_CreatedCells;
@@ -144,6 +144,7 @@ namespace Unity.MLAgentsExamples
 
             ClearLastPieceLog();
 
+
             var originalValue = m_Cells[move.Column, move.Row];
             var (otherRow, otherCol) = move.OtherCell();
             var destinationValue = m_Cells[otherCol, otherRow];
@@ -229,7 +230,7 @@ namespace Unity.MLAgentsExamples
 
 
             // Check if there is a matchable piece when swap the board
-            var _board = this.DeepCopy(this.gameObject);
+            var _board = this.DeepCopy(m_DummyBoard);
             
             _board.MakeMove(move);
             bool isMatched =  _board.MarkMatchedCells();
@@ -391,6 +392,9 @@ namespace Unity.MLAgentsExamples
                                 
                                     }
 
+
+
+    
                                     m_LastDestroyedPiece.Add((cellType, (int)matchedType));
 
                                     m_Matched[position[0], position[1]] = true;
@@ -606,7 +610,7 @@ namespace Unity.MLAgentsExamples
                         throw new Exception("Invalid Special Type");
                 }
 
-                // Debug.Log("Special Effect " + specialEffect.SpecialType + " at " + specialEffect.Column + ", " + specialEffect.Row);
+                Debug.Log("Special Effect " + specialEffect.SpecialType + " at " + specialEffect.Column + ", " + specialEffect.Row);
             }
             ClearSpecialEffects();
         }
@@ -642,6 +646,7 @@ namespace Unity.MLAgentsExamples
 
         public void InitSettled()
         {
+            Debug.Log("InitSettled()");
             InitRandom();
             while (true)
             {
@@ -672,6 +677,13 @@ namespace Unity.MLAgentsExamples
             }
         }
 
+        
+
+        // TODO 로켓 특수 효과 (위치, 대상 색상)
+        // TODO 폭탄 특수 효과 (위치)
+        // TODO 무지개 특수 효과 (위치, 대상 색상)
+
+
 
         void ClearCreatedCell()
         {
@@ -689,42 +701,16 @@ namespace Unity.MLAgentsExamples
             return m_Random.Next(0, NumCellTypes);
         }
 
+
         int GetRandomSpecialType()
         {
             return m_Random.Next((int)PieceType.NormalPiece, (int)PieceType.RainbowPiece);
         }
 
-        // Get EmptyBlock spaces in the board
-        public List<int[]> GetEmptyBlockPositions()
-        {
-            List<int[]> emptyBlockPositions = new List<int[]>();
-    
-            for (var i = 0; i < MaxRows; i++)
-            {
-                for (var j = 0; j < MaxColumns; j++)
-                {
-                    if (m_Cells[j, i].CellType == k_EmptyCell)
-                    {
-                        emptyBlockPositions.Add(new int[] { j, i });
-                    }
-                }
-            }
-            
-            return emptyBlockPositions;
-        }
-
-        // Get Number of empty space using the predefined method
-        public int GetEmptyBlockCount()
-        {
-            return GetEmptyBlockPositions().Count;
-        }
-
         public Match3Board DeepCopy(GameObject parent)
         {
-            // Turn off the monobehaviour error
             Match3Board board = parent.AddComponent<Match3Board>();
-            // Match3Board board = new Match3Board();
-
+            
             board.MaxColumns = this.MaxColumns;
             board.MaxRows = this.MaxRows;
             board.MinColumns = this.MinColumns;
@@ -748,32 +734,103 @@ namespace Unity.MLAgentsExamples
             return board;
         }
 
+        public bool HasEmptyCell()
+        {
+            int[] emptyCell = GetEmptyCell();
+            return emptyCell != null;
+        }
+
+        public int[] GetEmptyCell()
+        {
+            for (var i = 0; i < MaxRows; i++)
+            {
+                for (var j = 0; j < MaxColumns; j++)
+                {
+                    if (m_Cells[j, i].CellType == k_EmptyCell)
+                    {
+                        return new int[] {j, i};
+                    }
+                }
+            }
+            return null;
+        }
+
+        public int GetEmptyCellCount()
+        {
+            int count = 0;
+            for (var i = 0; i < MaxRows; i++)
+            {
+                for (var j = 0; j < MaxColumns; j++)
+                {
+                    if (m_Cells[j, i].CellType == k_EmptyCell)
+                    {
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+
+        public void SpawnRandomBlock()
+        {
+            int[] emptyCell = GetEmptyCell();
+            if (emptyCell == null) return;
+
+            int cellType = GetRandomCellType();
+            m_Cells[emptyCell[0], emptyCell[1]] = (cellType, (int)PieceType.NormalPiece);
+        }
+
+        public void SpawnColoredBlock(int cellType)
+        {
+            int[] emptyCell = GetEmptyCell();
+            if (emptyCell == null) return;
+
+            m_Cells[emptyCell[0], emptyCell[1]] = (cellType, (int)PieceType.NormalPiece);
+        }
+
+
         public int EvalMovePoints(Move move)
         {
+            // return 0;
+            // Deepcopy and simulate the board
             var _board = this.DeepCopy(m_DummyBoard);
+            
+            if (!_board.IsMoveValid(move)) return 0;
+
             _board.MakeMove(move);
             _board.MarkMatchedCells();
             _board.ClearMatchedCells();
-            _board.ExecuteSpecialEffect();
-            _board.SpawnSpecialCells();
 
-            var created = _board.GetLastCreatedPiece();
-            var destroyed = _board.GetLastDestroyedPiece();
+            // Create the spcial blocks to the board (before dropping)
+            _board.SpawnSpecialCells();
             
+            // Get lastly created and destroyed pieces
+            var createdPieces = _board.GetLastCreatedPiece();
+            var destroyedPieces = _board.GetLastDestroyedPiece();
+
+            // Count the points
             int createdPoints = 0, destroyedPoints = 0;
-            foreach (var piece in created)
+            foreach (var piece in createdPieces)
             {
                 PieceType type = (PieceType)piece.SpecialType;              
                 createdPoints += SpecialMatch.GetInstance().CreateScores[type];
+
+
             }
 
-            foreach (var piece in destroyed)
+            foreach (var piece in destroyedPieces)
             {
                 PieceType type = (PieceType)piece.SpecialType;              
                 destroyedPoints += SpecialMatch.GetInstance().DestroyScores[type];
             }
 
-            return createdPoints + destroyedPoints;
+            // Remove board component
+            Destroy(_board);
+
+            // Debug.Log("Created Points : " + createdPoints + " Destroyed Points : " + destroyedPoints);
+            int points = createdPoints + destroyedPoints;
+            
+            return points;
         }
     }
 
