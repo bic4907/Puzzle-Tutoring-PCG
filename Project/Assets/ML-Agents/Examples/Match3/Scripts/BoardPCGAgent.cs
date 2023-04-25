@@ -141,8 +141,7 @@ namespace Unity.MLAgentsExamples
                 case State.ClearMatched:
                     var pointsEarned = Board.ClearMatchedCells();
                     AddReward(k_RewardMultiplier * pointsEarned);
-
-                    // 
+                    
 
                     Board.ExecuteSpecialEffect();
                     Board.SpawnSpecialCells();

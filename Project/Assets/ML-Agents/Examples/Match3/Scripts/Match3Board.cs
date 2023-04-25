@@ -735,51 +735,78 @@ namespace Unity.MLAgentsExamples
             return board;
         }
 
+        public bool HasEmptyCell()
+        {
+            int[] emptyCell = GetEmptyCell();
+            return emptyCell != null;
+        }
+
+        public int[] GetEmptyCell()
+        {
+            for (var i = 0; i < MaxRows; i++)
+            {
+                for (var j = 0; j < MaxColumns; j++)
+                {
+                    if (m_Cells[j, i].CellType == k_EmptyCell)
+                    {
+                        return new int[] {j, i};
+                    }
+                }
+            }
+            return null;
+        }
+
+        public void SpawnRandomBlock()
+        {
+            int[] emptyCell = GetEmptyCell();
+            if (emptyCell == null) return;
+
+            int cellType = GetRandomCellType();
+            m_Cells[emptyCell[0], emptyCell[1]] = (cellType, (int)PieceType.NormalPiece);
+        }
+
         public int EvalMovePoints(Move move)
         {
-            return 0;
+            // return 0;
             // Deepcopy and simulate the board
-            // var _board = this.DeepCopy(m_DummyBoard);
+            var _board = this.DeepCopy(m_DummyBoard);
             
-            // if (!_board.IsMoveValid(move)) return 0;
+            if (!_board.IsMoveValid(move)) return 0;
 
-            // _board.MakeMove(move);
-            // _board.MarkMatchedCells();
-            // _board.ClearMatchedCells();
+            _board.MakeMove(move);
+            _board.MarkMatchedCells();
+            _board.ClearMatchedCells();
 
-            // // Create the spcial blocks to the board (before dropping)
-            // _board.SpawnSpecialCells();
+            // Create the spcial blocks to the board (before dropping)
+            _board.SpawnSpecialCells();
             
-            // // Get lastly created and destroyed pieces
-            // var createdPieces = _board.GetLastCreatedPiece();
-            // var destroyedPieces = _board.GetLastDestroyedPiece();
+            // Get lastly created and destroyed pieces
+            var createdPieces = _board.GetLastCreatedPiece();
+            var destroyedPieces = _board.GetLastDestroyedPiece();
 
-            // // Count the points
-            // int createdPoints = 0, destroyedPoints = 0;
-            // foreach (var piece in createdPieces)
-            // {
-            //     PieceType type = (PieceType)piece.SpecialType;              
-            //     createdPoints += SpecialMatch.GetInstance().CreateScores[type];
+            // Count the points
+            int createdPoints = 0, destroyedPoints = 0;
+            foreach (var piece in createdPieces)
+            {
+                PieceType type = (PieceType)piece.SpecialType;              
+                createdPoints += SpecialMatch.GetInstance().CreateScores[type];
 
 
-            // }
+            }
 
-            // foreach (var piece in destroyedPieces)
-            // {
-            //     PieceType type = (PieceType)piece.SpecialType;              
-            //     destroyedPoints += SpecialMatch.GetInstance().DestroyScores[type];
-            // }
+            foreach (var piece in destroyedPieces)
+            {
+                PieceType type = (PieceType)piece.SpecialType;              
+                destroyedPoints += SpecialMatch.GetInstance().DestroyScores[type];
+            }
 
-            // // Print board with grid with for loop
-            // // _board.PrintBoardWithGrid();
-
-            // // Remove board component
-            // // Destroy(_board);
+            // Remove board component
+            Destroy(_board);
 
             // Debug.Log("Created Points : " + createdPoints + " Destroyed Points : " + destroyedPoints);
-            // int points = createdPoints + destroyedPoints;
+            int points = createdPoints + destroyedPoints;
             
-            // return points;
+            return points;
         }
     }
 

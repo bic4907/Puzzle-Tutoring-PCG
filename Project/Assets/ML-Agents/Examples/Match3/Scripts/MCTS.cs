@@ -79,7 +79,6 @@ namespace Unity.MLAgentsExamples
 
         private void ResetRootNode()
         {  
-            // TODO Check
             rootNode = new Node(0, 0, 0f, new List<Node>(), null, simulator, SimulationType.Generator);
             Expand(rootNode);
         }
@@ -144,17 +143,36 @@ namespace Unity.MLAgentsExamples
 
         private void Expand(Node node) {
 
-            for(int i = 0; i < numberOfChild; i++)
+            
+            var tmpBoard = node.board.DeepCopy(m_DummyBoard);
+            SimulationType simType = node.board.HasEmptyCell() ? SimulationType.Generator : SimulationType.Solver;
+            Node tmpChild = null;
+
+            switch(simType)
             {
-                var move = node.board.ValidMoves().ToArray()[i];
+                case SimulationType.Generator:
+                    
+                    // Spawn a block in the random position
+                    tmpBoard.SpawnRandomBlock();
 
-                var tmpBoard = node.board.DeepCopy(m_DummyBoard);
-                tmpBoard.MakeMove(move);
+                    tmpChild = new Node(node.depth, 0, 0f, new List<Node>(), node, tmpBoard, SimulationType.Generator);
+                    node.children.Add(tmpChild);
 
-                var tmpChild = new Node(node.depth, 0, 0f, new List<Node>(), node, tmpBoard, SimulationType.Solver);
-                node.children.Add(tmpChild);
+                    break;
+                case SimulationType.Solver:
 
+                    // Append a child node with heuristic decision
+                    Move move = GreedyMatch3Solver.GetAction(tmpBoard);
+                    tmpBoard.MakeMove(move);
+
+                    tmpChild = new Node(node.depth, 0, 0f, new List<Node>(), node, tmpBoard, SimulationType.Solver);
+                    node.children.Add(tmpChild);
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
+
         }
 
         private float Simulate(Node node) {
@@ -164,37 +182,22 @@ namespace Unity.MLAgentsExamples
             switch (node.simulationType)
             {
                 case SimulationType.Generator:
-
-                    // TODO Place a random block in the board
                     
-
                     break; 
                 case SimulationType.Solver:
-                    Move move = GreedyMatch3Solver.GetAction(node.board);
-                    node.board.MakeMove(move);
 
-                    while (true)
+                    // TODO Player learning score
+
+                    var hasMatched = node.board.MarkMatchedCells();
+                    node.board.SpawnSpecialCells();
+
+                    var createdPieces = node.board.GetLastCreatedPiece();
+                    foreach (var piece in createdPieces)
                     {
-                        var hasMatched = node.board.MarkMatchedCells();
-                        if (!hasMatched)
-                        {
-                            break;
-                        }
-                        var pointsEarned = node.board.ClearMatchedCells();
-                        node.board.ExecuteSpecialEffect();
-                        node.board.SpawnSpecialCells();
-                        node.board.DropCells();
+                        PieceType type = (PieceType)piece.SpecialType;              
+                        Debug.Log("Special Piece: " + type);
                     }
 
-                    while (!HasValidMoves())
-                    {
-                        // Shuffle the board until we have a valid move.
-
-                        // Backpropagate null
-                        Board.InitSettled();
-                    }
-
-                    // TODO calculate the score
                     score =  1;
 
                     break;
@@ -203,35 +206,30 @@ namespace Unity.MLAgentsExamples
 
             }
 
-
-
-            /*
-            int cnt = 0;
-
-            while(HasValidMoves(node.boardState.ValidMoves()) && simulationStepLimit > cnt)
-            {
-                var hasMatched = node.boardState.MarkMatchedCells();
-                if (hasMatched)
-                {
-                    var pointsEarned = node.boardState.ClearMatchedCells();
-                    node.boardState.DropCells();
-                    // Here PCG Part
-                    // RequestDecision();
-                    node.boardState.FillFromAbove();
-
-                }
-                
-                var move = node.boardState.ValidMoves().ToArray()[0];
-                node.boardState.MakeMove(move);
-
-                cnt += 1;
-            }
-            */
-
             return score;
         }
 
-        /*        
+        private bool IsTerminal(Node node)
+        {
+            // TODO Add node depth for player simulating
+            return HasValidMoves(node.board.ValidMoves());
+        }
+
+
+        private SimulationType GetSimulationType(Match3Board baord) 
+        {
+            // Return the simulation type whether the empty space is exist in the board
+            if (baord.HasEmptyCell())
+            {
+                return SimulationType.Generator;
+            }
+            else
+            {
+                return SimulationType.Solver;
+            }
+        }
+
+         
         bool HasValidMoves(IEnumerable<Move> board)
         {
             foreach (var unused in board)
@@ -241,6 +239,6 @@ namespace Unity.MLAgentsExamples
 
             return false;
         }
-        */
+        
     }
 }
