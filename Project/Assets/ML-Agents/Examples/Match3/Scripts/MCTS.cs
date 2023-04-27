@@ -46,6 +46,12 @@ namespace Unity.MLAgentsExamples
             this.board = board;
             this.simulationType = simulationType;
         }
+        ~Node()
+        {
+            board = null;
+            parent = null;
+            children = null;
+        }
     }
 
     public class MCTS
@@ -156,6 +162,7 @@ namespace Unity.MLAgentsExamples
             board.m_Cells = ((int CellType, int SpecialType)[,])BestBoard.m_Cells.Clone();
 
             Debug.Log("IsChanged: " + IsChanged);
+            this.rootNode = null;
         }
 
         private void PrepareSearch()

@@ -709,7 +709,8 @@ namespace Unity.MLAgentsExamples
 
         public Match3Board DeepCopy(GameObject parent)
         {
-            Match3Board board = parent.AddComponent<Match3Board>();
+            // Match3Board board = parent.AddComponent<Match3Board>();
+            Match3Board board = new Match3Board();
             
             board.MaxColumns = this.MaxColumns;
             board.MaxRows = this.MaxRows;
@@ -717,7 +718,7 @@ namespace Unity.MLAgentsExamples
             board.MinRows = this.MinRows;
             board.RandomSeed = this.RandomSeed;
             board.NumCellTypes = this.NumCellTypes;
-            board.m_Random = new System.Random(RandomSeed == -1 ? gameObject.GetInstanceID() : this.RandomSeed);
+            board.m_Random = new System.Random(this.RandomSeed);
             board.Awake();
             
             board.m_Cells = ((int CellType, int SpecialType)[,])m_Cells.Clone();
