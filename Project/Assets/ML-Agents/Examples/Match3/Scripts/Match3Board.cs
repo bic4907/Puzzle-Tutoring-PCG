@@ -677,13 +677,6 @@ namespace Unity.MLAgentsExamples
             }
         }
 
-        
-
-        // TODO 로켓 특수 효과 (위치, 대상 색상)
-        // TODO 폭탄 특수 효과 (위치)
-        // TODO 무지개 특수 효과 (위치, 대상 색상)
-
-
 
         void ClearCreatedCell()
         {
@@ -709,9 +702,10 @@ namespace Unity.MLAgentsExamples
 
         public Match3Board DeepCopy(GameObject parent)
         {
-            // Match3Board board = parent.AddComponent<Match3Board>();
+
             Match3Board board = new Match3Board();
-            
+
+
             board.MaxColumns = this.MaxColumns;
             board.MaxRows = this.MaxRows;
             board.MinColumns = this.MinColumns;
