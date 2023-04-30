@@ -230,7 +230,7 @@ namespace Unity.MLAgentsExamples
 
 
             // Check if there is a matchable piece when swap the board
-            var _board = this.DeepCopy(m_DummyBoard);
+            var _board = this.DeepCopy();
             
             _board.MakeMove(move);
             bool isMatched =  _board.MarkMatchedCells();
@@ -610,7 +610,7 @@ namespace Unity.MLAgentsExamples
                         throw new Exception("Invalid Special Type");
                 }
 
-                Debug.Log("Special Effect " + specialEffect.SpecialType + " at " + specialEffect.Column + ", " + specialEffect.Row);
+                // Debug.Log("Special Effect " + specialEffect.SpecialType + " at " + specialEffect.Column + ", " + specialEffect.Row);
             }
             ClearSpecialEffects();
         }
@@ -646,7 +646,6 @@ namespace Unity.MLAgentsExamples
 
         public void InitSettled()
         {
-            Debug.Log("InitSettled()");
             InitRandom();
             while (true)
             {
@@ -677,6 +676,13 @@ namespace Unity.MLAgentsExamples
             }
         }
 
+        
+
+        // TODO 로켓 특수 효과 (위치, 대상 색상)
+        // TODO 폭탄 특수 효과 (위치)
+        // TODO 무지개 특수 효과 (위치, 대상 색상)
+
+
 
         void ClearCreatedCell()
         {
@@ -700,12 +706,11 @@ namespace Unity.MLAgentsExamples
             return m_Random.Next((int)PieceType.NormalPiece, (int)PieceType.RainbowPiece);
         }
 
-        public Match3Board DeepCopy(GameObject parent)
+        public Match3Board DeepCopy()
         {
-
+            // Match3Board board = parent.AddComponent<Match3Board>();
             Match3Board board = new Match3Board();
-
-
+            
             board.MaxColumns = this.MaxColumns;
             board.MaxRows = this.MaxRows;
             board.MinColumns = this.MinColumns;
@@ -786,41 +791,29 @@ namespace Unity.MLAgentsExamples
 
         public int EvalMovePoints(Move move)
         {
-            // return 0;
-            // Deepcopy and simulate the board
-            var _board = this.DeepCopy(m_DummyBoard);
-            
-            if (!_board.IsMoveValid(move)) return 0;
-
+            var _board = this.DeepCopy();
             _board.MakeMove(move);
             _board.MarkMatchedCells();
-            _board.ClearMatchedCells();
 
-            // Create the spcial blocks to the board (before dropping)
+            var pointsEarned = _board.ClearMatchedCells();
+            _board.ExecuteSpecialEffect();
             _board.SpawnSpecialCells();
-            
-            // Get lastly created and destroyed pieces
+
+
+            int createdPoints = 0, destroyedPoints = 0;
+
             var createdPieces = _board.GetLastCreatedPiece();
             var destroyedPieces = _board.GetLastDestroyedPiece();
 
-            // Count the points
-            int createdPoints = 0, destroyedPoints = 0;
             foreach (var piece in createdPieces)
             {
-                PieceType type = (PieceType)piece.SpecialType;              
-                createdPoints += SpecialMatch.GetInstance().CreateScores[type];
-
-
+                createdPoints += SpecialMatch.GetInstance().GetCreateScore((PieceType)piece.SpecialType);
             }
 
             foreach (var piece in destroyedPieces)
             {
-                PieceType type = (PieceType)piece.SpecialType;              
-                destroyedPoints += SpecialMatch.GetInstance().DestroyScores[type];
+                destroyedPoints += SpecialMatch.GetInstance().GetDestroyScore((PieceType)piece.SpecialType);
             }
-
-            // Remove board component
-            Destroy(_board);
 
             // Debug.Log("Created Points : " + createdPoints + " Destroyed Points : " + destroyedPoints);
             int points = createdPoints + destroyedPoints;

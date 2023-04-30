@@ -13,6 +13,13 @@ namespace Unity.MLAgentsExamples
         MCTS = 1,
     }
 
+
+    public enum GeneratorReward
+    {
+        Score = 0,
+        Knowledge = 1,
+    }
+
     public class BoardPCGAgent : Agent
     {
         [HideInInspector]
@@ -27,7 +34,12 @@ namespace Unity.MLAgentsExamples
         private int m_MovesMade;
         private ModelOverrider m_ModelOverrider;
 
+        public bool useForcedFast = true;
+
         public GeneratorType generatorType = GeneratorType.MCTS;
+
+        public GeneratorReward generatorRewardType = GeneratorReward.Score;
+
 
         private const float k_RewardMultiplier = 0.01f;
         protected override void Awake()
@@ -46,13 +58,16 @@ namespace Unity.MLAgentsExamples
             m_CurrentState = State.FindMatches;
             m_TimeUntilMove = MoveTime;
             m_MovesMade = 0;
+        
+            Debug.Log("OnEpisodeBegin");
+
         }
 
         private void FixedUpdate()
         {
             // Make a move every step if we're training, or we're overriding models in CI.
             var useFast = Academy.Instance.IsCommunicatorOn || (m_ModelOverrider != null && m_ModelOverrider.HasOverrides);
-            if (useFast)
+            if (useFast || useForcedFast)
             {
                 FastUpdate();
             }
@@ -68,6 +83,8 @@ namespace Unity.MLAgentsExamples
             {
                 EpisodeInterrupted();
             }
+
+            MCTS.Instance.SetRewardMode(generatorRewardType);
         }
 
         void FastUpdate()
@@ -91,7 +108,8 @@ namespace Unity.MLAgentsExamples
                         Board.FillFromAbove();
                         break;
                     case GeneratorType.MCTS:
-                        MCTS.Instance.FillEmpty(Board);
+                        bool _isChanged = MCTS.Instance.FillEmpty(Board);
+                        
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

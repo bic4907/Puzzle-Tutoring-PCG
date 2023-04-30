@@ -75,11 +75,13 @@ namespace Unity.MLAgentsExamples
         private Match3Board BestBoard;
         public int numberOfChild;
         public int depthLimit = 2;
-        public int simulationStepLimit = 200;
+        public int simulationStepLimit = 400;
 
         private int TargetDepth = 0;
 
         private bool IsChanged = false;
+
+        private GeneratorReward RewardMode = GeneratorReward.Score;
 
         GameObject m_DummyBoard;
 
@@ -140,12 +142,12 @@ namespace Unity.MLAgentsExamples
             }
         }
 
-        public void FillEmpty(Match3Board board)
+        public bool FillEmpty(Match3Board board)
         {
             
             // Print the empty cell count
 
-            var _board = board.DeepCopy(m_DummyBoard);
+            var _board = board.DeepCopy();
 
             // Initialize the searching process
             simulator = _board;
@@ -161,16 +163,21 @@ namespace Unity.MLAgentsExamples
 
             board.m_Cells = ((int CellType, int SpecialType)[,])BestBoard.m_Cells.Clone();
 
-            Debug.Log("IsChanged: " + IsChanged);
             this.rootNode = null;
+
+            // Return if the board is changed
+
+            // Debug.Log($"IsChanged: {IsChanged}, BestBoardScore: {BestBoardScore}");
+            return IsChanged;
         }
+
 
         private void PrepareSearch()
         {
             TargetDepth = simulator.GetEmptyCellCount();
-            BestBoardScore = float.MinValue;
+            BestBoardScore = -1;
 
-            BestBoard = simulator.DeepCopy(m_DummyBoard);
+            BestBoard = simulator.DeepCopy();
             BestBoard.FillFromAbove();
 
             IsChanged = false;
@@ -232,7 +239,7 @@ namespace Unity.MLAgentsExamples
 
                     for (int i = 0; i < randomArray.Length; i++)
                     {
-                        tmpBoard = node.board.DeepCopy(m_DummyBoard);
+                        tmpBoard = node.board.DeepCopy();
                         tmpBoard.SpawnColoredBlock(randomArray[i]);
 
                         tmpChild = new Node(node.depth + 1, 0, node.playerActionCount, 0f, new List<Node>(), node, tmpBoard, SimulationType.Generator);
@@ -242,7 +249,7 @@ namespace Unity.MLAgentsExamples
                     break;
                 case SimulationType.Solver:
 
-                    tmpBoard = node.board.DeepCopy(m_DummyBoard);
+                    tmpBoard = node.board.DeepCopy();
                     // Append a child node with heuristic decision
                     Move move = GreedyMatch3Solver.GetAction(tmpBoard);
                     tmpBoard.MakeMove(move);
@@ -287,19 +294,24 @@ namespace Unity.MLAgentsExamples
                     foreach (var piece in createdPieces)
                     {
                         PieceType type = (PieceType)piece.SpecialType;              
-                        // Debug.Log("Special Piece: " + type);
                     }
 
-                    score = 1.0f;
+                    switch(RewardMode)
+                    {
+                        case GeneratorReward.Score:
+                            score += createdPieces.Count;
+                            break;
+                        case GeneratorReward.Knowledge:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
 
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
 
             }
-
-            // Debug.Log("Simulation Start - Type: " + node.simulationType.ToString() + ", Depth: " + node.depth.ToString() + ", P-Action: " + node.playerActionCount.ToString() + ", Score: " + score.ToString());
-
 
             return score;
         }
@@ -334,6 +346,12 @@ namespace Unity.MLAgentsExamples
 
             return false;
         }
+
+        public void SetRewardMode(GeneratorReward mode)
+        {
+            this.RewardMode = mode;
+        }
+        
         
     }
 }
