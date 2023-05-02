@@ -377,6 +377,8 @@ namespace Unity.MLAgentsExamples
                                     {
                                         int[] midPosition = GetMidPosition(matchedPositions);
                                         m_CreatedCells[midPosition[0], midPosition[1]] = (cellType, (int)matchedType);
+                                    
+                                        
                                     }
                                     else
                                     {
@@ -392,9 +394,6 @@ namespace Unity.MLAgentsExamples
                                 
                                     }
 
-
-
-    
                                     m_LastDestroyedPiece.Add((cellType, (int)matchedType));
 
                                     m_Matched[position[0], position[1]] = true;
@@ -609,8 +608,6 @@ namespace Unity.MLAgentsExamples
                     default:
                         throw new Exception("Invalid Special Type");
                 }
-
-                // Debug.Log("Special Effect " + specialEffect.SpecialType + " at " + specialEffect.Column + ", " + specialEffect.Row);
             }
             ClearSpecialEffects();
         }
@@ -675,14 +672,6 @@ namespace Unity.MLAgentsExamples
                 }
             }
         }
-
-        
-
-        // TODO 로켓 특수 효과 (위치, 대상 색상)
-        // TODO 폭탄 특수 효과 (위치)
-        // TODO 무지개 특수 효과 (위치, 대상 색상)
-
-
 
         void ClearCreatedCell()
         {

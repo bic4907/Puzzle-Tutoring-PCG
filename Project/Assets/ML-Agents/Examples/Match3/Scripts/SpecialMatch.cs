@@ -70,7 +70,6 @@ namespace Unity.MLAgentsExamples
         {
             CreateScores = new Dictionary<PieceType, int>();
 
-
             CreateScores.Add(PieceType.Empty, 0);
             CreateScores.Add(PieceType.NormalPiece, 0);
             CreateScores.Add(PieceType.HorizontalPiece, 20);
@@ -103,6 +102,24 @@ namespace Unity.MLAgentsExamples
         public int GetDestroyScore(PieceType pieceType)
         {
             return DestroyScores[pieceType];
+        }
+
+        public static Dictionary<PieceType, int> GetMatchCount(List<(int CellType, int SpecialType)> pieceList)
+        {
+            PieceType[] targetPieces = {PieceType.HorizontalPiece, PieceType.VerticalPiece, PieceType.CrossPiece, PieceType.BombPiece, PieceType.RocketPiece, PieceType.RainbowPiece};
+            Dictionary<PieceType, int> matchCount = new Dictionary<PieceType, int>();
+            
+            foreach (var piece in targetPieces) // Initialize
+            {
+                matchCount.Add(piece, 0);
+            }
+            
+            foreach (var piece in pieceList)
+            {
+                matchCount[(PieceType)piece.SpecialType] += 1;
+            }
+
+            return matchCount;
         }
 
     }

@@ -31,8 +31,9 @@ namespace Unity.MLAgentsExamples
                             int CrossPieceCount,
                             int BombPieceCount,
                             int RocketPieceCount,
-                            int RainbowPieceCount) : base()
+                            int RainbowPieceCount) : this()
         {
+            
             TargetMatchCounts[PieceType.HorizontalPiece] = HorizontalPieceCount;
             TargetMatchCounts[PieceType.VerticalPiece] = VerticalPieceCount;
             TargetMatchCounts[PieceType.CrossPiece] = CrossPieceCount;
@@ -50,12 +51,17 @@ namespace Unity.MLAgentsExamples
             }
         }
 
-        public void IncreaseActionMatchCount(PieceType pieceType)
+        public void IncreaseMatchCount(PieceType type)
         {
-            CurrentMatchCounts[pieceType]++;
+            CurrentMatchCounts[type]++;
         }
 
-        public bool IsActionMatchCountReached(PieceType pieceType)
+        public void IncreaseMatchCount(PieceType type, int count)
+        {
+            CurrentMatchCounts[type] += count;
+        }
+
+        public bool IsMatchCountReachedTarget(PieceType pieceType)
         {
             return CurrentMatchCounts[pieceType] >= TargetMatchCounts[pieceType];
         }
@@ -71,26 +77,46 @@ namespace Unity.MLAgentsExamples
             return result;
         }
 
+        public SkillKnowledge Copy()
+        {
+            SkillKnowledge result = new SkillKnowledge();
+
+            // Clone dictionaries
+            foreach (KeyValuePair<PieceType, int> entry in CurrentMatchCounts)
+            {
+                result.CurrentMatchCounts[entry.Key] = entry.Value;
+            }
+            foreach (KeyValuePair<PieceType, int> entry in TargetMatchCounts)
+            {
+                result.TargetMatchCounts[entry.Key] = entry.Value;
+            }
+
+            return result;
+        }
+
     }
 
-    public class SkillKnowledgeExperimentSingle
+    public class SkillKnowledgeExperimentSingleton
     {
-        public SkillKnowledgeExperimentSingle Instance { 
+
+        private static SkillKnowledgeExperimentSingleton m_Instance;
+
+        public static SkillKnowledgeExperimentSingleton Instance { 
             get
             { 
-                if (Instance == null) 
+                if (m_Instance == null) 
                 {   
-                    Instance = new SkillKnowledgeExperimentSingle();
+                    m_Instance = new SkillKnowledgeExperimentSingleton();
                 }
-                return Instance;
+                return m_Instance;
             } 
-            set { value = Instance; }
+            set { value = m_Instance; }
         }
 
         private List<SkillKnowledge> SkillKnowledges;
 
         // Start is called before the first frame update
-        public SkillKnowledgeExperimentSingle()
+        public SkillKnowledgeExperimentSingleton()
         {
             SkillKnowledges = new List<SkillKnowledge>();
             /*
@@ -121,6 +147,12 @@ namespace Unity.MLAgentsExamples
             SkillKnowledges.Add(new SkillKnowledge(10, 8, 7, 4, 9, 5));
             SkillKnowledges.Add(new SkillKnowledge(4, 9, 1, 2, 3, 2));
         }
+
+        public SkillKnowledge GetSkillKnowledge(int index)
+        {
+            return SkillKnowledges[index].Copy();
+        }
+
     }
 
 

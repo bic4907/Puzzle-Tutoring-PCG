@@ -1,24 +1,18 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using Unity.MLAgents;
+using Unity.MLAgents.Sensors;
+using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Integrations.Match3;
+using UnityEditor;
 
 
 namespace Unity.MLAgentsExamples
 {
 
-    public enum GeneratorType
-    {
-        Random = 0,
-        MCTS = 1,
-    }
-
-
-    public enum GeneratorReward
-    {
-        Score = 0,
-        Knowledge = 1,
-    }
 
     public class BoardPCGAgent : Agent
     {
@@ -28,7 +22,6 @@ namespace Unity.MLAgentsExamples
         public float MoveTime = 0.0f;
         public int MaxMoves = 500;
 
-        public SkillKnowledge m_SkillKnowledge;
         State m_CurrentState = State.WaitForMove;
         float m_TimeUntilMove;
         private int m_MovesMade;
@@ -40,13 +33,37 @@ namespace Unity.MLAgentsExamples
 
         public GeneratorReward generatorRewardType = GeneratorReward.Score;
 
+        public static PieceType[] PieceLogOrder = new PieceType[6] {PieceType.HorizontalPiece, PieceType.VerticalPiece, PieceType.CrossPiece, PieceType.RocketPiece, PieceType.BombPiece, PieceType.RainbowPiece};
+
+        private string m_uuid = System.Guid.NewGuid().ToString();
+
+        private PCGStepLog m_Logger;
+ 
+        public int PlayerNumber = -1;
+
+        private SkillKnowledge m_SkillKnowledge;
+
+        public int TargetSkill0 { get { return m_SkillKnowledge.CurrentMatchCounts[PieceType.HorizontalPiece]; } }
 
         private const float k_RewardMultiplier = 0.01f;
+        
+        public int CurrentEpisodeCount = 0;
+        public int CurrentStepCount = 0;
+
         protected override void Awake()
         {
             base.Awake();
             Board = GetComponent<Match3Board>();
             m_ModelOverrider = GetComponent<ModelOverrider>();
+            m_Logger = new PCGStepLog();
+
+            if(ParameterManagerSingleton.GetInstance().HasParam("targetPlayer"))
+            {
+                PlayerNumber = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("targetPlayer"));
+            }
+
+            m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
+            
         }
 
         public override void OnEpisodeBegin()
@@ -58,9 +75,17 @@ namespace Unity.MLAgentsExamples
             m_CurrentState = State.FindMatches;
             m_TimeUntilMove = MoveTime;
             m_MovesMade = 0;
-        
-            Debug.Log("OnEpisodeBegin");
 
+            if (m_Logger != null && CurrentEpisodeCount != 0)
+            {
+                RecordResult();
+            }
+
+            m_Logger = new PCGStepLog();
+            m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
+            
+            CurrentEpisodeCount += 1;
+            CurrentStepCount = 0;
         }
 
         private void FixedUpdate()
@@ -79,7 +104,7 @@ namespace Unity.MLAgentsExamples
             // We can't use the normal MaxSteps system to decide when to end an episode,
             // since different agents will make moves at different frequencies (depending on the number of
             // chained moves). So track a number of moves per Agent and manually interrupt the episode.
-            if (m_MovesMade >= MaxMoves)
+            if (CurrentStepCount >= MaxMoves)
             {
                 EpisodeInterrupted();
             }
@@ -100,6 +125,13 @@ namespace Unity.MLAgentsExamples
                 AddReward(k_RewardMultiplier * pointsEarned);
                 Board.ExecuteSpecialEffect();
                 Board.SpawnSpecialCells();
+
+                var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());  
+                foreach (var (type, count) in createdPieces)
+                {
+                    m_SkillKnowledge.IncreaseMatchCount(type, count);
+                }
+            
                 Board.DropCells();
 
                 switch(generatorType)
@@ -114,6 +146,7 @@ namespace Unity.MLAgentsExamples
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+                CurrentStepCount += 1;
             }
 
             while (!HasValidMoves())
@@ -158,6 +191,13 @@ namespace Unity.MLAgentsExamples
 
                     Board.ExecuteSpecialEffect();
                     Board.SpawnSpecialCells();
+
+                    var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());  
+                    foreach (var (type, count) in createdPieces)
+                    {
+                        m_SkillKnowledge.IncreaseMatchCount(type, count);
+                    }
+                
                     nextState = State.Drop;
                     break;
                 case State.Drop:
@@ -178,6 +218,7 @@ namespace Unity.MLAgentsExamples
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
+                    CurrentStepCount += 1;
 
                     nextState = State.FindMatches;
                     break;
@@ -196,7 +237,7 @@ namespace Unity.MLAgentsExamples
                     // Simulate the board with greedy action
                     Move move = GreedyMatch3Solver.GetAction(Board);
                     Board.MakeMove(move);
-                    
+
                     nextState = State.FindMatches;
                     break;
                 default:
@@ -216,6 +257,112 @@ namespace Unity.MLAgentsExamples
             return false;
         }
 
+        public void RecordResult()
+        {
+            // Make a new PCG Log file with the parameters
+
+            m_Logger.EpisodeCount = CurrentEpisodeCount;
+            m_Logger.StepCount = CurrentStepCount;
+            m_Logger.Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            
+            // TODO : Add the instance UUID to the log
+            m_Logger.SkillKnowledge = m_SkillKnowledge;
+            m_Logger.InstanceUUID = m_uuid;
+
+            FlushLog(GetMatchResultLogPath(), m_Logger);
+        }
+
+        private string GetMatchResultLogPath()
+        {
+            return ParameterManagerSingleton.GetInstance().GetParam("logPath") + 
+            "MatchResult_" + ParameterManagerSingleton.GetInstance().GetParam("runId") + "_" + m_uuid + ".csv";
+        }
+
+        public void FlushLog(string filePath, PCGStepLog log)
+        {
+            if (!File.Exists(filePath))
+            {
+                // Print whether the file exists or not
+                using (StreamWriter sw = File.CreateText(filePath))
+                {
+                    sw.Write("EpisodeCount,StepCount,Time,InstanceUUID,");
+
+                    // Write the CSV header with the content and result index which are named Content[0] with repeated number of times
+
+                    //Also write the result index
+                    foreach (PieceType pieceType in Enum.GetValues(typeof(PieceType)))
+                    {
+                        sw.Write($"Matched_{pieceType},");
+                    }
+
+                    foreach (PieceType pieceType in Enum.GetValues(typeof(PieceType)))
+                    {
+                        sw.Write($"Target_{pieceType},");
+                    }
+
+                    sw.WriteLine();
+                }
+            }
+
+            // Append a file to write to csv file 
+            using (StreamWriter sw = File.AppendText(filePath))
+            {
+                sw.WriteLine(log.ToCSVRoW());
+            }
+        }
+
+
     }
+
+    public class PCGStepLog
+    {
+        public int EpisodeCount;
+        public int StepCount;
+        public string Time;
+        public string InstanceUUID;
+        public SkillKnowledge SkillKnowledge;
+
+        public PCGStepLog()
+        {
+           
+        }
+
+
+        public string ToCSVRoW()
+        {
+            string row = "";
+            row += EpisodeCount + ",";
+            row += StepCount + ",";
+            row += Time + ",";
+            row += InstanceUUID + ",";
+
+            foreach (Dictionary<PieceType, int> table in new Dictionary<PieceType, int>[2] { SkillKnowledge.CurrentMatchCounts, SkillKnowledge.TargetMatchCounts })
+            {
+                foreach (PieceType pieceType in BoardPCGAgent.PieceLogOrder)
+                {
+                    row += table[pieceType] + ",";
+                }
+            }
+        
+            // Remove the last comma
+            row = row.Substring(0, row.Length - 1);
+
+            return row;
+        }
+    }
+
+    public enum GeneratorType
+    {
+        Random = 0,
+        MCTS = 1,
+    }
+
+
+    public enum GeneratorReward
+    {
+        Score = 0,
+        Knowledge = 1,
+    }
+
 
 }
