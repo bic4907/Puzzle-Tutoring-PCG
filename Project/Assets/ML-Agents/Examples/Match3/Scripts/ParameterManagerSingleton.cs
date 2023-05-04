@@ -40,8 +40,9 @@ public class ParameterManagerSingleton
         // If not, add default value
         if (!ParsedArgs.ContainsKey("runId")) { ParsedArgs.Add("runId", "default-id"); }
         if (!ParsedArgs.ContainsKey("logPath")) { ParsedArgs.Add("logPath", Application.dataPath + "/ML-Agents/Examples/Match3/Logs/"); }
+
         // if (!ParsedArgs.ContainsKey("targetPlayer")) { ParsedArgs.Add("targetPlayer", 1); }
-        // if (!ParsedArgs.ContainsKey("pcgHeuristic")) { ParsedArgs.Add("pcgHeuristic", false); }
+        // if (!ParsedArgs.ContainsKey("algorithm")) { ParsedArgs.Add("algorithm", false); }
         // if (!ParsedArgs.ContainsKey("pcgRandom")) { ParsedArgs.Add("pcgRandom", false); }
         // if (!ParsedArgs.ContainsKey("pcgSaveEpisodeLimit")) { ParsedArgs.Add("pcgSaveEpisodeLimit", 0); }
     }
@@ -63,30 +64,18 @@ public class ParameterManagerSingleton
             {
                 ParsedArgs.Add("logPath", args[++idx]);
             }
-            if (args[idx].Contains("--targetPlayer")) 
+            else if (args[idx].Contains("--targetPlayer")) 
             {
                 ParsedArgs.Add("targetPlayer", args[++idx]);
             }
-            // else if (args[idx].Contains("--pcgSaveCreatedSkill")) 
-            // {
-            //     ParsedArgs.Add("pcgSaveCreatedSkill", true);
-            // }
-            // else if (args[idx].Contains("--pcgHeuristic")) 
-            // {
-            //     ParsedArgs.Add("pcgHeuristic", true);
-            // }
-            // else if (args[idx].Contains("--pcgRandom")) 
-            // {
-            //     ParsedArgs.Add("pcgRandom", true);
-            // }
-            // else if (args[idx].Contains("--pcgSaveEpisodeLimit")) 
-            // {
-            //     ParsedArgs.Add("pcgSaveEpisodeLimit", args[++idx]);
-            // }
-            // else if (args[idx].Contains("--pcgSimulationLimit")) 
-            // {
-            //     ParsedArgs.Add("pcgSimulationLimit", args[++idx]);
-            // }
+            else if (args[idx].Contains("--method")) 
+            {
+                ParsedArgs.Add("method",  args[++idx]);
+            }
+            else if (args[idx].Contains("--mctsSimulation")) 
+            {
+                ParsedArgs.Add("mctsSimulation",  args[++idx]);
+            }
 
             idx++;
         }

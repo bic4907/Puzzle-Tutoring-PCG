@@ -41,6 +41,8 @@ namespace Unity.MLAgentsExamples
  
         public int PlayerNumber = -1;
 
+        public int MCTS_Simulation = 300;
+
         private SkillKnowledge m_SkillKnowledge;
 
         public int TargetSkill0 { get { return m_SkillKnowledge.CurrentMatchCounts[PieceType.HorizontalPiece]; } }
@@ -50,6 +52,8 @@ namespace Unity.MLAgentsExamples
         public int CurrentEpisodeCount = 0;
         public int CurrentStepCount = 0;
 
+        public int TargetEpisodeCount = -1;
+
         protected override void Awake()
         {
             base.Awake();
@@ -57,9 +61,47 @@ namespace Unity.MLAgentsExamples
             m_ModelOverrider = GetComponent<ModelOverrider>();
             m_Logger = new PCGStepLog();
 
+
+            // Parsing the augments
             if(ParameterManagerSingleton.GetInstance().HasParam("targetPlayer"))
             {
                 PlayerNumber = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("targetPlayer"));
+            }
+            if(ParameterManagerSingleton.GetInstance().HasParam("method"))
+            {
+                string _method = Convert.ToString(ParameterManagerSingleton.GetInstance().GetParam("method"));
+
+                switch (_method)
+                {
+                    case "mcts":
+                        generatorType = GeneratorType.MCTS;
+                        break;
+                    case "random":
+                        generatorType = GeneratorType.Random;
+                        break;
+                }
+            }
+            if(ParameterManagerSingleton.GetInstance().HasParam("objective"))
+            {
+                string _objective = Convert.ToString(ParameterManagerSingleton.GetInstance().GetParam("objective"));
+
+                switch (_objective)
+                {
+                    case "score":
+                        generatorRewardType = GeneratorReward.Score;
+                        break;
+                    case "knowledge":
+                        generatorRewardType = GeneratorReward.Knowledge;
+                        break;
+                }
+            }
+            if(ParameterManagerSingleton.GetInstance().HasParam("mctsSimulation"))
+            {
+                MCTS_Simulation = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("mctsSimulation"));
+            }
+            if(ParameterManagerSingleton.GetInstance().HasParam("targetEpisodeCount"))
+            {
+                TargetEpisodeCount = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("targetEpisodeCount"));
             }
 
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
@@ -86,6 +128,16 @@ namespace Unity.MLAgentsExamples
             
             CurrentEpisodeCount += 1;
             CurrentStepCount = 0;
+
+            if(TargetEpisodeCount != -1 && CurrentEpisodeCount > TargetEpisodeCount)
+            {
+                # if UnityEditor
+                    UnityEditor.EditorApplication.isPlaying = false;
+                # else
+                    Application.Quit();
+                #endif
+            }
+
         }
 
         private void FixedUpdate()
