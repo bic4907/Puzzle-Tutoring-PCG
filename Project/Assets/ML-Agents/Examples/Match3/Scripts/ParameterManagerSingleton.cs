@@ -40,6 +40,7 @@ public class ParameterManagerSingleton
         // If not, add default value
         if (!ParsedArgs.ContainsKey("runId")) { ParsedArgs.Add("runId", "default-id"); }
         if (!ParsedArgs.ContainsKey("logPath")) { ParsedArgs.Add("logPath", Application.dataPath + "/ML-Agents/Examples/Match3/Logs/"); }
+        if (!ParsedArgs.ContainsKey("objective")) { ParsedArgs.Add("objective", "score"); }
 
         // if (!ParsedArgs.ContainsKey("targetPlayer")) { ParsedArgs.Add("targetPlayer", 1); }
         // if (!ParsedArgs.ContainsKey("algorithm")) { ParsedArgs.Add("algorithm", false); }
@@ -76,6 +77,15 @@ public class ParameterManagerSingleton
             {
                 ParsedArgs.Add("mctsSimulation",  args[++idx]);
             }
+            else if (args[idx].Contains("--objective")) 
+            {
+                ParsedArgs.Add("objective",  args[++idx]);
+            }
+            else if (args[idx].Contains("--targetEpisodeCount")) 
+            {
+                ParsedArgs.Add("targetEpisodeCount",  args[++idx]);
+            }
+
 
             idx++;
         }
