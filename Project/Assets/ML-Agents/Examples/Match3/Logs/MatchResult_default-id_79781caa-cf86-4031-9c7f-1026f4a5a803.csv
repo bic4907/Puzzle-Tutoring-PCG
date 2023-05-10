@@ -1,0 +1,6 @@
+EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,Matched_HorizontalPiece,Matched_VerticalPiece,Matched_CrossPiece,Matched_RocketPiece,Matched_BombPiece,Matched_RainbowPiece,Target_HorizontalPiece,Target_VerticalPiece,Target_CrossPiece,Target_RocketPiece,Target_BombPiece,Target_RainbowPiece
+1,300,2023-05-10 21:46:55.948,79781caa-cf86-4031-9c7f-1026f4a5a803,0,144,31,34,5,132,4,6,7,3,0,2,2,3
+2,300,2023-05-10 21:47:39.981,79781caa-cf86-4031-9c7f-1026f4a5a803,0,144,52,26,7,80,3,5,7,3,0,2,2,3
+3,300,2023-05-10 21:48:25.799,79781caa-cf86-4031-9c7f-1026f4a5a803,0,143,58,63,4,106,6,18,7,3,0,2,2,3
+4,300,2023-05-10 21:49:09.767,79781caa-cf86-4031-9c7f-1026f4a5a803,0,123,50,41,7,82,6,11,7,3,0,2,2,3
+5,300,2023-05-10 21:49:55.461,79781caa-cf86-4031-9c7f-1026f4a5a803,0,151,69,32,3,94,9,8,7,3,0,2,2,3

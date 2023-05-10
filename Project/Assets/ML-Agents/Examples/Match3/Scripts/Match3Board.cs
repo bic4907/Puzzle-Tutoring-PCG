@@ -409,8 +409,6 @@ namespace Unity.MLAgentsExamples
         /// <returns></returns>
         public int ClearMatchedCells()
         {
-
-
             int pointsEarned = 0;
             for (var i = 0; i < m_CurrentBoardSize.Rows; i++)
             {
@@ -590,9 +588,11 @@ namespace Unity.MLAgentsExamples
 
                         // Remove all same-cell type random block same with the original block
                         List<int[]> sameCellTypePositionsRainbow = GetCellTypePosition(cellType, true);
-                        if (sameCellTypePositionsRainbow.Count > 0)
+                        List<int[]> sampledPosition = SampleRandomCoordinate(sameCellTypePositionsRainbow, 5);
+
+                        if (sampledPosition.Count > 0)
                         {
-                            foreach (int[] position in sameCellTypePositionsRainbow)
+                            foreach (int[] position in sampledPosition)
                             {
                                 m_Cells[position[0], position[1]] = (k_EmptyCell, 0);
                             }
@@ -604,6 +604,30 @@ namespace Unity.MLAgentsExamples
                 }
             }
             ClearSpecialEffects();
+        }
+
+        private List<int[]> SampleRandomCoordinate(List<int[]> coordList, int N)
+        {
+
+
+            List<int[]> shuffledItems = new List<int[]>(coordList);
+            int n = shuffledItems.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = UnityEngine.Random.Range(0, n + 1);
+                int[] temp = shuffledItems[k];
+                shuffledItems[k] = shuffledItems[n];
+                shuffledItems[n] = temp;
+            }
+
+            List<int[]> sampledItems = new List<int[]>();
+            for (int i = 0; i < Mathf.Min(N, coordList.Count); i++)
+            {
+                sampledItems.Add(shuffledItems[i]);
+            }
+
+            return sampledItems;
         }
 
         // Get the list of the posititons of the same cell type

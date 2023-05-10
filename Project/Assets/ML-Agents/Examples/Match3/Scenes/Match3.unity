@@ -773,7 +773,7 @@ MonoBehaviour:
   Board: {fileID: 0}
   MoveTime: 0
   MaxMoves: 300
-  useForcedFast: 1
+  useForcedFast: 0
   generatorType: 1
   generatorRewardType: 0
   PlayerNumber: 0
@@ -782,6 +782,8 @@ MonoBehaviour:
   CurrentStepCount: 0
   TargetEpisodeCount: -1
   SettleCount: 0
+  ChangedCount: 0
+  NonChangedCount: 0
 --- !u!114 &1540485852
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -54,6 +54,10 @@ namespace Unity.MLAgentsExamples
 
         public int SettleCount = 0;
 
+        public int ChangedCount = 0;
+        public int NonChangedCount = 0;
+
+
         protected override void Awake()
         {
             base.Awake();
@@ -129,6 +133,7 @@ namespace Unity.MLAgentsExamples
             CurrentEpisodeCount += 1;
             CurrentStepCount = 0;
             SettleCount = 0;
+            ChangedCount = 0;
 
             if(TargetEpisodeCount != -1 && CurrentEpisodeCount > TargetEpisodeCount)
             {
@@ -138,6 +143,8 @@ namespace Unity.MLAgentsExamples
                     Application.Quit();
                 #endif
             }
+
+            
 
         }
 
@@ -163,6 +170,8 @@ namespace Unity.MLAgentsExamples
             }
 
             MCTS.Instance.SetRewardMode(generatorRewardType);
+            MCTS.Instance.SetSimulationLimit(MCTS_Simulation);
+
         }
 
         void FastUpdate()
@@ -176,7 +185,7 @@ namespace Unity.MLAgentsExamples
                 }
                 var pointsEarned = Board.ClearMatchedCells();
                 AddReward(k_RewardMultiplier * pointsEarned);
-                Board.ExecuteSpecialEffect();
+
                 Board.SpawnSpecialCells();
 
                 var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());  
@@ -184,7 +193,8 @@ namespace Unity.MLAgentsExamples
                 {
                     m_SkillKnowledge.IncreaseMatchCount(type, count);
                 }
-            
+                Board.ExecuteSpecialEffect();
+
                 Board.DropCells();
 
                 switch(generatorType)
@@ -195,6 +205,11 @@ namespace Unity.MLAgentsExamples
                     case GeneratorType.MCTS:
                         bool _isChanged = MCTS.Instance.FillEmpty(Board);
                         
+                        if(_isChanged)
+                        {
+                            ChangedCount += 1;
+                        }
+
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -248,8 +263,6 @@ namespace Unity.MLAgentsExamples
                     var pointsEarned = Board.ClearMatchedCells();
                     AddReward(k_RewardMultiplier * pointsEarned);
 
-
-                    Board.ExecuteSpecialEffect();
                     Board.SpawnSpecialCells();
 
                     var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());  
@@ -257,7 +270,8 @@ namespace Unity.MLAgentsExamples
                     {
                         m_SkillKnowledge.IncreaseMatchCount(type, count);
                     }
-                
+                    Board.ExecuteSpecialEffect();
+
                     nextState = State.Drop;
                     break;
                 case State.Drop:
@@ -272,8 +286,13 @@ namespace Unity.MLAgentsExamples
                             Board.FillFromAbove();
                             break;
                         case GeneratorType.MCTS:
-                            MCTS.Instance.FillEmpty(Board);
+                            bool _isChanged = MCTS.Instance.FillEmpty(Board);
                             
+                            if(_isChanged)
+                            {
+                                ChangedCount += 1;
+                            }
+
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -332,11 +351,11 @@ namespace Unity.MLAgentsExamples
             m_Logger.EpisodeCount = CurrentEpisodeCount;
             m_Logger.StepCount = CurrentStepCount;
             m_Logger.Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-            
-            // TODO : Add the instance UUID to the log
+
             m_Logger.SkillKnowledge = m_SkillKnowledge;
             m_Logger.InstanceUUID = m_uuid;
             m_Logger.SettleCount = SettleCount;
+            m_Logger.ChangedCount = ChangedCount;
 
             FlushLog(GetMatchResultLogPath(), m_Logger);
         }
@@ -355,11 +374,7 @@ namespace Unity.MLAgentsExamples
                 using (StreamWriter sw = File.CreateText(filePath))
                 {
                     string output = "";
-                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,";
-
-                    // Write the CSV header with the content and result index which are named Content[0] with repeated number of times
-
-                    //Also write the result index
+                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,";
 
 
                     foreach (PieceType pieceType in BoardPCGAgent.PieceLogOrder)
@@ -395,6 +410,7 @@ namespace Unity.MLAgentsExamples
         public string InstanceUUID;
         public SkillKnowledge SkillKnowledge;
         public int SettleCount;
+        public int ChangedCount;
 
         public PCGStepLog()
         {
@@ -409,6 +425,7 @@ namespace Unity.MLAgentsExamples
             row += Time + ",";
             row += InstanceUUID + ",";
             row += SettleCount + ",";
+            row += ChangedCount + ",";
 
             foreach (Dictionary<PieceType, int> table in new Dictionary<PieceType, int>[2] { SkillKnowledge.CurrentMatchCounts, SkillKnowledge.TargetMatchCounts })
             {

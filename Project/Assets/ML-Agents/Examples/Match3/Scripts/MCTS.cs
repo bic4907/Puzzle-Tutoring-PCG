@@ -75,7 +75,7 @@ namespace Unity.MLAgentsExamples
         private Match3Board BestBoard;
         public int numberOfChild;
         public int depthLimit = 2;
-        public int simulationStepLimit = 400;
+        public int simulationStepLimit = 300;
 
         private int TargetDepth = 0;
 
@@ -111,8 +111,6 @@ namespace Unity.MLAgentsExamples
             {
                 currentNode = SelectBestChild(currentNode);
             }
-
-            // Debug.Log($"Selected Node - Node depth: {currentNode.depth}, Player Action count: {currentNode.playerActionCount}");
 
             // Expand
             if (currentNode.visits == 0) {
@@ -353,5 +351,10 @@ namespace Unity.MLAgentsExamples
         }
         
         
+        public void SetSimulationLimit(int limit)
+        {
+            this.simulationStepLimit = limit;
+        }
+
     }
 }
