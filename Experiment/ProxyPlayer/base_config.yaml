@@ -36,7 +36,7 @@ env_settings:
   num_envs: 1
   num_areas: 1
   seed: -1
-  max_lifetime_restarts: 10
+  max_lifetime_restarts: 1
   restarts_rate_limit_n: 1
   restarts_rate_limit_period_s: 60
 checkpoint_settings:

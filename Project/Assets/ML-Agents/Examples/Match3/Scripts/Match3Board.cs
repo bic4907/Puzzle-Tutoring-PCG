@@ -330,6 +330,7 @@ namespace Unity.MLAgentsExamples
 
                             PieceType matchedType = pieceType;
                             matchedPositions.Clear();
+
                             for (var k = 0; k < shape.GetLength(0); k++)
                             {
                                 for (var l = 0; l < shape.GetLength(1); l++)
@@ -360,11 +361,6 @@ namespace Unity.MLAgentsExamples
                             }
 
                             if(matchedType != PieceType.None) {
-                                // Debug.Log("Matched " + matchedType + " at " + j + ", " + i);
-                                // TODO 생성된 블럭 Created에 넣기
-
-                                // Print the matchedType and the count
-                                // Debug.Log("Matched " + matchedType + " and #items "+ matchedPositions.Count);
 
                                 foreach(int[] position in matchedPositions)
                                 {
@@ -376,18 +372,16 @@ namespace Unity.MLAgentsExamples
                                     if (matchedType != PieceType.NormalPiece)
                                     {
                                         int[] midPosition = GetMidPosition(matchedPositions);
-                                        m_CreatedCells[midPosition[0], midPosition[1]] = (cellType, (int)matchedType);
-                                    
-                                        
+                                        m_CreatedCells[midPosition[0], midPosition[1]] = (cellType, (int)matchedType);    
                                     }
                                     else
                                     {
-                                        // If horizontal block breaks
                                         if (_pieceType == PieceType.HorizontalPiece || 
                                             _pieceType == PieceType.VerticalPiece ||
                                             _pieceType == PieceType.CrossPiece || 
                                             _pieceType == PieceType.BombPiece ||
-                                            _pieceType == PieceType.RocketPiece)
+                                            _pieceType == PieceType.RocketPiece ||
+                                            _pieceType == PieceType.RainbowPiece)
                                         {
                                             m_SpecialEffects.Add(new SpecialEffect(position[0], position[1], (PieceType)_pieceType, _cellType));
                                         }
@@ -697,7 +691,6 @@ namespace Unity.MLAgentsExamples
 
         public Match3Board DeepCopy()
         {
-            // Match3Board board = parent.AddComponent<Match3Board>();
             Match3Board board = new Match3Board();
             
             board.MaxColumns = this.MaxColumns;

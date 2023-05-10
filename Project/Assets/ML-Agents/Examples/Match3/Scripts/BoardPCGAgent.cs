@@ -45,14 +45,14 @@ namespace Unity.MLAgentsExamples
 
         private SkillKnowledge m_SkillKnowledge;
 
-        public int TargetSkill0 { get { return m_SkillKnowledge.CurrentMatchCounts[PieceType.HorizontalPiece]; } }
-
         private const float k_RewardMultiplier = 0.01f;
         
         public int CurrentEpisodeCount = 0;
         public int CurrentStepCount = 0;
 
         public int TargetEpisodeCount = -1;
+
+        public int SettleCount = 0;
 
         protected override void Awake()
         {
@@ -128,6 +128,7 @@ namespace Unity.MLAgentsExamples
             
             CurrentEpisodeCount += 1;
             CurrentStepCount = 0;
+            SettleCount = 0;
 
             if(TargetEpisodeCount != -1 && CurrentEpisodeCount > TargetEpisodeCount)
             {
@@ -201,11 +202,18 @@ namespace Unity.MLAgentsExamples
                 CurrentStepCount += 1;
             }
 
+            bool isBoardSettled = false;
             while (!HasValidMoves())
             {
                 Board.InitSettled();
+                isBoardSettled = true;
             }
 
+            if (isBoardSettled)
+            {
+                SettleCount += 1;
+            }
+            
             
             // Simulate the board with greedy action
             Move move = GreedyMatch3Solver.GetAction(Board);
@@ -275,6 +283,8 @@ namespace Unity.MLAgentsExamples
                     nextState = State.FindMatches;
                     break;
                 case State.WaitForMove:
+                    bool isBoardSettled = false;
+                    
                     while (true)
                     {
                         // Shuffle the board until we have a valid move.
@@ -284,8 +294,14 @@ namespace Unity.MLAgentsExamples
                             break;
                         }
                         Board.InitSettled();
+                        isBoardSettled = true;
                     }
                     
+                    if (isBoardSettled)
+                    {
+                        SettleCount += 1;
+                    }
+
                     // Simulate the board with greedy action
                     Move move = GreedyMatch3Solver.GetAction(Board);
                     Board.MakeMove(move);
@@ -320,6 +336,7 @@ namespace Unity.MLAgentsExamples
             // TODO : Add the instance UUID to the log
             m_Logger.SkillKnowledge = m_SkillKnowledge;
             m_Logger.InstanceUUID = m_uuid;
+            m_Logger.SettleCount = SettleCount;
 
             FlushLog(GetMatchResultLogPath(), m_Logger);
         }
@@ -337,22 +354,26 @@ namespace Unity.MLAgentsExamples
                 // Print whether the file exists or not
                 using (StreamWriter sw = File.CreateText(filePath))
                 {
-                    sw.Write("EpisodeCount,StepCount,Time,InstanceUUID,");
+                    string output = "";
+                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,";
 
                     // Write the CSV header with the content and result index which are named Content[0] with repeated number of times
 
                     //Also write the result index
-                    foreach (PieceType pieceType in Enum.GetValues(typeof(PieceType)))
+
+
+                    foreach (PieceType pieceType in BoardPCGAgent.PieceLogOrder)
                     {
-                        sw.Write($"Matched_{pieceType},");
+                        output += $"Matched_{pieceType},";
                     }
 
-                    foreach (PieceType pieceType in Enum.GetValues(typeof(PieceType)))
+                    foreach (PieceType pieceType in BoardPCGAgent.PieceLogOrder)
                     {
-                        sw.Write($"Target_{pieceType},");
+                        output += $"Target_{pieceType},";
                     }
+                    output = output.Substring(0, output.Length - 1);
 
-                    sw.WriteLine();
+                    sw.WriteLine(output);
                 }
             }
 
@@ -373,12 +394,12 @@ namespace Unity.MLAgentsExamples
         public string Time;
         public string InstanceUUID;
         public SkillKnowledge SkillKnowledge;
+        public int SettleCount;
 
         public PCGStepLog()
         {
            
         }
-
 
         public string ToCSVRoW()
         {
@@ -387,6 +408,7 @@ namespace Unity.MLAgentsExamples
             row += StepCount + ",";
             row += Time + ",";
             row += InstanceUUID + ",";
+            row += SettleCount + ",";
 
             foreach (Dictionary<PieceType, int> table in new Dictionary<PieceType, int>[2] { SkillKnowledge.CurrentMatchCounts, SkillKnowledge.TargetMatchCounts })
             {

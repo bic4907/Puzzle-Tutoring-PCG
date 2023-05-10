@@ -44,10 +44,10 @@ namespace Unity.MLAgentsExamples
 
         public void Reset()
         {
-            for (int i = 0; i < PieceTypes.Length; i++)
+            foreach (PieceType pieceType in PieceTypes)
             {
-                CurrentMatchCounts[PieceTypes[i]] = 0;
-                TargetMatchCounts[PieceTypes[i]] = DefaultTargetValue;
+                CurrentMatchCounts[pieceType] = 0;
+                TargetMatchCounts[pieceType] = DefaultTargetValue;
             }
         }
 

@@ -40,8 +40,8 @@ namespace Unity.MLAgentsExamples
 
             MatchCases.Add(PieceType.RainbowPiece, new List<int[,]>());
             MatchCases.Add(PieceType.BombPiece, new List<int[,]>());
-            MatchCases.Add(PieceType.RocketPiece, new List<int[,]>());
             MatchCases.Add(PieceType.CrossPiece, new List<int[,]>());
+            MatchCases.Add(PieceType.RocketPiece, new List<int[,]>());
             MatchCases.Add(PieceType.VerticalPiece, new List<int[,]>());
             MatchCases.Add(PieceType.HorizontalPiece, new List<int[,]>());
             MatchCases.Add(PieceType.NormalPiece, new List<int[,]>());
@@ -73,10 +73,10 @@ namespace Unity.MLAgentsExamples
             CreateScores.Add(PieceType.Empty, 0);
             CreateScores.Add(PieceType.NormalPiece, 0);
             CreateScores.Add(PieceType.HorizontalPiece, 20);
-            CreateScores.Add(PieceType.VerticalPiece, 30);
-            CreateScores.Add(PieceType.CrossPiece, 40);
-            CreateScores.Add(PieceType.BombPiece, 50);
-            CreateScores.Add(PieceType.RocketPiece, 60);
+            CreateScores.Add(PieceType.VerticalPiece, 20);
+            CreateScores.Add(PieceType.CrossPiece, 30);
+            CreateScores.Add(PieceType.BombPiece, 20);
+            CreateScores.Add(PieceType.RocketPiece, 50);
             CreateScores.Add(PieceType.RainbowPiece, 70);
         }
 
@@ -87,10 +87,10 @@ namespace Unity.MLAgentsExamples
             DestroyScores.Add(PieceType.Empty, 0);
             DestroyScores.Add(PieceType.NormalPiece, 10);
             DestroyScores.Add(PieceType.HorizontalPiece, 20);
-            DestroyScores.Add(PieceType.VerticalPiece, 30);
-            DestroyScores.Add(PieceType.CrossPiece, 40);
-            DestroyScores.Add(PieceType.BombPiece, 50);
-            DestroyScores.Add(PieceType.RocketPiece, 60);
+            DestroyScores.Add(PieceType.VerticalPiece, 20);
+            DestroyScores.Add(PieceType.CrossPiece, 30);
+            DestroyScores.Add(PieceType.BombPiece, 20);
+            DestroyScores.Add(PieceType.RocketPiece, 50);
             DestroyScores.Add(PieceType.RainbowPiece, 70);
         }
 
