@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/ML-Agents/Examples/Match3/Scenes/Match3.unity
+    guid: 2e09c5458f1494f9dad9cd6d09dff964
   m_configObjects: {}
