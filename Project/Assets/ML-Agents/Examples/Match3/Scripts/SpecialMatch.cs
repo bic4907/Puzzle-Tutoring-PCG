@@ -74,10 +74,10 @@ namespace Unity.MLAgentsExamples
             CreateScores.Add(PieceType.NormalPiece, 0);
             CreateScores.Add(PieceType.HorizontalPiece, 20);
             CreateScores.Add(PieceType.VerticalPiece, 20);
-            CreateScores.Add(PieceType.CrossPiece, 30);
+            CreateScores.Add(PieceType.CrossPiece, 20);
             CreateScores.Add(PieceType.BombPiece, 20);
-            CreateScores.Add(PieceType.RocketPiece, 50);
-            CreateScores.Add(PieceType.RainbowPiece, 70);
+            CreateScores.Add(PieceType.RocketPiece, 20);
+            CreateScores.Add(PieceType.RainbowPiece, 20);
         }
 
         private void InitializeDestroyScore()
@@ -88,10 +88,10 @@ namespace Unity.MLAgentsExamples
             DestroyScores.Add(PieceType.NormalPiece, 10);
             DestroyScores.Add(PieceType.HorizontalPiece, 20);
             DestroyScores.Add(PieceType.VerticalPiece, 20);
-            DestroyScores.Add(PieceType.CrossPiece, 30);
+            DestroyScores.Add(PieceType.CrossPiece, 20);
             DestroyScores.Add(PieceType.BombPiece, 20);
-            DestroyScores.Add(PieceType.RocketPiece, 50);
-            DestroyScores.Add(PieceType.RainbowPiece, 70);
+            DestroyScores.Add(PieceType.RocketPiece, 20);
+            DestroyScores.Add(PieceType.RainbowPiece, 20);
         }
 
         public int GetCreateScore(PieceType pieceType)
