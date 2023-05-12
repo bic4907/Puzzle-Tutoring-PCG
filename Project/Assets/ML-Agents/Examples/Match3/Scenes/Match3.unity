@@ -838,7 +838,7 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   Board: {fileID: 0}
-  MoveTime: 0
+  MoveTime: 0.1
   MaxMoves: 300
   useForcedFast: 0
   generatorType: 1

@@ -231,7 +231,7 @@ namespace Unity.MLAgentsExamples
         private void Expand(Node node) {
 
             // print the node depth and isEmpty
-            Debug.Log($"Node Depth: {node.depth}, IsEmpty: {node.board.HasEmptyCell()}");
+            // Debug.Log($"Node Depth: {node.depth}, IsEmpty: {node.board.HasEmptyCell()}");
 
             SimulationType simType = node.board.HasEmptyCell() ? SimulationType.Generator : SimulationType.Solver;
             Node tmpChild = null;

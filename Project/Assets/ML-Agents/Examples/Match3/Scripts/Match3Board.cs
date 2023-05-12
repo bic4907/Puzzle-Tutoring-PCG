@@ -227,19 +227,44 @@ namespace Unity.MLAgentsExamples
             var _board = this.DeepCopy();
             
             _board.MakeMove(move);
+
+            if (IsSameBoard(_board))
+            {
+                Destroy(_board);
+                return false;
+            }
+
+            bool isValid = false;
+
             _board.MarkMatchedCells();
 
-            bool isAvalid = false;
-
-            if (_board.m_Matched[move.Column, move.Row] == true || _board.m_Matched[otherCol, otherRow] == true)
+            if (_board.m_Matched[move.Column, move.Row] == true ||
+                _board.m_Matched[otherCol, otherRow] == true)
             {
-                isAvalid = true;
+                isValid = true;
             }
 
 
             Destroy(_board);
 
-            return isAvalid;
+            return isValid;
+        }
+
+        public bool IsSameBoard(Match3Board board)
+        {
+            for (var i = 0; i < MaxRows; i++)
+            {
+                for (var j = 0; j < MaxColumns; j++)
+                {
+                    if (m_Cells[j, i].CellType != board.m_Cells[j, i].CellType || 
+                        m_Cells[j, i].SpecialType != board.m_Cells[j, i].SpecialType)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
         public List<int[]> GetMatchedCells()
