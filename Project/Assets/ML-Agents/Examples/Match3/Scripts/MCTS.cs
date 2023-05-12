@@ -133,13 +133,23 @@ namespace Unity.MLAgentsExamples
                     {
                         BestBoardScore = currentNode.score;
                         BestBoard = currentNode.board;
+
                         IsChanged = true;
                         m_ComparisonCount += 1;
+
+
+                        // On the best node was searched
+
                     }
                 }
 
                 currentNode = currentNode.parent;
             }
+        }
+
+        private void OnBestNodeFound()
+        {
+            
         }
 
         public bool FillEmpty(Match3Board board)
@@ -225,9 +235,13 @@ namespace Unity.MLAgentsExamples
 
         private void Expand(Node node) {
 
+            // print the node depth and isEmpty
+            Debug.Log($"Node Depth: {node.depth}, IsEmpty: {node.board.HasEmptyCell()}");
+
             SimulationType simType = node.board.HasEmptyCell() ? SimulationType.Generator : SimulationType.Solver;
             Node tmpChild = null;
             Match3Board tmpBoard = null;
+
 
             switch(simType)
             {
@@ -249,7 +263,7 @@ namespace Unity.MLAgentsExamples
 
                     break;
                 case SimulationType.Solver:
-
+                    Debug.Log("Solver");
                     tmpBoard = node.board.DeepCopy();
                     // Append a child node with heuristic decision
                     Move move = GreedyMatch3Solver.GetAction(tmpBoard);
@@ -258,7 +272,6 @@ namespace Unity.MLAgentsExamples
                     tmpChild = new Node(node.depth + 1, 0, node.playerActionCount + 1, 0f, new List<Node>(), node, tmpBoard, SimulationType.Solver);
                     node.children.Add(tmpChild);
                     
-                    // Debug.Log($"Create New Node (Solver) -  Node depth: {tmpChild.depth}, Player Action Count: {tmpChild.playerActionCount}, Empty Space: {tmpBoard.GetEmptyCellCount()}");
 
                     break;
                 default:
@@ -276,31 +289,36 @@ namespace Unity.MLAgentsExamples
             switch (node.simulationType)
             {
                 case SimulationType.Generator:
-                    hasMatched = node.board.MarkMatchedCells();
-                    if (hasMatched)
-                    {
-                        score = -1.0f;
-                    }
+                    // hasMatched = node.board.MarkMatchedCells();
+                    // if (hasMatched)
+                    // {
+                    //     score = -1.0f;
+                    // }
                     break; 
                 case SimulationType.Solver:
+                    // Make move
 
-                    // TODO Player learning score
 
                     hasMatched = node.board.MarkMatchedCells();
-                    node.board.ExecuteSpecialEffect();
+                    node.board.ClearMatchedCells();
+                    // node.board.ExecuteSpecialEffect();
                     node.board.SpawnSpecialCells();
-                    node.board.DropCells();
+                    // node.board.DropCells();
 
                     var createdPieces = node.board.GetLastCreatedPiece();
                     foreach (var piece in createdPieces)
                     {
-                        PieceType type = (PieceType)piece.SpecialType;              
+                        PieceType type = (PieceType)piece.SpecialType;
+                        Debug.Log($"Created Piece: {type}");
                     }
 
                     switch(RewardMode)
                     {
                         case GeneratorReward.Score:
                             score += createdPieces.Count;
+
+                            Debug.Log("Score: " + score);
+
                             break;
                         case GeneratorReward.Knowledge:
                             break;

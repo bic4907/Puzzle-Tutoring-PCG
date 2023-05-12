@@ -283,7 +283,7 @@ namespace Unity.MLAgentsExamples
                     nextState = State.FillEmpty;
                     break;
                 case State.FillEmpty:
-
+    
                     switch(generatorType)
                     {
                         case GeneratorType.Random:
@@ -291,7 +291,7 @@ namespace Unity.MLAgentsExamples
                             break;
                         case GeneratorType.MCTS:
                             bool _isChanged = MCTS.Instance.FillEmpty(Board);
-                            
+
                             if(_isChanged)
                             {
                                 ChangedCount += 1;
@@ -327,7 +327,6 @@ namespace Unity.MLAgentsExamples
                         SettleCount += 1;
                     }
 
-                    // Simulate the board with greedy action
                     Move move = GreedyMatch3Solver.GetAction(Board);
                     Board.MakeMove(move);
 

@@ -232,6 +232,9 @@ namespace Unity.MLAgentsExamples
             // Check if there is a matchable piece when swap the board
             var _board = this.DeepCopy();
             
+
+            // TODO 해당 Move가 매칭을 일으키는지 확인해야함
+
             _board.MakeMove(move);
             bool isMatched =  _board.MarkMatchedCells();
             Destroy(_board);
@@ -821,7 +824,6 @@ namespace Unity.MLAgentsExamples
                 destroyedPoints += SpecialMatch.GetInstance().GetDestroyScore((PieceType)piece.SpecialType);
             }
 
-            // Debug.Log("Created Points : " + createdPoints + " Destroyed Points : " + destroyedPoints);
             int points = createdPoints + destroyedPoints;
             
             return points;
