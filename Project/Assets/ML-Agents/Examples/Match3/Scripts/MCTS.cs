@@ -147,11 +147,6 @@ namespace Unity.MLAgentsExamples
             }
         }
 
-        private void OnBestNodeFound()
-        {
-            
-        }
-
         public bool FillEmpty(Match3Board board)
         {
             

@@ -54,7 +54,7 @@ namespace Unity.MLAgentsExamples
         private List<(int CellType, int SpecialType)> m_LastCreatedPiece;
         private List<(int CellType, int SpecialType)> m_LastDestroyedPiece;
 
-        bool[,] m_Matched;
+        public bool[,] m_Matched;
 
         private BoardSize m_CurrentBoardSize;
 
@@ -141,9 +141,7 @@ namespace Unity.MLAgentsExamples
 
         public override bool MakeMove(Move move)
         {
-
             ClearLastPieceLog();
-
 
             var originalValue = m_Cells[move.Column, move.Row];
             var (otherRow, otherCol) = move.OtherCell();
@@ -154,7 +152,6 @@ namespace Unity.MLAgentsExamples
             {
                 m_Cells[move.Column, move.Row] = (k_EmptyCell, 0);
                 m_Cells[otherCol, otherRow] = (k_EmptyCell, 0);
-                // m_Matched[move.Column, move.Row] = true;
 
                 m_SpecialEffects.Add(new SpecialEffect
                 {
@@ -171,8 +168,6 @@ namespace Unity.MLAgentsExamples
                 m_Cells[move.Column, move.Row] = (k_EmptyCell, 0);
                 m_Cells[otherCol, otherRow] = (k_EmptyCell, 0);
 
-                // m_Matched[move.Column, move.Row] = true;
-
                 m_SpecialEffects.Add(new SpecialEffect
                 {
                     CellType = destinationValue.CellType,
@@ -184,7 +179,6 @@ namespace Unity.MLAgentsExamples
                 return true;
             }
             
-
             m_Cells[move.Column, move.Row] = destinationValue;
             m_Cells[otherCol, otherRow] = originalValue;
 
@@ -232,20 +226,20 @@ namespace Unity.MLAgentsExamples
             // Check if there is a matchable piece when swap the board
             var _board = this.DeepCopy();
             
-
-            // TODO 해당 Move가 매칭을 일으키는지 확인해야함
-
             _board.MakeMove(move);
-            bool isMatched =  _board.MarkMatchedCells();
+            _board.MarkMatchedCells();
+
+            bool isAvalid = false;
+
+            if (_board.m_Matched[move.Column, move.Row] == true || _board.m_Matched[otherCol, otherRow] == true)
+            {
+                isAvalid = true;
+            }
+
+
             Destroy(_board);
 
-            if (isMatched)
-            {
-                return true;
-            }
- 
-
-            return false;
+            return isAvalid;
         }
 
         public List<int[]> GetMatchedCells()
