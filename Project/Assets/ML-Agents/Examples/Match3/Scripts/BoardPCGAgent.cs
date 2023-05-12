@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
@@ -57,6 +58,7 @@ namespace Unity.MLAgentsExamples
         public int ChangedCount = 0;
         public int NonChangedCount = 0;
 
+        public List<int> ComparisonCounts;
 
         protected override void Awake()
         {
@@ -109,7 +111,7 @@ namespace Unity.MLAgentsExamples
             }
 
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
-            
+            ComparisonCounts = new List<int>();
         }
 
         public override void OnEpisodeBegin()
@@ -145,7 +147,7 @@ namespace Unity.MLAgentsExamples
             }
 
             
-
+            ComparisonCounts.Clear();
         }
 
         private void FixedUpdate()
@@ -209,6 +211,8 @@ namespace Unity.MLAgentsExamples
                         {
                             ChangedCount += 1;
                         }
+
+                        ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
 
                         break;
                     default:
@@ -293,6 +297,8 @@ namespace Unity.MLAgentsExamples
                                 ChangedCount += 1;
                             }
 
+                            ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
+
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -357,7 +363,18 @@ namespace Unity.MLAgentsExamples
             m_Logger.SettleCount = SettleCount;
             m_Logger.ChangedCount = ChangedCount;
 
+            m_Logger.MeanComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)ComparisonCounts.Average();
+            m_Logger.StdComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)CalculateStandardDeviation(ComparisonCounts);
+
             FlushLog(GetMatchResultLogPath(), m_Logger);
+        }
+
+        private double CalculateStandardDeviation(List<int> numbers) {
+            double mean = numbers.Average();
+            double sumOfSquaredDifferences = numbers.Select(num => Mathf.Pow(num - (float)mean, 2)).Sum();
+            double variance = sumOfSquaredDifferences / (numbers.Count - 1);
+            double stdDev = Mathf.Sqrt((float)variance);
+            return stdDev;
         }
 
         private string GetMatchResultLogPath()
@@ -374,7 +391,7 @@ namespace Unity.MLAgentsExamples
                 using (StreamWriter sw = File.CreateText(filePath))
                 {
                     string output = "";
-                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,";
+                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,MeanComparisonCount,StdComparisonCount,";
 
 
                     foreach (PieceType pieceType in BoardPCGAgent.PieceLogOrder)
@@ -411,6 +428,9 @@ namespace Unity.MLAgentsExamples
         public SkillKnowledge SkillKnowledge;
         public int SettleCount;
         public int ChangedCount;
+        public float MeanComparisonCount;
+        public float StdComparisonCount;
+
 
         public PCGStepLog()
         {
@@ -426,6 +446,8 @@ namespace Unity.MLAgentsExamples
             row += InstanceUUID + ",";
             row += SettleCount + ",";
             row += ChangedCount + ",";
+            row += MeanComparisonCount + ",";
+            row += StdComparisonCount + ",";
 
             foreach (Dictionary<PieceType, int> table in new Dictionary<PieceType, int>[2] { SkillKnowledge.CurrentMatchCounts, SkillKnowledge.TargetMatchCounts })
             {

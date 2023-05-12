@@ -80,6 +80,7 @@ namespace Unity.MLAgentsExamples
         private int TargetDepth = 0;
 
         private bool IsChanged = false;
+        private int m_ComparisonCount = 0;
 
         private GeneratorReward RewardMode = GeneratorReward.Score;
 
@@ -133,6 +134,7 @@ namespace Unity.MLAgentsExamples
                         BestBoardScore = currentNode.score;
                         BestBoard = currentNode.board;
                         IsChanged = true;
+                        m_ComparisonCount += 1;
                     }
                 }
 
@@ -149,6 +151,7 @@ namespace Unity.MLAgentsExamples
 
             // Initialize the searching process
             simulator = _board;
+            m_ComparisonCount = 0;
 
             // Fill Empty cells
             PrepareRootNode();
@@ -354,6 +357,11 @@ namespace Unity.MLAgentsExamples
         public void SetSimulationLimit(int limit)
         {
             this.simulationStepLimit = limit;
+        }
+
+        public int GetComparisonCount()
+        {
+            return m_ComparisonCount;
         }
 
     }
