@@ -79,8 +79,12 @@ namespace Unity.MLAgentsExamples
 
         private int TargetDepth = 0;
 
+        private int m_MaxDepth = 0;
+
         private bool IsChanged = false;
         private int m_ComparisonCount = 0;
+
+        private int ExpandCount = 0;
 
         private GeneratorReward RewardMode = GeneratorReward.Score;
 
@@ -105,6 +109,7 @@ namespace Unity.MLAgentsExamples
 
         public void Search()
         {
+            Debug.Log("Search()");
             currentNode = rootNode;
 
             // Select (Find the terminal node ,tree policy)
@@ -151,13 +156,15 @@ namespace Unity.MLAgentsExamples
         {
             
             // Print the empty cell count
+            Debug.Log("Empty Cell Count: " + board.GetEmptyCellCount() + "/ Simulate Limit: " + simulationStepLimit);
 
             var _board = board.DeepCopy();
 
             // Initialize the searching process
             simulator = _board;
             m_ComparisonCount = 0;
-
+            ExpandCount = 0;
+            m_MaxDepth = 0;
             // Fill Empty cells
             PrepareRootNode();
             PrepareSearch();
@@ -172,7 +179,7 @@ namespace Unity.MLAgentsExamples
             this.rootNode = null;
 
             // Return if the board is changed
-
+            Debug.Log("ExpandCount: " + ExpandCount + " / MaxDepth: " + m_MaxDepth + " / IsChanged: " + IsChanged);
             // Debug.Log($"IsChanged: {IsChanged}, BestBoardScore: {BestBoardScore}");
             return IsChanged;
         }
@@ -231,12 +238,16 @@ namespace Unity.MLAgentsExamples
         private void Expand(Node node) {
 
             // print the node depth and isEmpty
-            // Debug.Log($"Node Depth: {node.depth}, IsEmpty: {node.board.HasEmptyCell()}");
+            Debug.Log($"Node Depth: {node.depth}, IsEmpty: {node.board.HasEmptyCell()}");
 
             SimulationType simType = node.board.HasEmptyCell() ? SimulationType.Generator : SimulationType.Solver;
             Node tmpChild = null;
             Match3Board tmpBoard = null;
 
+            if (node.depth > m_MaxDepth)
+            {
+                m_MaxDepth = node.depth;
+            }
 
             switch(simType)
             {
@@ -254,11 +265,12 @@ namespace Unity.MLAgentsExamples
 
                         tmpChild = new Node(node.depth + 1, 0, node.playerActionCount, 0f, new List<Node>(), node, tmpBoard, SimulationType.Generator);
                         node.children.Add(tmpChild);
+
+                        ExpandCount += 1;
                     }
 
                     break;
                 case SimulationType.Solver:
-                    Debug.Log("Solver");
                     tmpBoard = node.board.DeepCopy();
                     // Append a child node with heuristic decision
                     Move move = GreedyMatch3Solver.GetAction(tmpBoard);
@@ -267,7 +279,7 @@ namespace Unity.MLAgentsExamples
                     tmpChild = new Node(node.depth + 1, 0, node.playerActionCount + 1, 0f, new List<Node>(), node, tmpBoard, SimulationType.Solver);
                     node.children.Add(tmpChild);
                     
-
+                    ExpandCount += 1;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

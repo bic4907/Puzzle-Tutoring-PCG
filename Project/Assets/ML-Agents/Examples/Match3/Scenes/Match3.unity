@@ -844,7 +844,7 @@ MonoBehaviour:
   generatorType: 1
   generatorRewardType: 0
   PlayerNumber: 0
-  MCTS_Simulation: 300
+  MCTS_Simulation: 10
   CurrentEpisodeCount: 0
   CurrentStepCount: 0
   TargetEpisodeCount: -1
