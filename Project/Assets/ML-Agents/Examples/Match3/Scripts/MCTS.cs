@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.MLAgentsExamples;
 using Unity.MLAgents.Integrations.Match3;
 using System.Linq;
-
+using UnityEditor;
 using UnityEngine;
 
 namespace Unity.MLAgentsExamples
@@ -74,7 +74,7 @@ namespace Unity.MLAgentsExamples
         private float BestBoardScore;
         private Match3Board BestBoard;
         public int numberOfChild;
-        public int depthLimit = 2;
+        public int DepthLimit = 2;
         public int simulationStepLimit = 300;
 
         private int TargetDepth = 0;
@@ -109,7 +109,6 @@ namespace Unity.MLAgentsExamples
 
         public void Search()
         {
-            Debug.Log("Search()");
             currentNode = rootNode;
 
             // Select (Find the terminal node ,tree policy)
@@ -123,6 +122,7 @@ namespace Unity.MLAgentsExamples
                 Expand(currentNode);
                 currentNode = SelectBestChild(currentNode);
             }
+            // Debug.Log("Search()" + "CurrentNode Depth: " + currentNode.depth + " / CurrentNode Visits: " + currentNode.visits + " / CurrentNode PlayerActionCount: " + currentNode.playerActionCount + " / CurrentNode Score: " + currentNode.score + " / CurrentNode SimulationType: " + currentNode.simulationType);
 
             // Rollout (Default policy)
             float score = Simulate(currentNode);
@@ -134,7 +134,7 @@ namespace Unity.MLAgentsExamples
                 
                 if (currentNode.depth == TargetDepth)
                 {
-                    if (currentNode.score > BestBoardScore || BestBoard == null)
+                    if (currentNode.score > BestBoardScore)
                     {
                         BestBoardScore = currentNode.score;
                         BestBoard = currentNode.board;
@@ -165,6 +165,7 @@ namespace Unity.MLAgentsExamples
             m_ComparisonCount = 0;
             ExpandCount = 0;
             m_MaxDepth = 0;
+
             // Fill Empty cells
             PrepareRootNode();
             PrepareSearch();
@@ -180,7 +181,11 @@ namespace Unity.MLAgentsExamples
 
             // Return if the board is changed
             Debug.Log("ExpandCount: " + ExpandCount + " / MaxDepth: " + m_MaxDepth + " / IsChanged: " + IsChanged);
-            // Debug.Log($"IsChanged: {IsChanged}, BestBoardScore: {BestBoardScore}");
+            Debug.Log($"IsChanged: {IsChanged}, BestBoardScore: {BestBoardScore}");
+            
+            // Pause the UnityEditor
+            //EditorApplication.isPaused = true;
+            
             return IsChanged;
         }
 
@@ -188,7 +193,9 @@ namespace Unity.MLAgentsExamples
         private void PrepareSearch()
         {
             TargetDepth = simulator.GetEmptyCellCount();
-            BestBoardScore = -1;
+            DepthLimit = TargetDepth + 1; // Upto solver's node
+
+            BestBoardScore = -99999f;
 
             BestBoard = simulator.DeepCopy();
             BestBoard.FillFromAbove();
@@ -238,11 +245,16 @@ namespace Unity.MLAgentsExamples
         private void Expand(Node node) {
 
             // print the node depth and isEmpty
-            Debug.Log($"Node Depth: {node.depth}, IsEmpty: {node.board.HasEmptyCell()}");
+            //Debug.Log($"Node Depth: {node.depth}, IsEmpty: {node.board.HasEmptyCell()}");
 
             SimulationType simType = node.board.HasEmptyCell() ? SimulationType.Generator : SimulationType.Solver;
             Node tmpChild = null;
             Match3Board tmpBoard = null;
+
+            if (node.depth > DepthLimit)
+            {
+                return;
+            }
 
             if (node.depth > m_MaxDepth)
             {
@@ -272,7 +284,7 @@ namespace Unity.MLAgentsExamples
                     break;
                 case SimulationType.Solver:
                     tmpBoard = node.board.DeepCopy();
-                    // Append a child node with heuristic decision
+
                     Move move = GreedyMatch3Solver.GetAction(tmpBoard);
                     tmpBoard.MakeMove(move);
 
@@ -296,11 +308,14 @@ namespace Unity.MLAgentsExamples
             switch (node.simulationType)
             {
                 case SimulationType.Generator:
-                    // hasMatched = node.board.MarkMatchedCells();
-                    // if (hasMatched)
-                    // {
-                    //     score = -1.0f;
-                    // }
+                    score = -0.01f;
+
+                    hasMatched = node.board.MarkMatchedCells();
+                    if (hasMatched)
+                    {
+                        // score = -0.5f;
+                        // Debug.Log("Matched");
+                    }
                     break; 
                 case SimulationType.Solver:
                     // Make move
@@ -313,18 +328,23 @@ namespace Unity.MLAgentsExamples
                     // node.board.DropCells();
 
                     var createdPieces = node.board.GetLastCreatedPiece();
+                    int createdPiecesCount = createdPieces.Count;
+                    // Debug.Log($"Created Piece Count: {createdPieces.Count}");
+
+                    node.board.ClearLastPieceLog();
+
                     foreach (var piece in createdPieces)
                     {
                         PieceType type = (PieceType)piece.SpecialType;
-                        Debug.Log($"Created Piece: {type}");
+                        // Debug.Log($"Created Piece: {type}");
                     }
 
                     switch(RewardMode)
                     {
                         case GeneratorReward.Score:
-                            score += createdPieces.Count;
+                            score += createdPiecesCount;
 
-                            Debug.Log("Score: " + score);
+                            // Debug.Log("Score: " + score);
 
                             break;
                         case GeneratorReward.Knowledge:
