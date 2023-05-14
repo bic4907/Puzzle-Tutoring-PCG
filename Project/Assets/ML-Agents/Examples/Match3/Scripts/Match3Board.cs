@@ -205,7 +205,6 @@ namespace Unity.MLAgentsExamples
 
         public override bool IsMoveValid(Move move)
         {
-
             var originalValue = m_Cells[move.Column, move.Row];
             var (otherRow, otherCol) = move.OtherCell();
             var destinationValue = m_Cells[otherCol, otherRow];
@@ -221,7 +220,6 @@ namespace Unity.MLAgentsExamples
             {
                 return true;
             }
-
 
             // Check if there is a matchable piece when swap the board
             var _board = this.DeepCopy();
@@ -249,6 +247,49 @@ namespace Unity.MLAgentsExamples
 
             return isValid;
         }
+
+        public Dictionary<PieceType, int> GetEmptyMatchableDictionary()
+        {
+            Dictionary<PieceType, int> matchablePieces = new Dictionary<PieceType, int>();
+            // Initialize the matchablePieces
+            foreach (PieceType pieceType in new PieceType[] { PieceType.HorizontalPiece, PieceType.VerticalPiece, PieceType.CrossPiece, 
+                                                              PieceType.BombPiece, PieceType.RocketPiece, PieceType.RainbowPiece })
+            {
+                matchablePieces.Add(pieceType, 0);
+            }
+
+            return matchablePieces;
+        }
+
+        public Dictionary<PieceType, int> GetSpecialMatchable()
+        {
+            var matchablePieces = GetEmptyMatchableDictionary();
+            
+            foreach (var move in AllMoves())
+            {
+                if (!IsMoveValid(move))
+                {
+                    continue;
+                }
+                
+                var _board = DeepCopy();
+
+                _board.MarkMatchedCells();
+                _board.SpawnSpecialCells();
+
+                var _matchablePieces = SpecialMatch.GetMatchCount(_board.GetLastCreatedPiece());
+
+                foreach (KeyValuePair<PieceType, int> pair in _matchablePieces)
+                {
+                    matchablePieces[pair.Key] = Math.Min(pair.Value | matchablePieces[pair.Key], 1);
+                }
+
+                _board = null;
+            }
+
+            return matchablePieces;
+        }
+
 
         public bool IsSameBoard(Match3Board board)
         {

@@ -25,9 +25,9 @@ namespace Unity.MLAgentsExamples
         public List<Node> children;
         public Node parent;
         public Match3Board board;
-
         public SimulationType simulationType;
-        
+        Dictionary<PieceType, int> matchablePieces;
+
         public Node(int depth, 
                     int visits,
                     int playerActionCount,
@@ -52,6 +52,29 @@ namespace Unity.MLAgentsExamples
             parent = null;
             children = null;
         }
+
+
+        public Dictionary<PieceType, int> GetMatchableBlockCount()
+        {
+            if (matchablePieces != null) return matchablePieces;
+
+            matchablePieces = board.GetSpecialMatchable();
+
+            return matchablePieces;
+
+        }
+
+        public override string ToString()
+        {
+            var matchables = GetMatchableBlockCount();
+            string output = "";
+            foreach (var match in matchables)
+            {
+                output += $"{match.Key}: {match.Value}";
+            }
+            return output;
+        }
+
     }
 
     public class MCTS
@@ -131,19 +154,16 @@ namespace Unity.MLAgentsExamples
                 currentNode.visits++;
                 currentNode.score += score;
                 
-                if (currentNode.depth == TargetDepth)
+                if (currentNode.score > BestBoardScore && currentNode.depth == TargetDepth)
                 {
-                    if (currentNode.score > BestBoardScore)
-                    {
-                        BestBoardScore = currentNode.score;
-                        BestBoard = currentNode.board;
+                    BestBoardScore = currentNode.score;
+                    BestBoard = currentNode.board;
 
-                        IsChanged = true;
-                        m_ComparisonCount += 1;
+                    IsChanged = true;
+                    m_ComparisonCount += 1;
 
-                    }
                 }
-
+        
                 currentNode = currentNode.parent;
             }
         }
@@ -152,7 +172,7 @@ namespace Unity.MLAgentsExamples
         {
             
             // Print the empty cell count
-            Debug.Log("Empty Cell Count: " + board.GetEmptyCellCount() + "/ Simulate Limit: " + simulationStepLimit);
+            // Debug.Log("Empty Cell Count: " + board.GetEmptyCellCount() + "/ Simulate Limit: " + simulationStepLimit);
 
             var _board = board.DeepCopy();
 
@@ -176,8 +196,8 @@ namespace Unity.MLAgentsExamples
             this.rootNode = null;
 
             // Return if the board is changed
-            Debug.Log("ExpandCount: " + ExpandCount + " / MaxDepth: " + m_MaxDepth + " / IsChanged: " + IsChanged);
-            Debug.Log($"IsChanged: {IsChanged}, BestBoardScore: {BestBoardScore}");
+            // Debug.Log("ExpandCount: " + ExpandCount + " / MaxDepth: " + m_MaxDepth + " / IsChanged: " + IsChanged);
+            // Debug.Log($"IsChanged: {IsChanged}, BestBoardScore: {BestBoardScore}");
             
             // Pause the UnityEditor
             //EditorApplication.isPaused = true;
@@ -302,15 +322,15 @@ namespace Unity.MLAgentsExamples
             {
                 case SimulationType.Generator:
 
-
                     // 새로 만들어진 블럭들에게서 점수를 구함
                     hasMatched = node.board.MarkMatchedCells();
                     if (hasMatched)
                     {
                         score = -0.001f;
-                        // Debug.Log("Matched");
                     }
-                    break; 
+                    break;
+
+
                 case SimulationType.Solver:
                     hasMatched = node.board.MarkMatchedCells();
                     node.board.ClearMatchedCells();

@@ -53,7 +53,7 @@ env_settings:
   - /workspace/results/method_random_player_3/
   - --targetEpisodeCount
   - 1000
-  max_lifetime_restarts: 1
+  max_lifetime_restarts: 0
   num_areas: 1
   num_envs: 1
   restarts_rate_limit_n: 1
