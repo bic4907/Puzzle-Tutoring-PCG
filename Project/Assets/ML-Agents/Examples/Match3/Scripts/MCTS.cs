@@ -122,7 +122,6 @@ namespace Unity.MLAgentsExamples
                 Expand(currentNode);
                 currentNode = SelectBestChild(currentNode);
             }
-            // Debug.Log("Search()" + "CurrentNode Depth: " + currentNode.depth + " / CurrentNode Visits: " + currentNode.visits + " / CurrentNode PlayerActionCount: " + currentNode.playerActionCount + " / CurrentNode Score: " + currentNode.score + " / CurrentNode SimulationType: " + currentNode.simulationType);
 
             // Rollout (Default policy)
             float score = Simulate(currentNode);
@@ -141,9 +140,6 @@ namespace Unity.MLAgentsExamples
 
                         IsChanged = true;
                         m_ComparisonCount += 1;
-
-
-                        // On the best node was searched
 
                     }
                 }
@@ -195,7 +191,7 @@ namespace Unity.MLAgentsExamples
             TargetDepth = simulator.GetEmptyCellCount();
             DepthLimit = TargetDepth + 1; // Upto solver's node
 
-            BestBoardScore = -99999f;
+            BestBoardScore = 0.0f;
 
             BestBoard = simulator.DeepCopy();
             BestBoard.FillFromAbove();
@@ -243,9 +239,6 @@ namespace Unity.MLAgentsExamples
         }
 
         private void Expand(Node node) {
-
-            // print the node depth and isEmpty
-            //Debug.Log($"Node Depth: {node.depth}, IsEmpty: {node.board.HasEmptyCell()}");
 
             SimulationType simType = node.board.HasEmptyCell() ? SimulationType.Generator : SimulationType.Solver;
             Node tmpChild = null;
@@ -308,19 +301,17 @@ namespace Unity.MLAgentsExamples
             switch (node.simulationType)
             {
                 case SimulationType.Generator:
-                    score = -0.01f;
 
+
+                    // 새로 만들어진 블럭들에게서 점수를 구함
                     hasMatched = node.board.MarkMatchedCells();
                     if (hasMatched)
                     {
-                        // score = -0.5f;
+                        score = -0.001f;
                         // Debug.Log("Matched");
                     }
                     break; 
                 case SimulationType.Solver:
-                    // Make move
-
-
                     hasMatched = node.board.MarkMatchedCells();
                     node.board.ClearMatchedCells();
                     // node.board.ExecuteSpecialEffect();
@@ -343,8 +334,6 @@ namespace Unity.MLAgentsExamples
                     {
                         case GeneratorReward.Score:
                             score += createdPiecesCount;
-
-                            // Debug.Log("Score: " + score);
 
                             break;
                         case GeneratorReward.Knowledge:
