@@ -25,6 +25,9 @@ for simple_effect in INCLUDE_SIMPLE_EFFECT:
             RUN_ID = list()
             RUN_ID.append('method'), RUN_ID.append(i_method)
             RUN_ID.append('player'), RUN_ID.append(i_player)
+            if simple_effect == 1:
+                RUN_ID.append('simpleEffect'), RUN_ID.append(simple_effect)
+                run_id += f'_simpleEffect_1'
 
             if i_method == 'mcts':
                 for i_objective in OBJECTIVE:
@@ -32,8 +35,7 @@ for simple_effect in INCLUDE_SIMPLE_EFFECT:
                         _RUN_ID = RUN_ID.copy()
                         _RUN_ID.append('objective'), _RUN_ID.append(i_objective)
                         _RUN_ID.append('simulation'), _RUN_ID.append(i_simulation)
-                        if simple_effect == 1:
-                            _RUN_ID.append('simpleEffect'), _RUN_ID.append(simple_effect)
+
 
                         _run_id = '_'.join(map(str, _RUN_ID))
 
