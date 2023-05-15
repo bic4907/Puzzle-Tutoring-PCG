@@ -44,15 +44,15 @@ env_settings:
   base_port: 5005
   env_args:
   - --runId
-  - method_mcts_player_2_objective_knowledge_simulation_300
+  - method_mcts_player_0_objective_score_simulation_800
   - --method
   - mcts
   - --targetPlayer
-  - 2
+  - 0
   - --logPath
-  - /workspace/results/method_mcts_player_2_objective_knowledge_simulation_300/
+  - /workspace/results/method_mcts_player_0_objective_score_simulation_800/
   - --mctsSimulation
-  - 300
+  - 800
   - --targetEpisodeCount
   - 1000
   max_lifetime_restarts: 0

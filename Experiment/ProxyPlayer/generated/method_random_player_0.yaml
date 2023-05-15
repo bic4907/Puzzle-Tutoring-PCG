@@ -49,6 +49,7 @@ env_settings:
   - random
   - --targetPlayer
   - 0
+  - --simpleEffect
   - --logPath
   - /workspace/results/method_random_player_0/
   - --targetEpisodeCount

@@ -44,15 +44,16 @@ env_settings:
   base_port: 5005
   env_args:
   - --runId
-  - method_mcts_player_2_objective_score_simulation_500
+  - method_mcts_player_0_objective_score_simulation_100_simpleEffect_1
   - --method
   - mcts
   - --targetPlayer
-  - 2
+  - 0
+  - --simpleEffect
   - --logPath
-  - /workspace/results/method_mcts_player_2_objective_score_simulation_500/
+  - /workspace/results/method_mcts_player_0_objective_score_simulation_100_simpleEffect_1/
   - --mctsSimulation
-  - 500
+  - 100
   - --targetEpisodeCount
   - 1000
   max_lifetime_restarts: 0
