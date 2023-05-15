@@ -41,11 +41,6 @@ public class ParameterManagerSingleton
         if (!ParsedArgs.ContainsKey("runId")) { ParsedArgs.Add("runId", "default-id"); }
         if (!ParsedArgs.ContainsKey("logPath")) { ParsedArgs.Add("logPath", Application.dataPath + "/ML-Agents/Examples/Match3/Logs/"); }
         if (!ParsedArgs.ContainsKey("objective")) { ParsedArgs.Add("objective", "score"); }
-
-        // if (!ParsedArgs.ContainsKey("targetPlayer")) { ParsedArgs.Add("targetPlayer", 1); }
-        // if (!ParsedArgs.ContainsKey("algorithm")) { ParsedArgs.Add("algorithm", false); }
-        // if (!ParsedArgs.ContainsKey("pcgRandom")) { ParsedArgs.Add("pcgRandom", false); }
-        // if (!ParsedArgs.ContainsKey("pcgSaveEpisodeLimit")) { ParsedArgs.Add("pcgSaveEpisodeLimit", 0); }
     }
     
     private void ParseCommandlineArgs()
@@ -85,7 +80,10 @@ public class ParameterManagerSingleton
             {
                 ParsedArgs.Add("targetEpisodeCount",  args[++idx]);
             }
-
+            else if (args[idx].Contains("--simpleEffect"))
+            {
+                ParsedArgs.Add("simpleEffect", true);
+            }
 
             idx++;
         }
@@ -115,6 +113,12 @@ public class ParameterManagerSingleton
     public bool HasParam(string key) 
     {
         return ParsedArgs.ContainsKey(key);
+    }
+
+    public bool IsSimpleSpecialEffectMode()
+    {
+        // return true;
+        return ParsedArgs.ContainsKey("simpleEffect");
     }
 
     // Update is called once per frame

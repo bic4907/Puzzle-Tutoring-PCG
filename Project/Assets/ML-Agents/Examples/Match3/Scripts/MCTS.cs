@@ -195,13 +195,6 @@ namespace Unity.MLAgentsExamples
 
             this.rootNode = null;
 
-            // Return if the board is changed
-            // Debug.Log("ExpandCount: " + ExpandCount + " / MaxDepth: " + m_MaxDepth + " / IsChanged: " + IsChanged);
-            // Debug.Log($"IsChanged: {IsChanged}, BestBoardScore: {BestBoardScore}");
-            
-            // Pause the UnityEditor
-            //EditorApplication.isPaused = true;
-            
             return IsChanged;
         }
 
@@ -334,30 +327,26 @@ namespace Unity.MLAgentsExamples
                 case SimulationType.Solver:
                     hasMatched = node.board.MarkMatchedCells();
                     node.board.ClearMatchedCells();
-                    // node.board.ExecuteSpecialEffect();
                     node.board.SpawnSpecialCells();
-                    // node.board.DropCells();
 
                     var createdPieces = node.board.GetLastCreatedPiece();
                     int createdPiecesCount = createdPieces.Count;
-                    // Debug.Log($"Created Piece Count: {createdPieces.Count}");
 
                     node.board.ClearLastPieceLog();
 
                     foreach (var piece in createdPieces)
                     {
                         PieceType type = (PieceType)piece.SpecialType;
-                        // Debug.Log($"Created Piece: {type}");
                     }
 
                     switch(RewardMode)
                     {
                         case GeneratorReward.Score:
                             score += createdPiecesCount;
-
                             break;
                         case GeneratorReward.Knowledge:
-                            break;
+                            throw new NotImplementedException("Please implement this!");
+                            // break;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }

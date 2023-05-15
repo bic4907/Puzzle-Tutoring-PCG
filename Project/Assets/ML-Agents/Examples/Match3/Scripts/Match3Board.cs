@@ -585,40 +585,93 @@ namespace Unity.MLAgentsExamples
                 switch(specialEffect.SpecialType)
                 {
                     case PieceType.HorizontalPiece:
-                        for (var i = 0; i < MaxColumns; i++)
+
+                        if (!ParameterManagerSingleton.GetInstance().IsSimpleSpecialEffectMode())
                         {
-                            m_Cells[i, specialEffect.Row] = (k_EmptyCell, 0);
+                            for (var i = 0; i < MaxColumns; i++)
+                            {
+                                m_Cells[i, specialEffect.Row] = (k_EmptyCell, 0);
+                            }
                         }
+                        else
+                        {
+                            for (var i = column - 2; i <= column + 2; i++)
+                            {
+                                if (!IsCellInBounds(i, specialEffect.Row)) continue;
+                                m_Cells[i, row] = (k_EmptyCell, 0);
+                            }
+                        }
+
                         break;
                     case PieceType.VerticalPiece:
-                        for (var i = 0; i < MaxRows; i++)
+
+                        if (!ParameterManagerSingleton.GetInstance().IsSimpleSpecialEffectMode())
                         {
-                            m_Cells[specialEffect.Column, i] = (k_EmptyCell, 0);
+                            for (var i = 0; i < MaxRows; i++)
+                            {
+                                m_Cells[specialEffect.Column, i] = (k_EmptyCell, 0);
+                            }
                         }
+                        else
+                        {
+                             for (var i = row - 2; i <= row + 2; i++)
+                            {
+                                if (!IsCellInBounds(column, i)) continue;
+
+                                m_Cells[column, i] = (k_EmptyCell, 0);
+                            }
+                        }
+
                         break;
                     case PieceType.CrossPiece:
 
-                        // Break the diagonal blocks from the row and columnts
-                        for (var i = 0; i < Math.Max(MaxColumns, MaxRows); i++)
+
+                        if (!ParameterManagerSingleton.GetInstance().IsSimpleSpecialEffectMode())
                         {
-                            if (IsCellInBounds(column - i, row - i))
+                            // Break the diagonal blocks from the row and columnts
+                            for (var i = 0; i < Math.Max(MaxColumns, MaxRows); i++)
                             {
-                                m_Cells[column - i, row - i] = (k_EmptyCell, 0);
-                            }
-                            if (IsCellInBounds(column + i, row + i))
-                            {
-                                m_Cells[column + i, row + i] = (k_EmptyCell, 0);
-                            }
-                            if (IsCellInBounds(column + i, row - i))
-                            {
-                                m_Cells[column + i, row - i] = (k_EmptyCell, 0);
-                            }
-                            if (IsCellInBounds(column - i, row + i))
-                            {
-                                m_Cells[column - i, row + i] = (k_EmptyCell, 0);
+                                if (IsCellInBounds(column - i, row - i))
+                                {
+                                    m_Cells[column - i, row - i] = (k_EmptyCell, 0);
+                                }
+                                if (IsCellInBounds(column + i, row + i))
+                                {
+                                    m_Cells[column + i, row + i] = (k_EmptyCell, 0);
+                                }
+                                if (IsCellInBounds(column + i, row - i))
+                                {
+                                    m_Cells[column + i, row - i] = (k_EmptyCell, 0);
+                                }
+                                if (IsCellInBounds(column - i, row + i))
+                                {
+                                    m_Cells[column - i, row + i] = (k_EmptyCell, 0);
+                                }
                             }
                         }
-                        
+                        else
+                        {
+                            for (var i = 0; i <= 1; i++)
+                            {
+                                if (IsCellInBounds(column - i, row - i))
+                                {
+                                    m_Cells[column - i, row - i] = (k_EmptyCell, 0);
+                                }
+                                if (IsCellInBounds(column + i, row + i))
+                                {
+                                    m_Cells[column + i, row + i] = (k_EmptyCell, 0);
+                                }
+                                if (IsCellInBounds(column + i, row - i))
+                                {
+                                    m_Cells[column + i, row - i] = (k_EmptyCell, 0);
+                                }
+                                if (IsCellInBounds(column - i, row + i))
+                                {
+                                    m_Cells[column - i, row + i] = (k_EmptyCell, 0);
+                                }
+                            }   
+                        }
+
                         break;
                     case PieceType.BombPiece:
 
@@ -671,8 +724,6 @@ namespace Unity.MLAgentsExamples
 
         private List<int[]> SampleRandomCoordinate(List<int[]> coordList, int N)
         {
-
-
             List<int[]> shuffledItems = new List<int[]>(coordList);
             int n = shuffledItems.Count;
             while (n > 1)
