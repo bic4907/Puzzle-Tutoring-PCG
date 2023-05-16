@@ -279,10 +279,9 @@ namespace Unity.MLAgentsExamples
             {
                 case SimulationType.Generator:
                     
-                    // Make the children with spawning a colored block in the empty space
-                    // TODO random sequence
-
                     int[] randomArray = GetRandomIntArray(node.board.NumCellTypes);
+
+                    // TODO 여기 주변 블럭 기준으로 스폰되도록 코드수정
 
                     for (int i = 0; i < randomArray.Length; i++)
                     {
