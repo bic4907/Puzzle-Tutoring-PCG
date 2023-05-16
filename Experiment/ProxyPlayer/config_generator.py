@@ -1,14 +1,16 @@
 import yaml
 import os
+import copy
 
 ENV_ARGS = list()
 
-MCTS_SIMULATION_TIMES = [100, 200, 400, 800]
+MCTS_SIMULATION_TIMES = [100, 200, 400]
 TARGET_PLAYER = [0]
 METHOD = ['mcts', 'random']
-OBJECTIVE = ['score']
+OBJECTIVE = ['score', 'knowledge']
 TARGET_EPISODE_COUNT = 1000
-INCLUDE_SIMPLE_EFFECT = [0, 1]
+INCLUDE_SIMPLE_EFFECT = [1]
+KNOWLEDGE_ALMOST_RATIO = ['1.0', '0.75']
 
 os.makedirs('generated', exist_ok=True)
 
@@ -31,30 +33,59 @@ for simple_effect in INCLUDE_SIMPLE_EFFECT:
 
             if i_method == 'mcts':
                 for i_objective in OBJECTIVE:
-                    for i_simulation in MCTS_SIMULATION_TIMES:
-                        _RUN_ID = RUN_ID.copy()
-                        _RUN_ID.append('objective'), _RUN_ID.append(i_objective)
-                        _RUN_ID.append('simulation'), _RUN_ID.append(i_simulation)
 
+                    if i_objective == 'knowledge':
 
-                        _run_id = '_'.join(map(str, _RUN_ID))
+                        for i_ratio in KNOWLEDGE_ALMOST_RATIO:
+                            for i_simulation in MCTS_SIMULATION_TIMES:
+                                _RUN_ID = RUN_ID.copy()
+                                _RUN_ID.append('objective'), _RUN_ID.append(i_objective)
+                                _RUN_ID.append('simulation'), _RUN_ID.append(i_simulation)
+                                _RUN_ID.append('almostRatio'), _RUN_ID.append(i_ratio)
 
-                        ENV_ARGS = list()
-                        ENV_ARGS.append('--runId'), ENV_ARGS.append(_run_id)
-                        ENV_ARGS.append('--method'), ENV_ARGS.append(i_method)
-                        ENV_ARGS.append('--targetPlayer'), ENV_ARGS.append(i_player)
-                        if simple_effect == 1:
-                            ENV_ARGS.append('--simpleEffect')
-                        ENV_ARGS.append('--logPath'), ENV_ARGS.append(f'/workspace/results/{_run_id}/')
-                        ENV_ARGS.append('--mctsSimulation'), ENV_ARGS.append(i_simulation)
-                        ENV_ARGS.append('--targetEpisodeCount'), ENV_ARGS.append(TARGET_EPISODE_COUNT)
+                                _run_id = '_'.join(map(str, _RUN_ID))
 
-                        base_config['env_settings']['env_args'] = ENV_ARGS
-                        print(_RUN_ID)
+                                ENV_ARGS = list()
+                                ENV_ARGS.append('--runId'), ENV_ARGS.append(_run_id)
+                                ENV_ARGS.append('--method'), ENV_ARGS.append(i_method)
+                                ENV_ARGS.append('--targetPlayer'), ENV_ARGS.append(i_player)
+                                if simple_effect == 1:
+                                    ENV_ARGS.append('--simpleEffect')
+                                ENV_ARGS.append('--logPath'), ENV_ARGS.append(f'/workspace/results/{_run_id}/')
+                                ENV_ARGS.append('--mctsSimulation'), ENV_ARGS.append(i_simulation)
+                                ENV_ARGS.append('--targetEpisodeCount'), ENV_ARGS.append(TARGET_EPISODE_COUNT)
+                                ENV_ARGS.append('--knowledgeAlmostRatio'), ENV_ARGS.append(i_ratio)
 
-                        with open(os.path.join('generated', f'{_run_id}.yaml'), 'w') as f:
-                            yaml.dump(base_config, f)
+                                base_config['env_settings']['env_args'] = ENV_ARGS
+                                print(_RUN_ID)
 
+                                with open(os.path.join('generated', f'{_run_id}.yaml'), 'w') as f:
+                                    yaml.dump(base_config, f)
+                    else:
+
+                        for i_ratio in KNOWLEDGE_ALMOST_RATIO:
+                            for i_simulation in MCTS_SIMULATION_TIMES:
+                                _RUN_ID = RUN_ID.copy()
+                                _RUN_ID.append('objective'), _RUN_ID.append(i_objective)
+                                _RUN_ID.append('simulation'), _RUN_ID.append(i_simulation)
+
+                                _run_id = '_'.join(map(str, _RUN_ID))
+
+                                ENV_ARGS = list()
+                                ENV_ARGS.append('--runId'), ENV_ARGS.append(_run_id)
+                                ENV_ARGS.append('--method'), ENV_ARGS.append(i_method)
+                                ENV_ARGS.append('--targetPlayer'), ENV_ARGS.append(i_player)
+                                if simple_effect == 1:
+                                    ENV_ARGS.append('--simpleEffect')
+                                ENV_ARGS.append('--logPath'), ENV_ARGS.append(f'/workspace/results/{_run_id}/')
+                                ENV_ARGS.append('--mctsSimulation'), ENV_ARGS.append(i_simulation)
+                                ENV_ARGS.append('--targetEpisodeCount'), ENV_ARGS.append(TARGET_EPISODE_COUNT)
+
+                                base_config['env_settings']['env_args'] = ENV_ARGS
+                                print(_RUN_ID)
+
+                                with open(os.path.join('generated', f'{_run_id}.yaml'), 'w') as f:
+                                    yaml.dump(base_config, f)
             else:
                 ENV_ARGS = list()
                 _run_id = run_id

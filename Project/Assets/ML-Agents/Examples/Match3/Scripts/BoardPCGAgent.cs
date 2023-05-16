@@ -36,7 +36,7 @@ namespace Unity.MLAgentsExamples
 
         public static PieceType[] PieceLogOrder = new PieceType[6] {PieceType.HorizontalPiece, PieceType.VerticalPiece, PieceType.CrossPiece, PieceType.RocketPiece, PieceType.BombPiece, PieceType.RainbowPiece};
 
-        private string m_uuid = System.Guid.NewGuid().ToString();
+        private string m_uuid = System.Guid.NewGuid().ToString().Substring(0, 8);
 
         private PCGStepLog m_Logger;
  
