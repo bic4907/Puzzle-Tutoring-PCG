@@ -147,7 +147,8 @@ namespace Unity.MLAgentsExamples
             }
 
             // Expand
-            if (currentNode.visits == 0) {
+            if (currentNode.visits <= 1 && currentNode.depth < DepthLimit)
+            {
                 Expand(currentNode);
                 currentNode = SelectBestChild(currentNode);
             }
