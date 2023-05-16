@@ -56,6 +56,7 @@ namespace Unity.MLAgentsExamples
         public int ChangedCount = 0;
         public int NonChangedCount = 0;
 
+        public float KnowledgeAlmostRatio = 0.75f;
         public int KnowledgeReachStep = -1;
         public int KnowledgeAlmostReachStep = -1; // 3/4 percentqage of the target
 
@@ -109,6 +110,10 @@ namespace Unity.MLAgentsExamples
             if(ParameterManagerSingleton.GetInstance().HasParam("targetEpisodeCount"))
             {
                 TargetEpisodeCount = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("targetEpisodeCount"));
+            }
+            if(ParameterManagerSingleton.GetInstance().HasParam("knowledgeAlmostRatio"))
+            {
+                KnowledgeAlmostRatio = (float)Convert.ToDouble(ParameterManagerSingleton.GetInstance().GetParam("knowledgeAlmostRatio"));
             }
 
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
@@ -174,7 +179,7 @@ namespace Unity.MLAgentsExamples
 
             MCTS.Instance.SetRewardMode(generatorRewardType);
             MCTS.Instance.SetSimulationLimit(MCTS_Simulation);
-
+            MCTS.Instance.SetKnowledgeAlmostRatio(KnowledgeAlmostRatio);
         }
 
         void FastUpdate()
@@ -206,7 +211,7 @@ namespace Unity.MLAgentsExamples
                         Board.FillFromAbove();
                         break;
                     case GeneratorType.MCTS:
-                        bool _isChanged = MCTS.Instance.FillEmpty(Board);
+                        bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
                         
                         if(_isChanged)
                         {
@@ -292,7 +297,7 @@ namespace Unity.MLAgentsExamples
                             Board.FillFromAbove();
                             break;
                         case GeneratorType.MCTS:
-                            bool _isChanged = MCTS.Instance.FillEmpty(Board);
+                            bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
 
                             if(_isChanged)
                             {
@@ -352,11 +357,11 @@ namespace Unity.MLAgentsExamples
 
         public void CheckKnowledgeReach()
         {
-            if (m_SkillKnowledge.IsAllBlockReachTarget())
+            if (KnowledgeReachStep == -1 && m_SkillKnowledge.IsAllBlockReachTarget())
             {
                 KnowledgeReachStep = CurrentStepCount;
             }
-            if (m_SkillKnowledge.IsAllBlockAlmostReachTarget(0.75))
+            if (KnowledgeAlmostReachStep == -1 && m_SkillKnowledge.IsAllBlockAlmostReachTarget(KnowledgeAlmostRatio))
             {
                 KnowledgeAlmostReachStep = CurrentStepCount;
             }
@@ -388,6 +393,9 @@ namespace Unity.MLAgentsExamples
             m_Logger.MeanComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)ComparisonCounts.Average();
             m_Logger.StdComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)CalculateStandardDeviation(ComparisonCounts);
 
+            m_Logger.KnowledgeReachStep = KnowledgeReachStep;
+            m_Logger.KnowledgeAlmostReachStep = KnowledgeAlmostReachStep;
+    
             FlushLog(GetMatchResultLogPath(), m_Logger);
         }
 
@@ -451,7 +459,8 @@ namespace Unity.MLAgentsExamples
         public int ChangedCount;
         public float MeanComparisonCount;
         public float StdComparisonCount;
-
+        public int KnowledgeReachStep;
+        public int KnowledgeAlmostReachStep;
 
         public PCGStepLog()
         {
@@ -464,7 +473,7 @@ namespace Unity.MLAgentsExamples
             row += EpisodeCount + ",";
             row += StepCount + ",";
             row += Time + ",";
-            row += InstanceUUID + ",";
+            row += InstanceUUID + ","; 
             row += SettleCount + ",";
             row += ChangedCount + ",";
             row += MeanComparisonCount + ",";
@@ -497,7 +506,10 @@ namespace Unity.MLAgentsExamples
     public enum GeneratorReward
     {
         Score = 0,
+        WeighteScore = 3,
         Knowledge = 1,
+        AlmostKnowledge = 2,
+
     }
 
 

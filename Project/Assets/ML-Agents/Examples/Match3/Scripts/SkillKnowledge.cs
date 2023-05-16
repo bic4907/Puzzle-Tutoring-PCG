@@ -74,7 +74,7 @@ namespace Unity.MLAgentsExamples
             }
             else
             {
-                return CurrentMatchCounts[pieceType] >= TargetMatchCounts[pieceType] * ratio;
+                return CurrentMatchCounts[pieceType] >= (int)(TargetMatchCounts[pieceType] * ratio);
             }
             
         }

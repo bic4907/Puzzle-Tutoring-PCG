@@ -78,12 +78,17 @@ public class ParameterManagerSingleton
             }
             else if (args[idx].Contains("--targetEpisodeCount")) 
             {
-                ParsedArgs.Add("targetEpisodeCount",  args[++idx]);
+                ParsedArgs.Add("targetEpisodeCount", args[++idx]);
             }
             else if (args[idx].Contains("--simpleEffect"))
             {
                 ParsedArgs.Add("simpleEffect", true);
             }
+            else if (args[idx].Contains("--knowledgeAlmostRatio"))
+            {
+                ParsedArgs.Add("knowledgeAlmostRatio", args[++idx]);
+            }
+
 
             idx++;
         }
