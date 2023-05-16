@@ -52,11 +52,12 @@ namespace Unity.MLAgentsExamples
         public int CurrentStepCount = 0;
 
         public int TargetEpisodeCount = -1;
-
         public int SettleCount = 0;
-
         public int ChangedCount = 0;
         public int NonChangedCount = 0;
+
+        public int KnowledgeReachStep = -1;
+        public int KnowledgeAlmostReachStep = -1; // 3/4 percentqage of the target
 
         public List<int> ComparisonCounts;
 
@@ -146,7 +147,7 @@ namespace Unity.MLAgentsExamples
                 #endif
             }
 
-            
+            ResetKnowledgeReach();
             ComparisonCounts.Clear();
         }
 
@@ -233,6 +234,7 @@ namespace Unity.MLAgentsExamples
                 SettleCount += 1;
             }
             
+            CheckKnowledgeReach();
             
             // Simulate the board with greedy action
             Move move = GreedyMatch3Solver.GetAction(Board);
@@ -327,6 +329,8 @@ namespace Unity.MLAgentsExamples
                         SettleCount += 1;
                     }
 
+                    CheckKnowledgeReach();
+
                     Move move = GreedyMatch3Solver.GetAction(Board);
                     Board.MakeMove(move);
 
@@ -337,6 +341,25 @@ namespace Unity.MLAgentsExamples
             }
 
             m_CurrentState = nextState;
+        }
+
+        public void ResetKnowledgeReach()
+        {
+            KnowledgeReachStep = -1;
+            KnowledgeAlmostReachStep = -1;
+        }
+
+
+        public void CheckKnowledgeReach()
+        {
+            if (m_SkillKnowledge.IsAllBlockReachTarget())
+            {
+                KnowledgeReachStep = CurrentStepCount;
+            }
+            if (m_SkillKnowledge.IsAllBlockAlmostReachTarget(0.75))
+            {
+                KnowledgeAlmostReachStep = CurrentStepCount;
+            }
         }
 
         bool HasValidMoves()
@@ -390,8 +413,7 @@ namespace Unity.MLAgentsExamples
                 using (StreamWriter sw = File.CreateText(filePath))
                 {
                     string output = "";
-                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,MeanComparisonCount,StdComparisonCount,";
-
+                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,MeanComparisonCount,StdComparisonCount,ReachedKnowledgeStep,AlmostReachedKnowledgeStep,";
 
                     foreach (PieceType pieceType in BoardPCGAgent.PieceLogOrder)
                     {
@@ -447,6 +469,8 @@ namespace Unity.MLAgentsExamples
             row += ChangedCount + ",";
             row += MeanComparisonCount + ",";
             row += StdComparisonCount + ",";
+            row += KnowledgeReachStep + ",";
+            row += KnowledgeAlmostReachStep + ",";
 
             foreach (Dictionary<PieceType, int> table in new Dictionary<PieceType, int>[2] { SkillKnowledge.CurrentMatchCounts, SkillKnowledge.TargetMatchCounts })
             {
