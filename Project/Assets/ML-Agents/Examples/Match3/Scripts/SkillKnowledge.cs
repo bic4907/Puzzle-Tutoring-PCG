@@ -65,7 +65,46 @@ namespace Unity.MLAgentsExamples
         {
             return CurrentMatchCounts[pieceType] >= TargetMatchCounts[pieceType];
         }
+
+        public bool IsMatchCountAlmostReachedTarget(PieceType pieceType, float ratio)
+        {
+            if (TargetMatchCounts[pieceType] == 0)
+            {
+                return true;
+            }
+            else
+            {
+                return CurrentMatchCounts[pieceType] >= TargetMatchCounts[pieceType] * ratio;
+            }
+            
+        }
         
+        public bool IsAllBlockReachTarget()
+        {
+            foreach (PieceType pieceType in PieceTypes)
+            {
+                if (!IsMatchCountReachedTarget(pieceType))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool IsAllBlockAlmostReachTarget(float ratio)
+        {
+            foreach (PieceType pieceType in PieceTypes)
+            {
+                if (!IsMatchCountAlmostReachedTarget(pieceType, ratio))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public Dictionary<PieceType, float> GetActionMatchPercentile()
         {
             Dictionary<PieceType, float> result = new Dictionary<PieceType, float>();
