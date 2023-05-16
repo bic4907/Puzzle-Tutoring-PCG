@@ -116,12 +116,29 @@ namespace Unity.MLAgentsExamples
         private int ExpandCount = 0;
 
         private GeneratorReward RewardMode = GeneratorReward.Score;
+        private SkillKnowledge PlayerKnowledge = null;
+        private Dictionary<PieceType, float> PieceScoreWeight = null;
+        private float KnowledgeAlmostRatio = 1.0f;
 
         GameObject m_DummyBoard;
 
         public MCTS()
         {
             m_DummyBoard = GameObject.Find("DummyBoard").gameObject;
+            InitializePieceScoreWeight();
+        }
+
+        public void InitializePieceScoreWeight()
+        {
+            // Reversed number of rarity
+            // 0.747835102	0.823021655	0.96658129	0.538003526	0.967900742	0.956657686
+            PieceScoreWeight = new Dictionary<PieceType, float>();
+            PieceScoreWeight.Add(PieceType.HorizontalPiece, 0.74f);
+            PieceScoreWeight.Add(PieceType.VerticalPiece, 0.82f);
+            PieceScoreWeight.Add(PieceType.CrossPiece, 0.96f);
+            PieceScoreWeight.Add(PieceType.BombPiece, 0.53f);
+            PieceScoreWeight.Add(PieceType.RocketPiece, 0.96f);
+            PieceScoreWeight.Add(PieceType.RainbowPiece, 0.95f);
         }
 
         public void PrepareRootNode()
@@ -175,11 +192,12 @@ namespace Unity.MLAgentsExamples
             }
         }
 
-        public bool FillEmpty(Match3Board board)
+        public bool FillEmpty(Match3Board board, SkillKnowledge knowledge)
         {
             
             // Print the empty cell count
             Debug.Log("Empty Cell Count: " + board.GetEmptyCellCount() + "/ Simulate Limit: " + simulationStepLimit);
+            PlayerKnowledge = knowledge;
 
             var _board = board.DeepCopy();
 
@@ -202,7 +220,8 @@ namespace Unity.MLAgentsExamples
 
             this.rootNode = null;
             
-            Debug.Log("Expand Count: " + ExpandCount + " / Max Depth: " + m_MaxDepth + " / IsChanged: " + IsChanged + " / BestBoardScore: " + BestBoardScore);
+            Debug.Log("Expand Count: " + ExpandCount + " / Max Depth: " + m_MaxDepth +
+             " / IsChanged: " + IsChanged + " / BestBoardScore: " + BestBoardScore);
 
             return IsChanged;
         }
@@ -327,11 +346,11 @@ namespace Unity.MLAgentsExamples
 
         }
 
-        private float Simulate(Node node) {
+        private float Simulate(Node node)
+        {
 
             float score = 0f;
             bool hasMatched;
-
 
             switch (node.simulationType)
             {
@@ -357,8 +376,20 @@ namespace Unity.MLAgentsExamples
                             }
                             break;
                         case GeneratorReward.Knowledge:
-                            throw new NotImplementedException("Please implement this!");
-                            // break;
+                            if (!node.IsSimulated)
+                            {
+                                foreach ((int CellType, int SpecialType) piece in node.createdPieces)
+                                {
+                                    bool isReached = PlayerKnowledge.IsMatchCountAlmostReachedTarget((PieceType)piece.SpecialType, KnowledgeAlmostRatio);
+                                    if (!isReached) // Have to learn
+                                    {
+                                        score += PieceScoreWeight[(PieceType)piece.SpecialType] * 1;
+                                    }
+                                }
+
+                                node.IsSimulated = true;
+                            }
+                            break;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
@@ -412,6 +443,11 @@ namespace Unity.MLAgentsExamples
         public void SetSimulationLimit(int limit)
         {
             this.simulationStepLimit = limit;
+        }
+
+        public void SetKnowledgeAlmostRatio(float ratio)
+        {
+            this.KnowledgeAlmostRatio = ratio;
         }
 
         public int GetComparisonCount()

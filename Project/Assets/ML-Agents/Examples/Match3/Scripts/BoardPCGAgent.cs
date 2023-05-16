@@ -52,11 +52,13 @@ namespace Unity.MLAgentsExamples
         public int CurrentStepCount = 0;
 
         public int TargetEpisodeCount = -1;
-
         public int SettleCount = 0;
-
         public int ChangedCount = 0;
         public int NonChangedCount = 0;
+
+        public float KnowledgeAlmostRatio = 0.75f;
+        public int KnowledgeReachStep = -1;
+        public int KnowledgeAlmostReachStep = -1; // 3/4 percentqage of the target
 
         public List<int> ComparisonCounts;
 
@@ -109,6 +111,10 @@ namespace Unity.MLAgentsExamples
             {
                 TargetEpisodeCount = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("targetEpisodeCount"));
             }
+            if(ParameterManagerSingleton.GetInstance().HasParam("knowledgeAlmostRatio"))
+            {
+                KnowledgeAlmostRatio = (float)Convert.ToDouble(ParameterManagerSingleton.GetInstance().GetParam("knowledgeAlmostRatio"));
+            }
 
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
             ComparisonCounts = new List<int>();
@@ -146,7 +152,7 @@ namespace Unity.MLAgentsExamples
                 #endif
             }
 
-            
+            ResetKnowledgeReach();
             ComparisonCounts.Clear();
         }
 
@@ -173,7 +179,7 @@ namespace Unity.MLAgentsExamples
 
             MCTS.Instance.SetRewardMode(generatorRewardType);
             MCTS.Instance.SetSimulationLimit(MCTS_Simulation);
-
+            MCTS.Instance.SetKnowledgeAlmostRatio(KnowledgeAlmostRatio);
         }
 
         void FastUpdate()
@@ -205,7 +211,7 @@ namespace Unity.MLAgentsExamples
                         Board.FillFromAbove();
                         break;
                     case GeneratorType.MCTS:
-                        bool _isChanged = MCTS.Instance.FillEmpty(Board);
+                        bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
                         
                         if(_isChanged)
                         {
@@ -233,6 +239,7 @@ namespace Unity.MLAgentsExamples
                 SettleCount += 1;
             }
             
+            CheckKnowledgeReach();
             
             // Simulate the board with greedy action
             Move move = GreedyMatch3Solver.GetAction(Board);
@@ -290,7 +297,7 @@ namespace Unity.MLAgentsExamples
                             Board.FillFromAbove();
                             break;
                         case GeneratorType.MCTS:
-                            bool _isChanged = MCTS.Instance.FillEmpty(Board);
+                            bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
 
                             if(_isChanged)
                             {
@@ -327,6 +334,8 @@ namespace Unity.MLAgentsExamples
                         SettleCount += 1;
                     }
 
+                    CheckKnowledgeReach();
+
                     Move move = GreedyMatch3Solver.GetAction(Board);
                     Board.MakeMove(move);
 
@@ -337,6 +346,25 @@ namespace Unity.MLAgentsExamples
             }
 
             m_CurrentState = nextState;
+        }
+
+        public void ResetKnowledgeReach()
+        {
+            KnowledgeReachStep = -1;
+            KnowledgeAlmostReachStep = -1;
+        }
+
+
+        public void CheckKnowledgeReach()
+        {
+            if (KnowledgeReachStep == -1 && m_SkillKnowledge.IsAllBlockReachTarget())
+            {
+                KnowledgeReachStep = CurrentStepCount;
+            }
+            if (KnowledgeAlmostReachStep == -1 && m_SkillKnowledge.IsAllBlockAlmostReachTarget(KnowledgeAlmostRatio))
+            {
+                KnowledgeAlmostReachStep = CurrentStepCount;
+            }
         }
 
         bool HasValidMoves()
@@ -365,6 +393,9 @@ namespace Unity.MLAgentsExamples
             m_Logger.MeanComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)ComparisonCounts.Average();
             m_Logger.StdComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)CalculateStandardDeviation(ComparisonCounts);
 
+            m_Logger.KnowledgeReachStep = KnowledgeReachStep;
+            m_Logger.KnowledgeAlmostReachStep = KnowledgeAlmostReachStep;
+    
             FlushLog(GetMatchResultLogPath(), m_Logger);
         }
 
@@ -390,8 +421,7 @@ namespace Unity.MLAgentsExamples
                 using (StreamWriter sw = File.CreateText(filePath))
                 {
                     string output = "";
-                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,MeanComparisonCount,StdComparisonCount,";
-
+                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,MeanComparisonCount,StdComparisonCount,ReachedKnowledgeStep,AlmostReachedKnowledgeStep,";
 
                     foreach (PieceType pieceType in BoardPCGAgent.PieceLogOrder)
                     {
@@ -429,7 +459,8 @@ namespace Unity.MLAgentsExamples
         public int ChangedCount;
         public float MeanComparisonCount;
         public float StdComparisonCount;
-
+        public int KnowledgeReachStep;
+        public int KnowledgeAlmostReachStep;
 
         public PCGStepLog()
         {
@@ -442,11 +473,13 @@ namespace Unity.MLAgentsExamples
             row += EpisodeCount + ",";
             row += StepCount + ",";
             row += Time + ",";
-            row += InstanceUUID + ",";
+            row += InstanceUUID + ","; 
             row += SettleCount + ",";
             row += ChangedCount + ",";
             row += MeanComparisonCount + ",";
             row += StdComparisonCount + ",";
+            row += KnowledgeReachStep + ",";
+            row += KnowledgeAlmostReachStep + ",";
 
             foreach (Dictionary<PieceType, int> table in new Dictionary<PieceType, int>[2] { SkillKnowledge.CurrentMatchCounts, SkillKnowledge.TargetMatchCounts })
             {
@@ -473,7 +506,10 @@ namespace Unity.MLAgentsExamples
     public enum GeneratorReward
     {
         Score = 0,
+        WeighteScore = 3,
         Knowledge = 1,
+        AlmostKnowledge = 2,
+
     }
 
 
