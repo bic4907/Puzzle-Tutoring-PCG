@@ -27,6 +27,8 @@ namespace Unity.MLAgentsExamples
         public Match3Board board;
         public SimulationType simulationType;
         Dictionary<PieceType, int> matchablePieces;
+        public List<(int CellType, int SpecialType)> createdPieces;
+        public bool IsSimulated;
 
         public Node(int depth, 
                     int visits,
@@ -45,6 +47,8 @@ namespace Unity.MLAgentsExamples
             this.parent = parent;
             this.board = board;
             this.simulationType = simulationType;
+            this.IsSimulated = false;
+            
         }
         ~Node()
         {
@@ -98,6 +102,8 @@ namespace Unity.MLAgentsExamples
         private Match3Board BestBoard;
         public int numberOfChild;
         public int DepthLimit = 2;
+        public int MaxPlayerDepth = 1;
+
         public int simulationStepLimit = 300;
 
         private int TargetDepth = 0;
@@ -172,7 +178,7 @@ namespace Unity.MLAgentsExamples
         {
             
             // Print the empty cell count
-            // Debug.Log("Empty Cell Count: " + board.GetEmptyCellCount() + "/ Simulate Limit: " + simulationStepLimit);
+            Debug.Log("Empty Cell Count: " + board.GetEmptyCellCount() + "/ Simulate Limit: " + simulationStepLimit);
 
             var _board = board.DeepCopy();
 
@@ -194,6 +200,8 @@ namespace Unity.MLAgentsExamples
             board.m_Cells = ((int CellType, int SpecialType)[,])BestBoard.m_Cells.Clone();
 
             this.rootNode = null;
+            
+            Debug.Log("Expand Count: " + ExpandCount + " / Max Depth: " + m_MaxDepth + " / IsChanged: " + IsChanged + " / BestBoardScore: " + BestBoardScore);
 
             return IsChanged;
         }
@@ -294,7 +302,21 @@ namespace Unity.MLAgentsExamples
                     Move move = GreedyMatch3Solver.GetAction(tmpBoard);
                     tmpBoard.MakeMove(move);
 
+                    tmpBoard.MarkMatchedCells();
+                    tmpBoard.ClearMatchedCells();
+                    tmpBoard.SpawnSpecialCells();
+
+                    // Record the matched blocks
+                    var createdPieces = tmpBoard.GetLastCreatedPiece();
+                    List<(int CellType, int SpecialType)> _createdPieces = createdPieces.ConvertAll(item => (item.CellType, item.SpecialType));
+                    tmpBoard.ClearLastPieceLog();
+
+                    tmpBoard.ExecuteSpecialEffect();
+                    tmpBoard.DropCells();
+
                     tmpChild = new Node(node.depth + 1, 0, node.playerActionCount + 1, 0f, new List<Node>(), node, tmpBoard, SimulationType.Solver);
+                    tmpChild.createdPieces = _createdPieces;
+
                     node.children.Add(tmpChild);
                     
                     ExpandCount += 1;
@@ -324,25 +346,15 @@ namespace Unity.MLAgentsExamples
                     break;
 
 
-                case SimulationType.Solver:
-                    hasMatched = node.board.MarkMatchedCells();
-                    node.board.ClearMatchedCells();
-                    node.board.SpawnSpecialCells();
-
-                    var createdPieces = node.board.GetLastCreatedPiece();
-                    int createdPiecesCount = createdPieces.Count;
-
-                    node.board.ClearLastPieceLog();
-
-                    foreach (var piece in createdPieces)
-                    {
-                        PieceType type = (PieceType)piece.SpecialType;
-                    }
-
+                case SimulationType.Solver:  
                     switch(RewardMode)
                     {
                         case GeneratorReward.Score:
-                            score += createdPiecesCount;
+                            if (!node.IsSimulated)
+                            {
+                                score += node.createdPieces.Count;
+                                node.IsSimulated = true;
+                            }
                             break;
                         case GeneratorReward.Knowledge:
                             throw new NotImplementedException("Please implement this!");
