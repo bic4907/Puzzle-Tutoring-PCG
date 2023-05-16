@@ -219,7 +219,8 @@ namespace Unity.MLAgentsExamples
 
             this.rootNode = null;
             
-            Debug.Log("Expand Count: " + ExpandCount + " / Max Depth: " + m_MaxDepth + " / IsChanged: " + IsChanged + " / BestBoardScore: " + BestBoardScore);
+            Debug.Log("Expand Count: " + ExpandCount + " / Max Depth: " + m_MaxDepth +
+             " / IsChanged: " + IsChanged + " / BestBoardScore: " + BestBoardScore);
 
             return IsChanged;
         }
