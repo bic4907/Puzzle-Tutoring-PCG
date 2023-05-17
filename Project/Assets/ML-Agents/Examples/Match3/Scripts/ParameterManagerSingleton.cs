@@ -88,6 +88,10 @@ public class ParameterManagerSingleton
             {
                 ParsedArgs.Add("knowledgeAlmostRatio", args[++idx]);
             }
+            else if (args[idx].Contains("--playerDepth"))
+            {
+                ParsedArgs.Add("playerDepth", args[++idx]);
+            }
 
 
             idx++;

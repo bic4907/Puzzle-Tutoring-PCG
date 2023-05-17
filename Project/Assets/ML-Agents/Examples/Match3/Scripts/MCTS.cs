@@ -102,7 +102,7 @@ namespace Unity.MLAgentsExamples
         private Match3Board BestBoard;
         public int numberOfChild;
         public int DepthLimit = 2;
-        public int MaxPlayerDepth = 1;
+        public int MaxPlayerDepth = 2;
 
         public int simulationStepLimit = 300;
 
@@ -114,6 +114,7 @@ namespace Unity.MLAgentsExamples
         private int m_ComparisonCount = 0;
 
         private int ExpandCount = 0;
+        private int PlayerDepthLimit = 1;
 
         private GeneratorReward RewardMode = GeneratorReward.Score;
         private SkillKnowledge PlayerKnowledge = null;
@@ -164,7 +165,9 @@ namespace Unity.MLAgentsExamples
             }
 
             // Expand
-            if (currentNode.visits <= 1 && currentNode.depth < DepthLimit)
+            // TODO 여기 수정해야함!
+            if (currentNode.visits <= 1 && 
+                currentNode.playerActionCount < PlayerDepthLimit) 
             {
                 Expand(currentNode);
                 currentNode = SelectBestChild(currentNode);
@@ -192,11 +195,11 @@ namespace Unity.MLAgentsExamples
             }
         }
 
-        public bool FillEmpty(Match3Board board, SkillKnowledge knowledge)
+        public bool FillEmpty(Match3Board board, SkillKnowledge knowledge, int playerDepthLimit = 1)
         {
             
             // Print the empty cell count
-            Debug.Log("Empty Cell Count: " + board.GetEmptyCellCount() + "/ Simulate Limit: " + simulationStepLimit);
+            // Debug.Log("Empty Cell Count: " + board.GetEmptyCellCount() + "/ Simulate Limit: " + simulationStepLimit);
             PlayerKnowledge = knowledge;
 
             var _board = board.DeepCopy();
@@ -206,6 +209,7 @@ namespace Unity.MLAgentsExamples
             m_ComparisonCount = 0;
             ExpandCount = 0;
             m_MaxDepth = 0;
+            PlayerDepthLimit = playerDepthLimit;
 
             // Fill Empty cells
             PrepareRootNode();
@@ -220,8 +224,8 @@ namespace Unity.MLAgentsExamples
 
             this.rootNode = null;
             
-            Debug.Log("Expand Count: " + ExpandCount + " / Max Depth: " + m_MaxDepth +
-             " / IsChanged: " + IsChanged + " / BestBoardScore: " + BestBoardScore);
+            // Debug.Log("Expand Count: " + ExpandCount + " / Max Depth: " + m_MaxDepth +
+            //  " / IsChanged: " + IsChanged + " / BestBoardScore: " + BestBoardScore);
 
             return IsChanged;
         }
@@ -230,7 +234,7 @@ namespace Unity.MLAgentsExamples
         private void PrepareSearch()
         {
             TargetDepth = simulator.GetEmptyCellCount();
-            DepthLimit = TargetDepth + 1; // Upto solver's node
+            // DepthLimit = TargetDepth + 1; // Upto solver's node
 
             BestBoardScore = 0.0f;
 
@@ -285,10 +289,10 @@ namespace Unity.MLAgentsExamples
             Node tmpChild = null;
             Match3Board tmpBoard = null;
 
-            if (node.depth > DepthLimit)
-            {
-                return;
-            }
+            // if (node.depth > DepthLimit)
+            // {
+            //     return;
+            // }
 
             if (node.depth > m_MaxDepth)
             {
