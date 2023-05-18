@@ -305,17 +305,46 @@ namespace Unity.MLAgentsExamples
                     
                     int[] randomArray = GetRandomIntArray(node.board.NumCellTypes);
 
-                    // TODO 여기 주변 블럭 기준으로 스폰되도록 코드수정
-
                     for (int i = 0; i < randomArray.Length; i++)
                     {
+  
                         tmpBoard = node.board.DeepCopy();
-                        tmpBoard.SpawnColoredBlock(randomArray[i]);
+                        int[] spawnedPos = tmpBoard.SpawnColoredBlock(randomArray[i]); // Get spawned block position here
 
-                        tmpChild = new Node(node.depth + 1, 0, node.playerActionCount, 0f, new List<Node>(), node, tmpBoard, SimulationType.Generator);
-                        node.children.Add(tmpChild);
+                        // Check if the PCG agent make a match case which a player didn't make
+                        Match3Board _tmpBoard = tmpBoard.DeepCopy();
 
-                        ExpandCount += 1;
+                        bool makeNode = true;
+
+                        // Check if the spawned position made a special match
+                        bool madeMatch = _tmpBoard.MarkMatchedCells();
+                        if (madeMatch)
+                        {
+                            List<(PieceType SpecialType, List<int[]> Positions)> specialMatches = _tmpBoard.GetSpecialMatchPositions();
+                            foreach ((int SpecialType, List<int[]> Positions) specialMatch in specialMatches)
+                            {
+                                foreach (int[] pos in specialMatch.Positions)
+                                {
+                                    if (pos[0] == spawnedPos[0] && pos[1] == spawnedPos[1])
+                                    {
+                                        makeNode = false;
+                                        break;
+                                    }
+                                }
+                                if (!makeNode) break;
+                            }
+
+                        }
+
+                        _tmpBoard = null;
+                        
+
+                        if (makeNode)
+                        {
+                            tmpChild = new Node(node.depth + 1, 0, node.playerActionCount, 0f, new List<Node>(), node, tmpBoard, SimulationType.Generator);
+                            node.children.Add(tmpChild);
+                            ExpandCount += 1;
+                        }
                     }
 
                     break;

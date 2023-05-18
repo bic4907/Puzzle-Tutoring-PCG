@@ -53,6 +53,8 @@ namespace Unity.MLAgentsExamples
         private List<SpecialEffect> m_SpecialEffects;
         private List<(int CellType, int SpecialType)> m_LastCreatedPiece;
         private List<(int CellType, int SpecialType)> m_LastDestroyedPiece;
+        private List<(PieceType SpecialType, List<int[]> Positions)> m_SpecialMatchPositions;
+
 
         public bool[,] m_Matched;
 
@@ -77,6 +79,7 @@ namespace Unity.MLAgentsExamples
             m_LastCreatedPiece = new List<(int CellType, int SpecialType)>();
             m_LastDestroyedPiece = new List<(int CellType, int SpecialType)>();
             m_SpecialEffects = new List<SpecialEffect>();
+            m_SpecialMatchPositions = new List<(PieceType SpecialType, List<int[]> Positions)>();
         
             // Set Dummyboard children game object
             m_DummyBoard = GameObject.Find("DummyBoard").gameObject;
@@ -362,6 +365,7 @@ namespace Unity.MLAgentsExamples
         {
             ClearMarked();
             ClearCreatedCell();
+            ClearSpecialMatchPositions();
 
             PieceType[] matchableBlocks = { 
                 PieceType.NormalPiece, 
@@ -447,6 +451,7 @@ namespace Unity.MLAgentsExamples
                                             _pieceType == PieceType.RainbowPiece)
                                         {
                                             m_SpecialEffects.Add(new SpecialEffect(position[0], position[1], (PieceType)_pieceType, _cellType));
+                                            m_SpecialMatchPositions.Add((_pieceType, matchedPositions));
                                         }
                                 
                                     }
@@ -900,12 +905,14 @@ namespace Unity.MLAgentsExamples
             m_Cells[emptyCell[0], emptyCell[1]] = (cellType, (int)PieceType.NormalPiece);
         }
 
-        public void SpawnColoredBlock(int cellType)
+        public int[] SpawnColoredBlock(int cellType)
         {
             int[] emptyCell = GetEmptyCell();
-            if (emptyCell == null) return;
+            if (emptyCell == null) return null;
 
             m_Cells[emptyCell[0], emptyCell[1]] = (cellType, (int)PieceType.NormalPiece);
+
+            return emptyCell;
         }
 
 
@@ -939,7 +946,19 @@ namespace Unity.MLAgentsExamples
             
             return points;
         }
+        private void ClearSpecialMatchPositions()
+        {
+            m_SpecialMatchPositions.Clear();
+        }
+
+        public List<(PieceType SpecialType, List<int[]> Positions)> GetSpecialMatchPositions()
+        {
+            return m_SpecialMatchPositions;
+        }
+
+
     }
+
 
 
 }
