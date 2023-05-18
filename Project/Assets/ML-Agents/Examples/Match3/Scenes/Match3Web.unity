@@ -841,7 +841,7 @@ MonoBehaviour:
   MoveTime: 0.1
   MaxMoves: 10
   useForcedFast: 0
-  generatorType: 1
+  generatorType: 0
   generatorRewardType: 0
   PlayerNumber: 0
   MCTS_Simulation: 300
@@ -856,7 +856,7 @@ MonoBehaviour:
   KnowledgeReachStep: -1
   KnowledgeAlmostReachStep: -1
   ComparisonCounts: 
-  SaveFirebaseLog: 0
+  SaveFirebaseLog: 1
 --- !u!114 &1540485853
 MonoBehaviour:
   m_ObjectHideFlags: 0
