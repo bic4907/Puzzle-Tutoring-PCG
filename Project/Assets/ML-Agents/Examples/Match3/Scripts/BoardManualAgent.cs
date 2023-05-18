@@ -37,7 +37,7 @@ namespace Unity.MLAgentsExamples
 
         private PCGStepLog m_Logger;
  
-        public int PlayerNumber = ;
+        public int PlayerNumber = 0;
 
         public int MCTS_Simulation = 300;
 
@@ -157,7 +157,7 @@ namespace Unity.MLAgentsExamples
 
         private void OnPlayerAction()
         {
-            if (SaveFirebaseLog && CurrentEpisodeCount != 0)
+            if (SaveFirebaseLog)
             {
                 FirebaseLog log = new FirebaseLog();
                 log.EpisodeCount = CurrentEpisodeCount;

@@ -59,7 +59,7 @@ namespace Unity.MLAgentsExamples
                 // Check if the request was successful
                 if (response.IsSuccessStatusCode)
                 {
-                    // Debug.Log(response.Content.ReadAsStringAsync().Result);
+                    Debug.Log(response.Content.ReadAsStringAsync().Result);
                 }
                 else
                 {
