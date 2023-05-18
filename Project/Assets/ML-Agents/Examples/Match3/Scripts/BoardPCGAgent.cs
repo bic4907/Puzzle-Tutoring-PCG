@@ -45,12 +45,13 @@ namespace Unity.MLAgentsExamples
         public int MCTS_Simulation = 300;
 
         private SkillKnowledge m_SkillKnowledge;
+        private SkillKnowledge m_ManualSkillKnowledge;
 
         private const float k_RewardMultiplier = 0.01f;
         
         public int CurrentEpisodeCount = 0;
+        public int TotalStepCount = 0;
         public int CurrentStepCount = 0;
-
         public int TargetEpisodeCount = -1;
         public int SettleCount = 0;
         public int ChangedCount = 0;
@@ -119,6 +120,8 @@ namespace Unity.MLAgentsExamples
             }
 
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
+            m_ManualSkillKnowledge = new SkillKnowledge();
+
             ComparisonCounts = new List<int>();
         }
 
@@ -132,11 +135,6 @@ namespace Unity.MLAgentsExamples
             m_TimeUntilMove = MoveTime;
             m_MovesMade = 0;
             
-            if (SaveFirebaseLog)
-            {
-                FirebaseLogger.Instance.SendGameResult();
-            }
-
             if (m_Logger != null && CurrentEpisodeCount != 0)
             {
                 RecordResult();
@@ -161,6 +159,22 @@ namespace Unity.MLAgentsExamples
 
             ResetKnowledgeReach();
             ComparisonCounts.Clear();
+        }
+
+        private void OnPlayerAction()
+        {
+            if (SaveFirebaseLog && CurrentEpisodeCount != 0)
+            {
+                FirebaseLog log = new FirebaseLog();
+                log.EpisodeCount = CurrentEpisodeCount;
+                log.EpisodeStepCount = CurrentStepCount;
+                log.TotalStepCount = TotalStepCount;
+                log.Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                log.InstanceUUID = m_uuid;
+                log.SkillKnowledge = m_ManualSkillKnowledge;
+                FirebaseLogger.Instance.Post(log);
+            }
+
         }
 
         private void FixedUpdate()
@@ -207,6 +221,7 @@ namespace Unity.MLAgentsExamples
                 foreach (var (type, count) in createdPieces)
                 {
                     m_SkillKnowledge.IncreaseMatchCount(type, count);
+                    m_ManualSkillKnowledge.IncreaseMatchCount(type, count);
                 }
                 Board.ExecuteSpecialEffect();
 
@@ -232,6 +247,7 @@ namespace Unity.MLAgentsExamples
                         throw new ArgumentOutOfRangeException();
                 }
                 CurrentStepCount += 1;
+                TotalStepCount += 1;
             }
 
             bool isBoardSettled = false;
@@ -251,6 +267,7 @@ namespace Unity.MLAgentsExamples
             // Simulate the board with greedy action
             Move move = GreedyMatch3Solver.GetAction(Board);
             Board.MakeMove(move);
+            OnPlayerAction();
 
             m_MovesMade++;
         }
@@ -287,6 +304,7 @@ namespace Unity.MLAgentsExamples
                     foreach (var (type, count) in createdPieces)
                     {
                         m_SkillKnowledge.IncreaseMatchCount(type, count);
+                        m_ManualSkillKnowledge.IncreaseMatchCount(type, count);
                     }
                     Board.ExecuteSpecialEffect();
 
@@ -318,6 +336,7 @@ namespace Unity.MLAgentsExamples
                             throw new ArgumentOutOfRangeException();
                     }
                     CurrentStepCount += 1;
+                    TotalStepCount += 1;
 
                     nextState = State.FindMatches;
                     break;
@@ -345,6 +364,7 @@ namespace Unity.MLAgentsExamples
 
                     Move move = GreedyMatch3Solver.GetAction(Board);
                     Board.MakeMove(move);
+                    OnPlayerAction();
 
                     nextState = State.FindMatches;
                     break;

@@ -9,6 +9,7 @@ namespace Unity.MLAgentsExamples
     {
         public Dictionary<PieceType, int> CurrentMatchCounts;
         public Dictionary<PieceType, int> TargetMatchCounts;
+        public Dictionary<PieceType, bool> ManualCheck;
         
         public PieceType[] PieceTypes = new PieceType[] {PieceType.HorizontalPiece, PieceType.VerticalPiece, PieceType.CrossPiece, PieceType.BombPiece, PieceType.RocketPiece, PieceType.RainbowPiece};
 
@@ -18,11 +19,13 @@ namespace Unity.MLAgentsExamples
         {
             CurrentMatchCounts = new Dictionary<PieceType, int>();
             TargetMatchCounts = new Dictionary<PieceType, int>();
+            ManualCheck = new Dictionary<PieceType, bool>();
 
             for (int i = 0; i < PieceTypes.Length; i++)
             {
                 CurrentMatchCounts.Add(PieceTypes[i], 0);
                 TargetMatchCounts.Add(PieceTypes[i], DefaultTargetValue);
+                ManualCheck.Add(PieceTypes[i], false);
             }
         }
         
