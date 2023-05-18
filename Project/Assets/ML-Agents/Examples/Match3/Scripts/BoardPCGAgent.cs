@@ -63,6 +63,7 @@ namespace Unity.MLAgentsExamples
 
         public List<int> ComparisonCounts;
         public bool SaveFirebaseLog = false;
+        private FirebaseLogger m_FirebaseLogger;
 
         protected override void Awake()
         {
@@ -72,6 +73,14 @@ namespace Unity.MLAgentsExamples
             m_Logger = new PCGStepLog();
 
             
+            if (SaveFirebaseLog)
+            {
+                // Add FirebaseLogger component in this game objct
+                if (this.gameObject.GetComponent<FirebaseLogger>() == null)
+                {
+                    m_FirebaseLogger = this.gameObject.AddComponent<FirebaseLogger>();
+                }
+            }
 
             // Parsing the augments
             if(ParameterManagerSingleton.GetInstance().HasParam("targetPlayer"))
@@ -172,7 +181,7 @@ namespace Unity.MLAgentsExamples
                 log.Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
                 log.InstanceUUID = m_uuid;
                 log.SkillKnowledge = m_ManualSkillKnowledge;
-                FirebaseLogger.Instance.Post(log);
+                m_FirebaseLogger.Post(log);
             }
 
         }
