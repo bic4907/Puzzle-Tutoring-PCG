@@ -856,7 +856,7 @@ MonoBehaviour:
   KnowledgeReachStep: -1
   KnowledgeAlmostReachStep: -1
   ComparisonCounts: 
-  SaveFirebaseLog: 0
+  SaveFirebaseLog: 1
 --- !u!114 &1540485853
 MonoBehaviour:
   m_ObjectHideFlags: 0
