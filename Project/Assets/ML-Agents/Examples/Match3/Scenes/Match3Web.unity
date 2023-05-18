@@ -841,7 +841,7 @@ MonoBehaviour:
   MoveTime: 0.1
   MaxMoves: 10
   useForcedFast: 0
-  generatorType: 0
+  generatorType: 1
   generatorRewardType: 0
   PlayerNumber: 0
   MCTS_Simulation: 300
