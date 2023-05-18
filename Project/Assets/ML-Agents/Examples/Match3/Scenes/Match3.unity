@@ -847,6 +847,7 @@ MonoBehaviour:
   PlayerNumber: 0
   MCTS_Simulation: 300
   CurrentEpisodeCount: 0
+  TotalStepCount: 0
   CurrentStepCount: 0
   TargetEpisodeCount: -1
   SettleCount: 0
@@ -856,7 +857,7 @@ MonoBehaviour:
   KnowledgeReachStep: -1
   KnowledgeAlmostReachStep: -1
   ComparisonCounts: 
-  SaveFirebaseLog: 1
+  SaveFirebaseLog: 0
 --- !u!114 &1540485852
 MonoBehaviour:
   m_ObjectHideFlags: 0
