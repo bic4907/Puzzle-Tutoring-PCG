@@ -61,6 +61,7 @@ namespace Unity.MLAgentsExamples
         public int KnowledgeAlmostReachStep = -1; // 3/4 percentqage of the target
 
         public List<int> ComparisonCounts;
+        public bool SaveFirebaseLog = false;
 
         protected override void Awake()
         {
@@ -69,6 +70,7 @@ namespace Unity.MLAgentsExamples
             m_ModelOverrider = GetComponent<ModelOverrider>();
             m_Logger = new PCGStepLog();
 
+            
 
             // Parsing the augments
             if(ParameterManagerSingleton.GetInstance().HasParam("targetPlayer"))
@@ -129,6 +131,11 @@ namespace Unity.MLAgentsExamples
             m_CurrentState = State.FindMatches;
             m_TimeUntilMove = MoveTime;
             m_MovesMade = 0;
+            
+            if (SaveFirebaseLog)
+            {
+                FirebaseLogger.Instance.SendGameResult();
+            }
 
             if (m_Logger != null && CurrentEpisodeCount != 0)
             {
