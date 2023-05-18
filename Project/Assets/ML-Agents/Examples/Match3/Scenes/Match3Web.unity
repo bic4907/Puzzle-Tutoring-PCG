@@ -710,11 +710,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1540485844}
   - component: {fileID: 1540485850}
-  - component: {fileID: 1540485849}
   - component: {fileID: 1540485848}
   - component: {fileID: 1540485847}
   - component: {fileID: 1540485851}
-  - component: {fileID: 1540485853}
   m_Layer: 0
   m_Name: Match3 PCG Agent
   m_TagString: Untagged
@@ -771,25 +769,6 @@ MonoBehaviour:
   CubeSpacing: 1.25
   TilePrefab: {fileID: 4007900521885639951, guid: faee4e805953b49e688bd00b45c55f2e,
     type: 3}
---- !u!114 &1540485849
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1540485843}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d982f0cd92214bd2b689be838fa40c44, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  agentParameters:
-    maxStep: 0
-  hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
-  Board: {fileID: 0}
-  MoveTime: 0
-  MaxMoves: 500
 --- !u!114 &1540485850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -830,16 +809,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1540485843}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ddc5df1dd63f527469300ea78bdb64ad, type: 3}
+  m_Script: {fileID: 11500000, guid: d223aae5da8d2ea4bad8d6cb54776486, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentParameters:
-    maxStep: 0
-  hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
   Board: {fileID: 0}
-  MoveTime: 0.1
-  MaxMoves: 10
+  MoveTime: 0
+  MaxMoves: 500
   useForcedFast: 0
   generatorType: 1
   generatorRewardType: 0
@@ -857,19 +832,3 @@ MonoBehaviour:
   KnowledgeAlmostReachStep: -1
   ComparisonCounts: 
   SaveFirebaseLog: 1
---- !u!114 &1540485853
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1540485843}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88b6042bc9a5d4aa58d931eae49442e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  agentParameters:
-    maxStep: 0
-  hasUpgradedFromAgentParameters: 1
-  MaxStep: 0

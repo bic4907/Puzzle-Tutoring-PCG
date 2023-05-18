@@ -37,7 +37,7 @@ namespace Unity.MLAgentsExamples
 
         private PCGStepLog m_Logger;
  
-        public int PlayerNumber = -1;
+        public int PlayerNumber = ;
 
         public int MCTS_Simulation = 300;
 
