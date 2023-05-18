@@ -831,4 +831,4 @@ MonoBehaviour:
   KnowledgeReachStep: -1
   KnowledgeAlmostReachStep: -1
   ComparisonCounts: 
-  SaveFirebaseLog: 1
+  SaveFirebaseLog: 0
