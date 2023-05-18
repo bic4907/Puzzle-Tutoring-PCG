@@ -715,6 +715,7 @@ GameObject:
   - component: {fileID: 1540485847}
   - component: {fileID: 1540485851}
   - component: {fileID: 1540485852}
+  - component: {fileID: 1540485853}
   m_Layer: 0
   m_Name: Match3 PCG Agent
   m_TagString: Untagged
@@ -839,7 +840,7 @@ MonoBehaviour:
   MaxStep: 0
   Board: {fileID: 0}
   MoveTime: 0.1
-  MaxMoves: 300
+  MaxMoves: 10
   useForcedFast: 0
   generatorType: 1
   generatorRewardType: 0
@@ -851,7 +852,11 @@ MonoBehaviour:
   SettleCount: 0
   ChangedCount: 0
   NonChangedCount: 0
+  KnowledgeAlmostRatio: 0.75
+  KnowledgeReachStep: -1
+  KnowledgeAlmostReachStep: -1
   ComparisonCounts: 
+  SaveFirebaseLog: 1
 --- !u!114 &1540485852
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -866,3 +871,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DecisionPeriod: 20
   TakeActionsBetweenDecisions: 0
+--- !u!114 &1540485853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1540485843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88b6042bc9a5d4aa58d931eae49442e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
