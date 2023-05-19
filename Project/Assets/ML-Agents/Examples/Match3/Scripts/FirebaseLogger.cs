@@ -1,80 +1,86 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
+using System.Text;
 using Newtonsoft.Json;
 using UnityEngine;
-using System.Net;
+using UnityEngine.Networking;
+
 
 
 namespace Unity.MLAgentsExamples
 {
 
-    public class FirebaseLogger
+    public class FirebaseLogger: MonoBehaviour
     {
         // Start is called before the first frame update
-        private static FirebaseLogger m_Instance;
         private const string FirebaseUrl = "https://tutoringpcg-default-rtdb.firebaseio.com/gameResult/log.json";
 
         private string m_ExternalIPAddress;
 
-        public static FirebaseLogger Instance { 
-            get
-            { 
-                if (m_Instance == null) 
-                {   
-                    m_Instance = new FirebaseLogger();
-                }
-                return m_Instance;
-            } 
-            set { value = m_Instance; }
-        }
-
-        public FirebaseLogger()
+        void Start()
         {
-            FetchExternalIPAddress();
+            StartCoroutine(FetchExternalIPAddress());
+
         }
 
-        public async void Post(FirebaseLog log)
+        public void Post(FirebaseLog log)
         {
-            await SendPostRequest(log);
+            StartCoroutine(SendPostRequest(log));
 
         }
 
-        private async Task SendPostRequest(FirebaseLog log)
+
+        private IEnumerator SendPostRequest(FirebaseLog log)
         {
             Dictionary<string, object> jsonBody = log.ToDict();
             jsonBody.Add("IPAddress", m_ExternalIPAddress);
 
             string jsonString = JsonConvert.SerializeObject(jsonBody);
 
-            using (HttpClient client = new HttpClient())
+            using (UnityWebRequest request = UnityWebRequest.Post(FirebaseUrl, ""))
             {
-                // Create the HTTP content with JSON body
-                var content = new StringContent(jsonString, System.Text.Encoding.UTF8, "application/json");
-                
-                // Send the POST request asynchronously
-                HttpResponseMessage response = await client.PostAsync(FirebaseUrl, content);
 
-                // Check if the request was successful
-                if (response.IsSuccessStatusCode)
+                byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonString);
+                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                request.downloadHandler = new DownloadHandlerBuffer();
+                request.SetRequestHeader("Content-Type", "application/json");
+                request.SetRequestHeader("Access-Control-Allow-Origin", "*");
+                
+                yield return request.SendWebRequest();
+
+                if (request.result == UnityWebRequest.Result.Success)
                 {
-                    // Debug.Log(response.Content.ReadAsStringAsync().Result);
+                    Debug.Log(request.downloadHandler.text);
                 }
                 else
                 {
-                    Debug.LogError("Error sending POST request: " + response.StatusCode);
+                    Debug.LogError("Error sending POST request: " + request.responseCode);
                 }
             }
+
+
         }
 
-        private void FetchExternalIPAddress()
-        {
-            using (var webClient = new WebClient())
-            {
-                // Make a request to the IP address detection service
-                m_ExternalIPAddress = webClient.DownloadString("https://api.ip.pe.kr/");
 
+        private IEnumerator FetchExternalIPAddress()
+        {
+
+            using (UnityWebRequest request = UnityWebRequest.Get("https://api.ip.pe.kr/"))
+            {
+                request.SetRequestHeader("Access-Control-Allow-Origin", "*");
+
+                yield return request.SendWebRequest();
+
+                if (request.result == UnityWebRequest.Result.Success)
+                {
+                    m_ExternalIPAddress = request.downloadHandler.text;
+                    Debug.Log("External IP Address: " + m_ExternalIPAddress);
+                }
+                else
+                {
+                    Debug.LogError("Error fetching external IP address: " + request.error);
+                }
             }
         }
 
