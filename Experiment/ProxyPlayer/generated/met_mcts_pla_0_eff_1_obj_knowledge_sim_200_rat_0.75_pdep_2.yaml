@@ -44,16 +44,22 @@ env_settings:
   base_port: 5005
   env_args:
   - --runId
-  - method_random_player_0_simpleEffect_1
+  - met_mcts_pla_0_eff_1_obj_knowledge_sim_200_rat_0.75_pdep_2
   - --method
-  - random
+  - mcts
   - --targetPlayer
   - 0
   - --simpleEffect
   - --logPath
-  - /workspace/results/method_random_player_0_simpleEffect_1/
+  - /workspace/results/met_mcts_pla_0_eff_1_obj_knowledge_sim_200_rat_0.75_pdep_2/
+  - --mctsSimulation
+  - 200
   - --targetEpisodeCount
   - 1000
+  - --knowledgeAlmostRatio
+  - '0.75'
+  - --playerDepth
+  - 2
   max_lifetime_restarts: 0
   num_areas: 1
   num_envs: 1

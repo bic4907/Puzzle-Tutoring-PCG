@@ -60,6 +60,7 @@ namespace Unity.MLAgentsExamples
         public float KnowledgeAlmostRatio = 0.75f;
         public int KnowledgeReachStep = -1;
         public int KnowledgeAlmostReachStep = -1; // 3/4 percentqage of the target
+        public int PlayerDepthLimit = 1;
 
         public List<int> ComparisonCounts;
         public bool SaveFirebaseLog = false;
@@ -126,6 +127,10 @@ namespace Unity.MLAgentsExamples
             if(ParameterManagerSingleton.GetInstance().HasParam("knowledgeAlmostRatio"))
             {
                 KnowledgeAlmostRatio = (float)Convert.ToDouble(ParameterManagerSingleton.GetInstance().GetParam("knowledgeAlmostRatio"));
+            }
+            if(ParameterManagerSingleton.GetInstance().HasParam("playerDepth"))
+            {
+                PlayerDepthLimit = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("playerDepth"));
             }
 
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
@@ -242,7 +247,7 @@ namespace Unity.MLAgentsExamples
                         Board.FillFromAbove();
                         break;
                     case GeneratorType.MCTS:
-                        bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
+                        bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge, PlayerDepthLimit);
                         
                         if(_isChanged)
                         {
@@ -331,7 +336,7 @@ namespace Unity.MLAgentsExamples
                             Board.FillFromAbove();
                             break;
                         case GeneratorType.MCTS:
-                            bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
+                            bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge, PlayerDepthLimit);
 
                             if(_isChanged)
                             {
@@ -397,7 +402,7 @@ namespace Unity.MLAgentsExamples
             {
                 KnowledgeReachStep = CurrentStepCount;
             }
-            if (KnowledgeAlmostReachStep == -1 && m_SkillKnowledge.IsAllBlockAlmostReachTarget(KnowledgeAlmostRatio))
+            if (KnowledgeAlmostReachStep == -1 && m_SkillKnowledge.IsAllBlockAlmostReachTarget(0.75f))
             {
                 KnowledgeAlmostReachStep = CurrentStepCount;
             }
