@@ -59,7 +59,9 @@ namespace Unity.MLAgentsExamples
 
         public float KnowledgeAlmostRatio = 0.75f;
         public int KnowledgeReachStep = -1;
-        public int KnowledgeAlmostReachStep = -1; // 3/4 percentqage of the target
+        public int KnowledgeQ1ReachStep = -1; // 3/4 percentqage of the target
+        public int KnowledgeQ2ReachStep = -1; // 3/4 percentqage of the target
+        public int KnowledgeQ3ReachStep = -1; // 3/4 percentqage of the target
         public int PlayerDepthLimit = 1;
 
         public List<int> ComparisonCounts;
@@ -195,6 +197,11 @@ namespace Unity.MLAgentsExamples
         {
             // Make a move every step if we're training, or we're overriding models in CI.
             var useFast = Academy.Instance.IsCommunicatorOn || (m_ModelOverrider != null && m_ModelOverrider.HasOverrides);
+            if (useFast)
+            {
+                MCTS.Instance.SetVerbose(false);
+            }
+
             if (useFast || useForcedFast)
             {
                 FastUpdate();
@@ -392,7 +399,10 @@ namespace Unity.MLAgentsExamples
         public void ResetKnowledgeReach()
         {
             KnowledgeReachStep = -1;
-            KnowledgeAlmostReachStep = -1;
+            KnowledgeQ1ReachStep = -1;
+            KnowledgeQ2ReachStep = -1;
+            KnowledgeQ3ReachStep = -1;
+            
         }
 
 
@@ -402,9 +412,17 @@ namespace Unity.MLAgentsExamples
             {
                 KnowledgeReachStep = CurrentStepCount;
             }
-            if (KnowledgeAlmostReachStep == -1 && m_SkillKnowledge.IsAllBlockAlmostReachTarget(0.75f))
+            if (KnowledgeQ3ReachStep == -1 && m_SkillKnowledge.IsAllBlockAlmostReachTarget(0.75f))
             {
-                KnowledgeAlmostReachStep = CurrentStepCount;
+                KnowledgeQ3ReachStep = CurrentStepCount;
+            }
+            if (KnowledgeQ2ReachStep == -1 && m_SkillKnowledge.IsAllBlockAlmostReachTarget(0.50f))
+            {
+                KnowledgeQ2ReachStep = CurrentStepCount;
+            }
+            if (KnowledgeQ1ReachStep == -1 && m_SkillKnowledge.IsAllBlockAlmostReachTarget(0.25f))
+            {
+                KnowledgeQ1ReachStep = CurrentStepCount;
             }
         }
 
@@ -435,7 +453,9 @@ namespace Unity.MLAgentsExamples
             m_Logger.StdComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)CalculateStandardDeviation(ComparisonCounts);
 
             m_Logger.KnowledgeReachStep = KnowledgeReachStep;
-            m_Logger.KnowledgeAlmostReachStep = KnowledgeAlmostReachStep;
+            m_Logger.KnowledgeQ1ReachStep = KnowledgeQ1ReachStep;
+            m_Logger.KnowledgeQ2ReachStep = KnowledgeQ2ReachStep;
+            m_Logger.KnowledgeQ3ReachStep = KnowledgeQ3ReachStep;
     
             FlushLog(GetMatchResultLogPath(), m_Logger);
         }
@@ -462,7 +482,7 @@ namespace Unity.MLAgentsExamples
                 using (StreamWriter sw = File.CreateText(filePath))
                 {
                     string output = "";
-                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,MeanComparisonCount,StdComparisonCount,ReachedKnowledgeStep,AlmostReachedKnowledgeStep,";
+                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,MeanComparisonCount,StdComparisonCount,ReachedKnowledgeStep,Q1ReachedKnowledgeStep,Q2ReachedKnowledgeStep,Q3ReachedKnowledgeStep,";
 
                     foreach (PieceType pieceType in BoardPCGAgent.PieceLogOrder)
                     {
@@ -501,8 +521,10 @@ namespace Unity.MLAgentsExamples
         public float MeanComparisonCount;
         public float StdComparisonCount;
         public int KnowledgeReachStep;
-        public int KnowledgeAlmostReachStep;
-
+        public int KnowledgeQ1ReachStep;
+        public int KnowledgeQ2ReachStep;
+        public int KnowledgeQ3ReachStep;
+        
         public PCGStepLog()
         {
            
@@ -520,7 +542,9 @@ namespace Unity.MLAgentsExamples
             row += MeanComparisonCount + ",";
             row += StdComparisonCount + ",";
             row += KnowledgeReachStep + ",";
-            row += KnowledgeAlmostReachStep + ",";
+            row += KnowledgeQ1ReachStep + ",";
+            row += KnowledgeQ2ReachStep + ",";
+            row += KnowledgeQ3ReachStep + ",";
 
             foreach (Dictionary<PieceType, int> table in new Dictionary<PieceType, int>[2] { SkillKnowledge.CurrentMatchCounts, SkillKnowledge.TargetMatchCounts })
             {

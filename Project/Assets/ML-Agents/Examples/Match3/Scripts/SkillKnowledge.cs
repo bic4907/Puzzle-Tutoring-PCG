@@ -119,7 +119,7 @@ namespace Unity.MLAgentsExamples
             return result;
         }
 
-        public SkillKnowledge Copy()
+        public SkillKnowledge DeepCopy()
         {
             SkillKnowledge result = new SkillKnowledge();
 
@@ -192,7 +192,7 @@ namespace Unity.MLAgentsExamples
 
         public SkillKnowledge GetSkillKnowledge(int index)
         {
-            return SkillKnowledges[index].Copy();
+            return SkillKnowledges[index].DeepCopy();
         }
 
     }

@@ -5,7 +5,7 @@ import copy
 ENV_ARGS = list()
 
 MCTS_SIMULATION_TIMES = [100, 200, 400]
-TARGET_PLAYER = [0]
+TARGET_PLAYER = [0, 1, 2, 3]
 METHOD = ['mcts', 'random']
 OBJECTIVE = ['score', 'knowledge']
 TARGET_EPISODE_COUNT = 1000

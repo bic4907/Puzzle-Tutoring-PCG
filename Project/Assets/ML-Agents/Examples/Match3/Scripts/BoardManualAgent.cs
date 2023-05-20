@@ -418,7 +418,7 @@ namespace Unity.MLAgentsExamples
             m_Logger.StdComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)CalculateStandardDeviation(ComparisonCounts);
 
             m_Logger.KnowledgeReachStep = KnowledgeReachStep;
-            m_Logger.KnowledgeAlmostReachStep = KnowledgeAlmostReachStep;
+            // m_Logger.KnowledgeAlmostReachStep = KnowledgeAlmostReachStep;
     
             FlushLog(GetMatchResultLogPath(), m_Logger);
         }

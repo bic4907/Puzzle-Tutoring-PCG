@@ -29,6 +29,7 @@ namespace Unity.MLAgentsExamples
         Dictionary<PieceType, int> matchablePieces;
         public List<(int CellType, int SpecialType)> createdPieces;
         public bool IsSimulated;
+        public SkillKnowledge playerKnowledge;
 
         public Node(int depth, 
                     int visits,
@@ -37,7 +38,8 @@ namespace Unity.MLAgentsExamples
                     List<Node> children,
                     Node parent,
                     Match3Board board,
-                    SimulationType simulationType)
+                    SimulationType simulationType,
+                    SkillKnowledge playerKnowledge = null)
         {
             this.depth = depth;
             this.visits = visits;
@@ -48,7 +50,7 @@ namespace Unity.MLAgentsExamples
             this.board = board;
             this.simulationType = simulationType;
             this.IsSimulated = false;
-            
+            this.playerKnowledge = playerKnowledge;
         }
         ~Node()
         {
@@ -120,6 +122,7 @@ namespace Unity.MLAgentsExamples
         private SkillKnowledge PlayerKnowledge = null;
         private Dictionary<PieceType, float> PieceScoreWeight = null;
         private float KnowledgeAlmostRatio = 1.0f;
+        private bool Verbose = true;
 
         GameObject m_DummyBoard;
 
@@ -150,7 +153,7 @@ namespace Unity.MLAgentsExamples
 
         private void ResetRootNode()
         {  
-            rootNode = new Node(0, 0, 0, 0f, new List<Node>(), null, simulator, SimulationType.Generator);
+            rootNode = new Node(0, 0, 0, 0f, new List<Node>(), null, simulator, SimulationType.Generator, PlayerKnowledge.DeepCopy());
             Expand(rootNode);
         }
 
@@ -197,9 +200,8 @@ namespace Unity.MLAgentsExamples
 
         public bool FillEmpty(Match3Board board, SkillKnowledge knowledge, int playerDepthLimit = 1)
         {
-            
+            int _emptyCellCount = board.GetEmptyCellCount();
             // Print the empty cell count
-            // Debug.Log("Empty Cell Count: " + board.GetEmptyCellCount() + "/ Simulate Limit: " + simulationStepLimit);
             PlayerKnowledge = knowledge;
 
             var _board = board.DeepCopy();
@@ -224,8 +226,19 @@ namespace Unity.MLAgentsExamples
 
             this.rootNode = null;
             
-            // Debug.Log("Expand Count: " + ExpandCount + " / Max Depth: " + m_MaxDepth +
-            //  " / IsChanged: " + IsChanged + " / BestBoardScore: " + BestBoardScore);
+            // Print Simulation Results
+            string _log = $"[{RewardMode}:{simulationStepLimit}] ";    
+
+            _log += "Target Depth: " + _emptyCellCount + " / " +
+                "Expand Count: " + ExpandCount + " / Max Depth: " + m_MaxDepth +
+              " / IsChanged: " + IsChanged + " / BestBoardScore: " + BestBoardScore;
+            if (RewardMode.Equals(GeneratorReward.Knowledge))
+            {
+                _log += " / KnowledgeAlmostRatio: " + KnowledgeAlmostRatio.ToString();
+            }
+            if (Verbose) Debug.Log(_log);
+
+
 
             return IsChanged;
         }
@@ -341,7 +354,7 @@ namespace Unity.MLAgentsExamples
 
                         if (makeNode)
                         {
-                            tmpChild = new Node(node.depth + 1, 0, node.playerActionCount, 0f, new List<Node>(), node, tmpBoard, SimulationType.Generator);
+                            tmpChild = new Node(node.depth + 1, 0, node.playerActionCount, 0f, new List<Node>(), node, tmpBoard, SimulationType.Generator, node.playerKnowledge.DeepCopy());
                             node.children.Add(tmpChild);
                             ExpandCount += 1;
                         }
@@ -366,7 +379,7 @@ namespace Unity.MLAgentsExamples
                     tmpBoard.ExecuteSpecialEffect();
                     tmpBoard.DropCells();
 
-                    tmpChild = new Node(node.depth + 1, 0, node.playerActionCount + 1, 0f, new List<Node>(), node, tmpBoard, SimulationType.Solver);
+                    tmpChild = new Node(node.depth + 1, 0, node.playerActionCount + 1, 0f, new List<Node>(), node, tmpBoard, SimulationType.Solver, node.playerKnowledge.DeepCopy());
                     tmpChild.createdPieces = _createdPieces;
 
                     node.children.Add(tmpChild);
@@ -413,10 +426,11 @@ namespace Unity.MLAgentsExamples
                             {
                                 foreach ((int CellType, int SpecialType) piece in node.createdPieces)
                                 {
-                                    bool isReached = PlayerKnowledge.IsMatchCountAlmostReachedTarget((PieceType)piece.SpecialType, KnowledgeAlmostRatio);
+                                    bool isReached = node.playerKnowledge.IsMatchCountAlmostReachedTarget((PieceType)piece.SpecialType, KnowledgeAlmostRatio);
                                     if (!isReached) // Have to learn
                                     {
                                         score += PieceScoreWeight[(PieceType)piece.SpecialType] * 1;
+                                        node.playerKnowledge.IncreaseMatchCount((PieceType)piece.SpecialType);
                                     }
                                 }
 
@@ -481,6 +495,11 @@ namespace Unity.MLAgentsExamples
         public void SetKnowledgeAlmostRatio(float ratio)
         {
             this.KnowledgeAlmostRatio = ratio;
+        }
+
+        public void SetVerbose(bool verbose)
+        {
+            this.Verbose = verbose;
         }
 
         public int GetComparisonCount()
