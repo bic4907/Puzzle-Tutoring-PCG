@@ -76,6 +76,7 @@ namespace Unity.MLAgentsExamples
         private ModelOverrider m_ModelOverrider;
 
         private const float k_RewardMultiplier = 0.01f;
+
         protected override void Awake()
         {
             base.Awake();
@@ -142,7 +143,7 @@ namespace Unity.MLAgentsExamples
             m_MovesMade++;
         }
 
-        void AnimatedUpdate()
+        public void AnimatedUpdate()
         {
             m_TimeUntilMove -= Time.deltaTime;
             if (m_TimeUntilMove > 0.0f)
@@ -189,6 +190,7 @@ namespace Unity.MLAgentsExamples
                         }
                         Board.InitSettled();
                     }
+                    
                     RequestDecision();
 
                     nextState = State.FindMatches;

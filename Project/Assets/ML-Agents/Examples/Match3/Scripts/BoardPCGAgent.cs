@@ -67,6 +67,10 @@ namespace Unity.MLAgentsExamples
         public List<int> ComparisonCounts;
         public bool SaveFirebaseLog = false;
         private FirebaseLogger m_FirebaseLogger;
+        
+        [Header("")]
+        public AgentType agentType = AgentType.Agent;
+        public MouseInteraction m_mouseInput;
 
         protected override void Awake()
         {
@@ -74,8 +78,7 @@ namespace Unity.MLAgentsExamples
             Board = GetComponent<Match3Board>();
             m_ModelOverrider = GetComponent<ModelOverrider>();
             m_Logger = new PCGStepLog();
-
-            
+                                    
             if (SaveFirebaseLog)
             {
                 // Add FirebaseLogger component in this game objct
@@ -382,8 +385,15 @@ namespace Unity.MLAgentsExamples
                     }
 
                     CheckKnowledgeReach();
-
-                    Move move = GreedyMatch3Solver.GetAction(Board);
+                    switch(agentType)
+                    {
+                        case AgentType.Agent:
+                            Move move = GreedyMatch3Solver.GetAction(Board);
+                        break;
+                        case AgentType.Human:
+                            m_mouseInput.WaitForMouseInput();
+                        break;
+                    }
                     Board.MakeMove(move);
                     OnPlayerAction();
 
@@ -567,6 +577,11 @@ namespace Unity.MLAgentsExamples
         MCTS = 1,
     }
 
+    public enum AgentType
+    {
+        Agent = 0,
+        Human = 1,
+    }
 
     public enum GeneratorReward
     {
