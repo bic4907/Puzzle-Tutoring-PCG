@@ -19,7 +19,7 @@ namespace Unity.MLAgentsExamples
     {
         [HideInInspector]
         public Match3Board Board;
-
+        
         public float MoveTime = 0.0f;
         public int MaxMoves = 500;
 
@@ -366,7 +366,7 @@ namespace Unity.MLAgentsExamples
                     break;
                 case State.WaitForMove:
                     bool isBoardSettled = false;
-                    
+                    Move move = new Move();
                     while (true)
                     {
                         // Shuffle the board until we have a valid move.
@@ -388,10 +388,10 @@ namespace Unity.MLAgentsExamples
                     switch(agentType)
                     {
                         case AgentType.Agent:
-                            Move move = GreedyMatch3Solver.GetAction(Board);
+                            move = GreedyMatch3Solver.GetAction(Board);
                         break;
                         case AgentType.Human:
-                            m_mouseInput.WaitForMouseInput();
+                            move = m_mouseInput.GetMove();
                         break;
                     }
                     Board.MakeMove(move);

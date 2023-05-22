@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Unity.MLAgentsExamples;
-
+using Unity.MLAgents.Integrations.Match3;
 public class MouseInteraction : MonoBehaviour
 {
     public Camera mainCamera;
@@ -11,52 +11,87 @@ public class MouseInteraction : MonoBehaviour
     RaycastHit hit;
     RaycastHit hit2;
     Ray ray;
+    public Direction direction;
     Move move;
-    bool vaildMove = false;
-    bool isDifferenctObj = false;
+    public Match3Board Board;
+    void Start()
+    {
+        move = new Move();
+        Board = GetComponent<Match3Board>();
+    }
+    void Update()
+    {
+        WaitForMouseInput();
+    }
+    public Move GetMove()
+    {
+        return move;
+    }
+    Direction GetDirection(int row, int col, int row2, int col2)
+    {
+        if(row == row2)
+        {
+            if(col > col2 && col - col2 == 1)
+            {
+                direction = Direction.Left;
+            }
+            else
+            {
+                direction = Direction.Right;
+            }
+        }
+        else if(col == col2)
+        {
+            if(row > row2 && row - row2 == 1)
+            {
+                direction = Direction.Down;
+            }
+            else
+            {
+                direction = Direction.Up;
+            }
+        }
 
-    public Move WaitForMouseInput()
+        return direction;
+    }
+    public void WaitForMouseInput()
     {
         // Vector3 mousePos = Input.mousePosition;
         // mousePos = mainCamera.ScreenToWorldPoint(mousePos);
         // Debug.DrawRay(transform.position, mousePos -  transform.position, Color.blue);
-        while(!isDifferenctObj || !vaildMove)
-        {
             if (Input.GetMouseButtonDown(0))
             {
-                Debug.Log("clicked");
                 ray = mainCamera.ScreenPointToRay(Input.mousePosition);
                 
                 if (Physics.Raycast(ray,out hit))
                 {
-                    Debug.Log(hit.transform.name);
-                    // hit.transform.GetComponent<Renderer>().material.color = 
-                    // Color.red;
+                    hit.transform.position = new Vector3(hit.transform.position.x, hit.transform.position.y, hit.transform.position.z + 2f);
                 }
             }
             if(Input.GetMouseButtonUp(0))
             {
-                Debug.Log("Released");
                 ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
                 if (Physics.Raycast(ray,out hit2))
                 {
-                    Debug.Log(hit2.transform.name);
                     if(hit.transform.GetInstanceID() != hit2.transform.GetInstanceID())
                     {
-                        isDifferenctObj = true;
-                        vaildMove = true;
-                        Debug.Log("Diff");
+                        //Todo: extract row and col even input is two digit
+                        var row = (int)char.GetNumericValue(hit.transform.name[1]);
+                        var col = (int)char.GetNumericValue(hit.transform.name[4]);
+                        
+                        var row2 = (int)char.GetNumericValue(hit2.transform.name[1]);
+                        var col2 = (int)char.GetNumericValue(hit2.transform.name[4]);
+
+                        GetDirection(row, col, row2, col2);
+                        //Todo: Add None move on move
+                        move = Move.FromPositionAndDirection(row, col, direction, Board.GetCurrentBoardSize());
                     }
                     else
                     {
-                        Debug.Log("Same");
+                        
                     }
                 }
             }
-        }
-        isDifferenctObj = false;
-        vaildMove = false;
-        return move;
     }
 }

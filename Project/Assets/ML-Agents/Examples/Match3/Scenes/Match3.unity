@@ -830,7 +830,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1540485843}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ddc5df1dd63f527469300ea78bdb64ad, type: 3}
   m_Name: 
@@ -862,7 +862,7 @@ MonoBehaviour:
   PlayerDepthLimit: 1
   ComparisonCounts: 
   SaveFirebaseLog: 0
-  agentType: 0
+  agentType: 1
   m_mouseInput: {fileID: 1540485854}
 --- !u!114 &1540485852
 MonoBehaviour:
