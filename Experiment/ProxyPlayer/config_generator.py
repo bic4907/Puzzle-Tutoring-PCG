@@ -8,7 +8,7 @@ MCTS_SIMULATION_TIMES = [100, 200, 400]
 TARGET_PLAYER = [0, 1, 2, 3]
 METHOD = ['mcts', 'random']
 OBJECTIVE = ['score', 'knowledge']
-TARGET_EPISODE_COUNT = 1000
+TARGET_EPISODE_COUNT = 500
 INCLUDE_SIMPLE_EFFECT = [1]
 KNOWLEDGE_ALMOST_RATIO = ['1.0', '0.75']
 PLAYER_DEPTH = [1, 2]
@@ -29,7 +29,7 @@ for simple_effect in INCLUDE_SIMPLE_EFFECT:
             RUN_ID.append('pla'), RUN_ID.append(i_player)
             if simple_effect == 1:
                 RUN_ID.append('eff'), RUN_ID.append(simple_effect)
-                run_id += f'_eff'
+                run_id += f'_eff_1'
 
             if i_method == 'mcts':
 

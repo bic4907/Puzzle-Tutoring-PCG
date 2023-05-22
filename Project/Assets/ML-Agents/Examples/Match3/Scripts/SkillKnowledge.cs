@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -77,7 +78,7 @@ namespace Unity.MLAgentsExamples
             }
             else
             {
-                return CurrentMatchCounts[pieceType] >= (int)(TargetMatchCounts[pieceType] * ratio);
+                return CurrentMatchCounts[pieceType] >= (int)Math.Ceiling(TargetMatchCounts[pieceType] * ratio);
             }
             
         }

@@ -55,7 +55,7 @@ env_settings:
   - --mctsSimulation
   - 100
   - --targetEpisodeCount
-  - 1000
+  - 500
   - --playerDepth
   - 1
   max_lifetime_restarts: 0

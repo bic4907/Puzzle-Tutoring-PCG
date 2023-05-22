@@ -55,7 +55,7 @@ env_settings:
   - --mctsSimulation
   - 100
   - --targetEpisodeCount
-  - 1000
+  - 500
   - --knowledgeAlmostRatio
   - '1.0'
   - --playerDepth
