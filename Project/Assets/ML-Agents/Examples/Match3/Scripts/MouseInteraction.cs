@@ -14,10 +14,12 @@ public class MouseInteraction : MonoBehaviour
     public Direction direction;
     Move move;
     public Match3Board Board;
+    public bool playerHadVaildAction;
     void Start()
     {
         move = new Move();
         Board = GetComponent<Match3Board>();
+        playerHadVaildAction = false;
     }
     void Update()
     {
@@ -25,7 +27,15 @@ public class MouseInteraction : MonoBehaviour
     }
     public Move GetMove()
     {
-        return move;
+        if(playerHadVaildAction)
+        {
+            playerHadVaildAction = false;
+            return move;
+        }
+        else
+        {
+            return move;
+        }
     }
     Direction GetDirection(int row, int col, int row2, int col2)
     {
@@ -86,6 +96,7 @@ public class MouseInteraction : MonoBehaviour
                         GetDirection(row, col, row2, col2);
                         //Todo: Add None move on move
                         move = Move.FromPositionAndDirection(row, col, direction, Board.GetCurrentBoardSize());
+                        playerHadVaildAction = true;
                     }
                     else
                     {

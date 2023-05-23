@@ -366,6 +366,7 @@ namespace Unity.MLAgentsExamples
                     break;
                 case State.WaitForMove:
                     bool isBoardSettled = false;
+                    nextState = State.WaitForMove;
                     Move move = new Move();
                     while (true)
                     {
@@ -389,15 +390,22 @@ namespace Unity.MLAgentsExamples
                     {
                         case AgentType.Agent:
                             move = GreedyMatch3Solver.GetAction(Board);
+                            Board.MakeMove(move);
+                            OnPlayerAction();
+
+                            nextState = State.FindMatches;
                         break;
                         case AgentType.Human:
-                            move = m_mouseInput.GetMove();
+                            if(m_mouseInput.playerHadVaildAction == true)
+                            {
+                                move = m_mouseInput.GetMove();
+                                Board.MakeMove(move);
+                                OnPlayerAction();
+
+                                nextState = State.FindMatches;    
+                            }
                         break;
                     }
-                    Board.MakeMove(move);
-                    OnPlayerAction();
-
-                    nextState = State.FindMatches;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
