@@ -446,13 +446,11 @@ namespace Unity.MLAgentsExamples
                                 
                                 foreach ((int CellType, int SpecialType) piece in node.createdPieces)
                                 {
-                                    float matchPercentile = node.playerKnowledge.GetMatchPercentile(pieceType);
+                                    float matchPercentile = node.playerKnowledge.GetMatchPercentile((PieceType)piece.SpecialType);
 
-                                    if (!isReached) // Have to learn
-                                    {
-                                        score += 1 - matchPercentile;
-                                        node.playerKnowledge.IncreaseMatchCount((PieceType)piece.SpecialType);
-                                    }
+                                    score += 1 - matchPercentile;
+                                    node.playerKnowledge.IncreaseMatchCount((PieceType)piece.SpecialType);
+
                                 }
 
                                 node.IsSimulated = true;
