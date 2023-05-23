@@ -109,6 +109,9 @@ namespace Unity.MLAgentsExamples
                     case "knowledge":
                         generatorRewardType = GeneratorReward.Knowledge;
                         break;
+                    case "knowledgePercentile":
+                        generatorRewardType = GeneratorReward.KnowledgePercentile;
+                        break;
                 }
             }
             if(ParameterManagerSingleton.GetInstance().HasParam("mctsSimulation"))
