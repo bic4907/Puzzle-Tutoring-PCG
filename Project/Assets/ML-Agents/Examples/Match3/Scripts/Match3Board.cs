@@ -441,21 +441,18 @@ namespace Unity.MLAgentsExamples
                                         int[] midPosition = GetMidPosition(matchedPositions);
                                         m_CreatedCells[midPosition[0], midPosition[1]] = (cellType, (int)matchedType);    
                                     }
-                                    else
-                                    {
-                                        if (_pieceType == PieceType.HorizontalPiece || 
-                                            _pieceType == PieceType.VerticalPiece ||
-                                            _pieceType == PieceType.CrossPiece || 
-                                            _pieceType == PieceType.BombPiece ||
-                                            _pieceType == PieceType.RocketPiece ||
-                                            _pieceType == PieceType.RainbowPiece)
-                                        {
-                                            m_SpecialEffects.Add(new SpecialEffect(position[0], position[1], (PieceType)_pieceType, _cellType));
-                                            m_SpecialMatchPositions.Add((_pieceType, matchedPositions));
-                                        }
-                                
-                                    }
 
+                                    if (_pieceType == PieceType.HorizontalPiece || 
+                                        _pieceType == PieceType.VerticalPiece ||
+                                        _pieceType == PieceType.CrossPiece || 
+                                        _pieceType == PieceType.BombPiece ||
+                                        _pieceType == PieceType.RocketPiece ||
+                                        _pieceType == PieceType.RainbowPiece)
+                                    {
+                                        m_SpecialEffects.Add(new SpecialEffect(position[0], position[1], (PieceType)_pieceType, _cellType));
+                                        m_SpecialMatchPositions.Add((_pieceType, matchedPositions));
+                                    }
+                            
                                     m_LastDestroyedPiece.Add((cellType, (int)matchedType));
 
                                     m_Matched[position[0], position[1]] = true;

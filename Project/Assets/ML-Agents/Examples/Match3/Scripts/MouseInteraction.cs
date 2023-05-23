@@ -15,6 +15,7 @@ public class MouseInteraction : MonoBehaviour
     Move move;
     public Match3Board Board;
     public bool playerHadVaildAction;
+    public bool ForceMove;
     void Start()
     {
         move = new Move();
@@ -96,10 +97,19 @@ public class MouseInteraction : MonoBehaviour
                         GetDirection(row, col, row2, col2);
                         //Todo: Add None move on move
                         move = Move.FromPositionAndDirection(row, col, direction, Board.GetCurrentBoardSize());
-                        if(Board.IsMoveValid(move))
+                        
+                        if (ForceMove)
                         {
                             playerHadVaildAction = true;    
+                        } 
+                        else
+                        {
+                            if(Board.IsMoveValid(move))
+                            {
+                                playerHadVaildAction = true;    
+                            }                   
                         }
+         
 
                     }
                     else
