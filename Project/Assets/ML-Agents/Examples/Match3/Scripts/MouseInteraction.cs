@@ -96,7 +96,11 @@ public class MouseInteraction : MonoBehaviour
                         GetDirection(row, col, row2, col2);
                         //Todo: Add None move on move
                         move = Move.FromPositionAndDirection(row, col, direction, Board.GetCurrentBoardSize());
-                        playerHadVaildAction = true;
+                        if(Board.IsMoveValid(move))
+                        {
+                            playerHadVaildAction = true;    
+                        }
+
                     }
                     else
                     {
