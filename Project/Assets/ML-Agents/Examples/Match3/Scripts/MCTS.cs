@@ -450,7 +450,7 @@ namespace Unity.MLAgentsExamples
 
                                     if (!isReached) // Have to learn
                                     {
-                                        score += PieceScoreWeight[(PieceType)piece.SpecialType] * 1;
+                                        score += 1 - matchPercentile;
                                         node.playerKnowledge.IncreaseMatchCount((PieceType)piece.SpecialType);
                                     }
                                 }

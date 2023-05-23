@@ -120,7 +120,7 @@ namespace Unity.MLAgentsExamples
             {
                 percentile = (float)CurrentMatchCounts[pieceType] / (float)TargetMatchCounts[pieceType];
             }
-            return percentile;
+            return Math.Max(Math.Min(percentile, 1.0f), 0.0f);
         }
         
         public SkillKnowledge DeepCopy()
