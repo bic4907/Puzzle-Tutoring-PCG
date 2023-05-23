@@ -412,7 +412,7 @@ PrefabInstance:
     - target: {fileID: 4745731572733944066, guid: 2fafdcd0587684641b03b11f04454f1b,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2fafdcd0587684641b03b11f04454f1b, type: 3}
@@ -907,3 +907,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 327661544}
+  direction: 0
+  Board: {fileID: 0}
+  playerHadVaildAction: 0

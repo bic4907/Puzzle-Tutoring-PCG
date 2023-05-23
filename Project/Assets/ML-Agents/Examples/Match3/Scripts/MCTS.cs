@@ -438,9 +438,25 @@ namespace Unity.MLAgentsExamples
                             }
                             break;
                         case GeneratorReward.KnowledgePercentile:
-                    
+                            if (!node.IsSimulated)
+                            {
+                                // Get Percentiles for each piece
 
+                                Dictionary<PieceType, float> piecePercentiles = new Dictionary<PieceType, float>();
+                                
+                                foreach ((int CellType, int SpecialType) piece in node.createdPieces)
+                                {
+                                    float matchPercentile = node.playerKnowledge.GetMatchPercentile(pieceType);
 
+                                    if (!isReached) // Have to learn
+                                    {
+                                        score += PieceScoreWeight[(PieceType)piece.SpecialType] * 1;
+                                        node.playerKnowledge.IncreaseMatchCount((PieceType)piece.SpecialType);
+                                    }
+                                }
+
+                                node.IsSimulated = true;
+                            }
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
