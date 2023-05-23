@@ -9,6 +9,8 @@ namespace Unity.MLAgentsExamples
     {
         public int DebugMoveIndex = -1;
 
+        AgentType currentAgentType;
+
         static Color[] s_Colors = new[]
         {
             Color.red,
@@ -20,15 +22,16 @@ namespace Unity.MLAgentsExamples
             Color.gray,
             Color.black,
         };
-
         private static Color s_EmptyColor = new Color(0.5f, 0.5f, 0.5f, .25f);
 
         public Dictionary<(int, int), Match3TileSelector> tilesDict = new Dictionary<(int, int), Match3TileSelector>();
         public float CubeSpacing = 1.25f;
         public GameObject TilePrefab;
-
         private bool m_Initialized;
         private Match3Board m_Board;
+        bool OnlyExplodeOnce = true;
+        public GameObject explosionPrefab;
+        int matchedCellCount = 0;
 
         void Awake()
         {
@@ -36,6 +39,7 @@ namespace Unity.MLAgentsExamples
             {
                 InitializeDict();
             }
+            currentAgentType = GetComponent<BoardPCGAgent>().agentType;
         }
 
         void InitializeDict()
@@ -58,7 +62,9 @@ namespace Unity.MLAgentsExamples
                     var go = Instantiate(TilePrefab, transform.position, Quaternion.identity, transform);
                     go.name = $"r{i}_c{j}";
                     go.AddComponent(typeof(BoxCollider));
+
                     tilesDict.Add((i, j), go.GetComponent<Match3TileSelector>());
+                    go.GetComponent<Match3TileSelector>().explosionPrefab = explosionPrefab;
                 }
             }
 
@@ -67,6 +73,7 @@ namespace Unity.MLAgentsExamples
 
         void Update()
         {
+            
             if (!m_Board)
             {
                 m_Board = GetComponent<Match3Board>();
@@ -75,6 +82,26 @@ namespace Unity.MLAgentsExamples
             if (!m_Initialized)
             {
                 InitializeDict();
+            }
+
+            if(currentAgentType == AgentType.Human)
+            {
+                var matchedCells = m_Board.GetMatchedCells();
+                if (matchedCells.Count == 0 || (matchedCells.Count != matchedCellCount))
+                {
+                    OnlyExplodeOnce = true;
+                }
+
+                matchedCellCount = matchedCells.Count;
+                
+                if(OnlyExplodeOnce)
+                {
+                    foreach (var item in matchedCells)
+                    {
+                        tilesDict[(item[1], item[0])].ExplodeTile();
+                    }
+                    OnlyExplodeOnce = false;
+                }
             }
 
             var currentSize = m_Board.GetCurrentBoardSize();

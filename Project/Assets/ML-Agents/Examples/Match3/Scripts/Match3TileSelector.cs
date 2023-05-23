@@ -6,7 +6,7 @@ public class Match3TileSelector : MonoBehaviour
     public GameObject emptyTile;
     public GameObject[] tileTypes = new GameObject[0];
     public Material[] materialTypes = new Material[0];
-
+    public GameObject explosionPrefab;
     private Dictionary<int, MeshRenderer> tileDict = new Dictionary<int, MeshRenderer>();
 
     // Start is called before the first frame update
@@ -51,5 +51,10 @@ public class Match3TileSelector : MonoBehaviour
                 }
             }
         }
+    }
+    public void ExplodeTile()
+    {
+        var tmp = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+        Destroy(tmp, 1f);
     }
 }
