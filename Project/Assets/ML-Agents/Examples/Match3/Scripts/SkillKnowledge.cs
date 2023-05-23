@@ -109,17 +109,20 @@ namespace Unity.MLAgentsExamples
             return true;
         }
 
-        public Dictionary<PieceType, float> GetActionMatchPercentile()
+        public float GetMatchPercentile(PieceType pieceType)
         {
-            Dictionary<PieceType, float> result = new Dictionary<PieceType, float>();
-            for (int i = 0; i < PieceTypes.Length; i++)
+            float percentile;
+            if (TargetMatchCounts[pieceType] == 0)
             {
-                result.Add(PieceTypes[i], (float)CurrentMatchCounts[PieceTypes[i]] / (float)TargetMatchCounts[PieceTypes[i]]);
+                percentile = 1.0f;
             }
-
-            return result;
+            else
+            {
+                percentile = (float)CurrentMatchCounts[pieceType] / (float)TargetMatchCounts[pieceType];
+            }
+            return percentile;
         }
-
+        
         public SkillKnowledge DeepCopy()
         {
             SkillKnowledge result = new SkillKnowledge();

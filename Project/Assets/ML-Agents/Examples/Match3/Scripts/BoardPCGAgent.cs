@@ -596,7 +596,7 @@ namespace Unity.MLAgentsExamples
         Score = 0,
         WeighteScore = 3,
         Knowledge = 1,
-        AlmostKnowledge = 2,
+        KnowledgePercentile = 2,
 
     }
 
