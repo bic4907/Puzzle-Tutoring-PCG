@@ -19,7 +19,7 @@ namespace Unity.MLAgentsExamples
     {
         [HideInInspector]
         public Match3Board Board;
-
+        
         public float MoveTime = 0.0f;
         public int MaxMoves = 500;
 
@@ -67,6 +67,10 @@ namespace Unity.MLAgentsExamples
         public List<int> ComparisonCounts;
         public bool SaveFirebaseLog = false;
         private FirebaseLogger m_FirebaseLogger;
+        
+        [Header("")]
+        public AgentType agentType = AgentType.Agent;
+        public MouseInteraction m_mouseInput;
 
         protected override void Awake()
         {
@@ -74,8 +78,7 @@ namespace Unity.MLAgentsExamples
             Board = GetComponent<Match3Board>();
             m_ModelOverrider = GetComponent<ModelOverrider>();
             m_Logger = new PCGStepLog();
-
-            
+                                    
             if (SaveFirebaseLog)
             {
                 // Add FirebaseLogger component in this game objct
@@ -363,7 +366,8 @@ namespace Unity.MLAgentsExamples
                     break;
                 case State.WaitForMove:
                     bool isBoardSettled = false;
-                    
+                    nextState = State.WaitForMove;
+                    Move move = new Move();
                     while (true)
                     {
                         // Shuffle the board until we have a valid move.
@@ -382,12 +386,26 @@ namespace Unity.MLAgentsExamples
                     }
 
                     CheckKnowledgeReach();
+                    switch(agentType)
+                    {
+                        case AgentType.Agent:
+                            move = GreedyMatch3Solver.GetAction(Board);
+                            Board.MakeMove(move);
+                            OnPlayerAction();
 
-                    Move move = GreedyMatch3Solver.GetAction(Board);
-                    Board.MakeMove(move);
-                    OnPlayerAction();
+                            nextState = State.FindMatches;
+                        break;
+                        case AgentType.Human:
+                            if(m_mouseInput.playerHadVaildAction == true)
+                            {
+                                move = m_mouseInput.GetMove();
+                                Board.MakeMove(move);
+                                OnPlayerAction();
 
-                    nextState = State.FindMatches;
+                                nextState = State.FindMatches;    
+                            }
+                        break;
+                    }
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -567,6 +585,11 @@ namespace Unity.MLAgentsExamples
         MCTS = 1,
     }
 
+    public enum AgentType
+    {
+        Agent = 0,
+        Human = 1,
+    }
 
     public enum GeneratorReward
     {

@@ -57,6 +57,7 @@ namespace Unity.MLAgentsExamples
                 {
                     var go = Instantiate(TilePrefab, transform.position, Quaternion.identity, transform);
                     go.name = $"r{i}_c{j}";
+                    go.AddComponent(typeof(BoxCollider));
                     tilesDict.Add((i, j), go.GetComponent<Match3TileSelector>());
                 }
             }
