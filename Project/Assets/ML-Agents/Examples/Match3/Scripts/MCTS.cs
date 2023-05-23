@@ -437,6 +437,11 @@ namespace Unity.MLAgentsExamples
                                 node.IsSimulated = true;
                             }
                             break;
+                        case GeneratorReward.KnowledgePercentile:
+                    
+
+
+                            break;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
