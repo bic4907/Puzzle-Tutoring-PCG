@@ -109,7 +109,7 @@ namespace Unity.MLAgentsExamples
                     case "knowledge":
                         generatorRewardType = GeneratorReward.Knowledge;
                         break;
-                    case "knowledgePercentile":
+                    case "kp":  // knowledge percentile
                         generatorRewardType = GeneratorReward.KnowledgePercentile;
                         break;
                 }
