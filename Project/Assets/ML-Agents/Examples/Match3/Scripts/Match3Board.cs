@@ -707,26 +707,26 @@ namespace Unity.MLAgentsExamples
                         break;
                     case PieceType.RocketPiece:
 
-                        // Remove one same-cell type random block same with the original block
                         List<int[]> sameCellTypePositions = GetCellTypePosition(cellType, true);
                         if (sameCellTypePositions.Count > 0)
                         {
-                            int randomIndex = UnityEngine.Random.Range(0, sameCellTypePositions.Count);
-                            int[] randomPosition = sameCellTypePositions[randomIndex];
-                            m_Matched[randomPosition[0], randomPosition[1]] = true;
-                            m_Cells[randomPosition[0], randomPosition[1]] = (k_EmptyCell, 0);
+                            // Get nearest block from origin
+
+                            int[] nearestPosition = GetNearestCoordinate(sameCellTypePositions, new int[] {column, row});
+                            
+                            m_Matched[nearestPosition[0], nearestPosition[1]] = true;
+                            m_Cells[nearestPosition[0], nearestPosition[1]] = (k_EmptyCell, 0);
                         }
 
                         break;
                     case PieceType.RainbowPiece:
 
-                        // Remove all same-cell type random block same with the original block
                         List<int[]> sameCellTypePositionsRainbow = GetCellTypePosition(cellType, true);
-                        List<int[]> sampledPosition = SampleRandomCoordinate(sameCellTypePositionsRainbow, 5);
+                        List<int[]> nearestPositions = GetNearestCoordinates(sameCellTypePositionsRainbow, new int[] {column, row}, 3);
 
-                        if (sampledPosition.Count > 0)
+                        if (nearestPositions.Count > 0)
                         {
-                            foreach (int[] position in sampledPosition)
+                            foreach (int[] position in nearestPositions)
                             {
                                 m_Cells[position[0], position[1]] = (k_EmptyCell, 0);
                             }
@@ -738,6 +738,61 @@ namespace Unity.MLAgentsExamples
                 }
             }
             ClearSpecialEffects();
+        }
+
+        private int[] GetNearestCoordinate(List<int[]> coordList, int[] origin)
+        {
+            int[] nearestCoord = new int[2];
+            int minDistance = 100;
+
+            foreach(int[] coord in coordList)
+            {
+                int distance = Math.Abs(coord[0] - origin[0]) + Math.Abs(coord[1] - origin[1]);
+                if(distance < minDistance)
+                {
+                    minDistance = distance;
+                    nearestCoord = coord;
+                }
+            }
+
+            return nearestCoord;
+        }
+
+        private List<int[]> GetNearestCoordinates(List<int[]> coordList, int[] origin, int N)
+        {
+            SortedList<int, List<int[]>> nearestCoords = new SortedList<int, List<int[]>>();
+
+            foreach (int[] coord in coordList)
+            {
+                int distance = Math.Abs(coord[0] - origin[0]) + Math.Abs(coord[1] - origin[1]);
+
+                if (nearestCoords.ContainsKey(distance))
+                {
+                    nearestCoords[distance].Add(coord);
+                }
+                else
+                {
+                    nearestCoords.Add(distance, new List<int[]>() { coord });
+                }
+            }
+
+            List<int[]> result = new List<int[]>();
+
+            foreach (List<int[]> coords in nearestCoords.Values)
+            {
+                if (result.Count + coords.Count <= N)
+                {
+                    result.AddRange(coords);
+                }
+                else
+                {
+                    int remaining = N - result.Count;
+                    result.AddRange(coords.GetRange(0, remaining));
+                    break;
+                }
+            }
+
+            return result;
         }
 
         private List<int[]> SampleRandomCoordinate(List<int[]> coordList, int N)
