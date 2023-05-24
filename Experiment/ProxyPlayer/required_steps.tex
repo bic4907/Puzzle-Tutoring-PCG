@@ -1,0 +1,17 @@
+\begin{table}[!h]
+\centering
+\caption{Descriptive statistics on the controllability of the generative models}
+\label{tab:pcg_controllbility_small}
+\begin{tabular}{llrrrr}
+\toprule
+{} & {} & {25\%} & {50\%} & {75\%} & {100\%} \\
+{} & {} & {mean} & {mean} & {mean} & {mean} \\
+{method} & {objective} & {} & {} & {} & {} \\
+\midrule
+\multirow[c]{3}{*}{mcts} & knowledge & 78.380 & 102.269 & 135.473 & 145.287 \\
+ & kp & \textbf{76.815} & \textbf{98.540} & \textbf{132.039} & \textbf{141.713} \\
+ & score & 77.614 & 102.043 & 132.853 & 142.086 \\
+random & - & \textbf{104.225} & \textbf{131.037} & \textbf{171.635} & \textbf{181.932} \\
+\bottomrule
+\end{tabular}
+\end{table}
