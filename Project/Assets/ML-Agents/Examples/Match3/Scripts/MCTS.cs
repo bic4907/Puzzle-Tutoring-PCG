@@ -429,7 +429,7 @@ namespace Unity.MLAgentsExamples
                                     bool isReached = node.playerKnowledge.IsMatchCountAlmostReachedTarget((PieceType)piece.SpecialType, KnowledgeAlmostRatio);
                                     if (!isReached) // Have to learn
                                     {
-                                        score += PieceScoreWeight[(PieceType)piece.SpecialType] * 1;
+                                        score += (float)Math.Pow(PieceScoreWeight[(PieceType)piece.SpecialType], 1 / node.playerActionCount);
                                         node.playerKnowledge.IncreaseMatchCount((PieceType)piece.SpecialType);
                                     }
                                 }
