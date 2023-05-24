@@ -273,8 +273,6 @@ namespace Unity.MLAgentsExamples
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                CurrentStepCount += 1;
-                TotalStepCount += 1;
             }
 
             bool isBoardSettled = false;
@@ -294,6 +292,10 @@ namespace Unity.MLAgentsExamples
             // Simulate the board with greedy action
             Move move = GreedyMatch3Solver.GetAction(Board);
             Board.MakeMove(move);
+
+            CurrentStepCount += 1;
+            TotalStepCount += 1;
+            
             OnPlayerAction();
 
             m_MovesMade++;

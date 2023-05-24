@@ -136,10 +136,10 @@ namespace Unity.MLAgentsExamples
         /// </summary>
         public void UpdateCurrentBoardSize()
         {
-            var newRows = m_Random.Next(MinRows, MaxRows + 1);
-            var newCols = m_Random.Next(MinColumns, MaxColumns + 1);
-            m_CurrentBoardSize.Rows = newRows;
-            m_CurrentBoardSize.Columns = newCols;
+            // var newRows = m_Random.Next(MinRows, MaxRows + 1);
+            // var newCols = m_Random.Next(MinColumns, MaxColumns + 1);
+            // m_CurrentBoardSize.Rows = newRows;
+            // m_CurrentBoardSize.Columns = newCols;
         }
 
         public override bool MakeMove(Move move)
@@ -592,15 +592,17 @@ namespace Unity.MLAgentsExamples
                         {
                             for (var i = 0; i < MaxColumns; i++)
                             {
-                                m_Matched[i, specialEffect.Row] = true;
-                                m_Cells[i, specialEffect.Row] = (k_EmptyCell, 0);
+                                if (!IsCellInBounds(i, row)) continue;
+
+                                m_Matched[i, row] = true;
+                                m_Cells[i, row] = (k_EmptyCell, 0);
                             }
                         }
                         else
                         {
                             for (var i = column - 2; i <= column + 2; i++)
                             {
-                                if (!IsCellInBounds(i, specialEffect.Row)) continue;
+                                if (!IsCellInBounds(i, row)) continue;
 
                                 m_Matched[i, row] = true;
                                 m_Cells[i, row] = (k_EmptyCell, 0);
@@ -614,8 +616,9 @@ namespace Unity.MLAgentsExamples
                         {
                             for (var i = 0; i < MaxRows; i++)
                             {
-                                m_Matched[specialEffect.Column, i] = true;
-                                m_Cells[specialEffect.Column, i] = (k_EmptyCell, 0);
+                                if (!IsCellInBounds(column, i)) continue;
+                                m_Matched[column, i] = true;
+                                m_Cells[column, i] = (k_EmptyCell, 0);
                             }
                         }
                         else
@@ -623,7 +626,6 @@ namespace Unity.MLAgentsExamples
                              for (var i = row - 2; i <= row + 2; i++)
                             {
                                 if (!IsCellInBounds(column, i)) continue;
-
                                 m_Matched[column, i] = true;
                                 m_Cells[column, i] = (k_EmptyCell, 0);
                             }
@@ -695,11 +697,10 @@ namespace Unity.MLAgentsExamples
                         {
                             for (var j = -1; j <= 1; j++)
                             {
-                                if (IsCellInBounds(column + i, row + j))
-                                {
-                                    m_Matched[column + i, row + i] = true;
-                                    m_Cells[column + i, row + j] = (k_EmptyCell, 0);
-                                }
+                                if (!IsCellInBounds(column + i, row + j)) continue;
+
+                                m_Matched[column + i, row + j] = true;
+                                m_Cells[column + i, row + j] = (k_EmptyCell, 0);
                             }
                         }
 
