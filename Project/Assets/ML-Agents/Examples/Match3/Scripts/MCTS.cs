@@ -122,7 +122,7 @@ namespace Unity.MLAgentsExamples
         private SkillKnowledge PlayerKnowledge = null;
         private Dictionary<PieceType, float> PieceScoreWeight = null;
         private float KnowledgeAlmostRatio = 1.0f;
-        private bool Verbose = true;
+        private bool Verbose = false;
 
         GameObject m_DummyBoard;
 
@@ -450,7 +450,6 @@ namespace Unity.MLAgentsExamples
 
                                     score += 1 - matchPercentile;
                                     node.playerKnowledge.IncreaseMatchCount((PieceType)piece.SpecialType);
-
                                 }
 
                                 node.IsSimulated = true;
