@@ -844,7 +844,7 @@ MonoBehaviour:
   MaxStep: 0
   Board: {fileID: 0}
   MoveTime: 0.1
-  MaxMoves: 300
+  MaxMoves: 200
   useForcedFast: 0
   generatorType: 1
   generatorRewardType: 0
