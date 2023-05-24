@@ -19,7 +19,7 @@ namespace Unity.MLAgentsExamples
         {
             
         }
-
+     
         public static Move GetAction(Match3Board board)
         {
 

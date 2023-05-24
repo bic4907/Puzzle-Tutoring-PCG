@@ -5,13 +5,13 @@ import copy
 ENV_ARGS = list()
 
 MCTS_SIMULATION_TIMES = [200]
-TARGET_PLAYER = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-METHOD = ['mcts', 'random']
-OBJECTIVE = ['score', 'knowledge', 'kp']
+TARGET_PLAYER = [0, 1, 2, 3, 4]
+METHOD = ['random', 'mcts']
+OBJECTIVE = ['score', 'knowledge']
 TARGET_EPISODE_COUNT = 500
-INCLUDE_SIMPLE_EFFECT = [0, 1]
+INCLUDE_SIMPLE_EFFECT = [1]
 KNOWLEDGE_ALMOST_RATIO = ['1.0']
-PLAYER_DEPTH = [1]
+PLAYER_DEPTH = [1, 2, 3]
 os.makedirs('generated', exist_ok=True)
 
 

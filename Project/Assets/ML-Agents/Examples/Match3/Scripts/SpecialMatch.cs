@@ -72,12 +72,12 @@ namespace Unity.MLAgentsExamples
 
             CreateScores.Add(PieceType.Empty, 0);
             CreateScores.Add(PieceType.NormalPiece, 0);
-            CreateScores.Add(PieceType.HorizontalPiece, 20);
-            CreateScores.Add(PieceType.VerticalPiece, 20);
-            CreateScores.Add(PieceType.CrossPiece, 20);
-            CreateScores.Add(PieceType.BombPiece, 20);
-            CreateScores.Add(PieceType.RocketPiece, 20);
-            CreateScores.Add(PieceType.RainbowPiece, 20);
+            CreateScores.Add(PieceType.HorizontalPiece, 200);
+            CreateScores.Add(PieceType.VerticalPiece, 200);
+            CreateScores.Add(PieceType.CrossPiece, 500);
+            CreateScores.Add(PieceType.BombPiece, 500);
+            CreateScores.Add(PieceType.RocketPiece, 500);
+            CreateScores.Add(PieceType.RainbowPiece, 1000);
         }
 
         private void InitializeDestroyScore()
@@ -85,13 +85,13 @@ namespace Unity.MLAgentsExamples
             DestroyScores = new Dictionary<PieceType, int>();
         
             DestroyScores.Add(PieceType.Empty, 0);
-            DestroyScores.Add(PieceType.NormalPiece, 10);
-            DestroyScores.Add(PieceType.HorizontalPiece, 20);
-            DestroyScores.Add(PieceType.VerticalPiece, 20);
-            DestroyScores.Add(PieceType.CrossPiece, 20);
-            DestroyScores.Add(PieceType.BombPiece, 20);
-            DestroyScores.Add(PieceType.RocketPiece, 20);
-            DestroyScores.Add(PieceType.RainbowPiece, 20);
+            DestroyScores.Add(PieceType.NormalPiece, 1);
+            DestroyScores.Add(PieceType.HorizontalPiece, 1);
+            DestroyScores.Add(PieceType.VerticalPiece, 1);
+            DestroyScores.Add(PieceType.CrossPiece, 1);
+            DestroyScores.Add(PieceType.BombPiece, 1);
+            DestroyScores.Add(PieceType.RocketPiece, 1);
+            DestroyScores.Add(PieceType.RainbowPiece, 2);
         }
 
         public int GetCreateScore(PieceType pieceType)

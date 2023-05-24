@@ -847,7 +847,7 @@ MonoBehaviour:
   MaxMoves: 200
   useForcedFast: 0
   generatorType: 1
-  generatorRewardType: 0
+  generatorRewardType: 1
   PlayerNumber: 0
   MCTS_Simulation: 100
   CurrentEpisodeCount: 0
