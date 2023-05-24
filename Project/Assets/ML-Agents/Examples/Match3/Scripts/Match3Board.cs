@@ -705,9 +705,7 @@ namespace Unity.MLAgentsExamples
 
                         break;
                     case PieceType.RocketPiece:
-                        // TODO Make it more deterministic
 
-                        // Remove one same-cell type random block same with the original block
                         List<int[]> sameCellTypePositions = GetCellTypePosition(cellType, true);
                         if (sameCellTypePositions.Count > 0)
                         {
@@ -721,9 +719,7 @@ namespace Unity.MLAgentsExamples
 
                         break;
                     case PieceType.RainbowPiece:
-                        // TODO Make it more deterministic
 
-                        // Remove all same-cell type random block same with the original block
                         List<int[]> sameCellTypePositionsRainbow = GetCellTypePosition(cellType, true);
                         List<int[]> nearestPositions = GetNearestCoordinates(sameCellTypePositionsRainbow, new int[] {column, row}, 3);
 
