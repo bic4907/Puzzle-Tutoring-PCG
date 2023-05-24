@@ -865,7 +865,7 @@ MonoBehaviour:
   PlayerDepthLimit: 1
   ComparisonCounts: 
   SaveFirebaseLog: 0
-  agentType: 1
+  agentType: 0
   m_mouseInput: {fileID: 1540485854}
 --- !u!114 &1540485852
 MonoBehaviour:
@@ -913,3 +913,4 @@ MonoBehaviour:
   direction: 0
   Board: {fileID: 0}
   playerHadVaildAction: 0
+  ForceMove: 0

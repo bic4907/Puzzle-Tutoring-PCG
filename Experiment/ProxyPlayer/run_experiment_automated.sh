@@ -4,8 +4,9 @@ mkdir exp_logs
 
 exp_idx=0
 num_gpus=$(nvidia-smi --list-gpus | wc -l)
+num_cpus=$(nproc)
 container_prefix="ttpcg"
-max_container_count=40
+max_container_count=$((num_cpus * 3/4))
 file_list=()
 
 directory="./generated"
