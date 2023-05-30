@@ -4,14 +4,14 @@ import copy
 
 ENV_ARGS = list()
 
-MCTS_SIMULATION_TIMES = [200]
-TARGET_PLAYER = [0, 1, 2, 3, 4]
-METHOD = ['random', 'mcts']
-OBJECTIVE = ['score', 'knowledge']
+MCTS_SIMULATION_TIMES = [100, 1000]
+TARGET_PLAYER = [0]
+METHOD = ['mcts']
+OBJECTIVE = ['knowledge']
 TARGET_EPISODE_COUNT = 500
 INCLUDE_SIMPLE_EFFECT = [1]
 KNOWLEDGE_ALMOST_RATIO = ['1.0']
-PLAYER_DEPTH = [1, 2, 3]
+PLAYER_DEPTH = [1]
 os.makedirs('generated', exist_ok=True)
 
 
@@ -57,6 +57,7 @@ for simple_effect in INCLUDE_SIMPLE_EFFECT:
                                         ENV_ARGS.append('--simpleEffect')
                                     ENV_ARGS.append('--logPath'), ENV_ARGS.append(f'/workspace/results/{_run_id}/')
                                     ENV_ARGS.append('--mctsSimulation'), ENV_ARGS.append(i_simulation)
+                                    ENV_ARGS.append('--objective'), ENV_ARGS.append(i_objective)
                                     ENV_ARGS.append('--targetEpisodeCount'), ENV_ARGS.append(TARGET_EPISODE_COUNT)
                                     ENV_ARGS.append('--knowledgeAlmostRatio'), ENV_ARGS.append(i_ratio)
                                     ENV_ARGS.append('--playerDepth'), ENV_ARGS.append(i_p_depth)
@@ -84,6 +85,7 @@ for simple_effect in INCLUDE_SIMPLE_EFFECT:
                                     ENV_ARGS.append('--simpleEffect')
                                 ENV_ARGS.append('--logPath'), ENV_ARGS.append(f'/workspace/results/{_run_id}/')
                                 ENV_ARGS.append('--mctsSimulation'), ENV_ARGS.append(i_simulation)
+                                ENV_ARGS.append('--objective'), ENV_ARGS.append(i_objective)
                                 ENV_ARGS.append('--targetEpisodeCount'), ENV_ARGS.append(TARGET_EPISODE_COUNT)
                                 ENV_ARGS.append('--playerDepth'), ENV_ARGS.append(i_p_depth)
 
