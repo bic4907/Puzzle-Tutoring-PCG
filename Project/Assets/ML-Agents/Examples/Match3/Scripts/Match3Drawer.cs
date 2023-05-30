@@ -120,6 +120,7 @@ namespace Unity.MLAgentsExamples
                     pos *= CubeSpacing;
 
                     tilesDict[(i, j)].transform.position = transform.TransformPoint(pos);
+
                     if(currentAgentType == AgentType.Human)
                     {
                         tilesDict[(i, j)].SetActiveTile(specialType, value, isHumanControlled: true);
