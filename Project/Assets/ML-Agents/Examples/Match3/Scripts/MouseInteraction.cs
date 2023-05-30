@@ -76,7 +76,7 @@ public class MouseInteraction : MonoBehaviour
                 
                 if (Physics.Raycast(ray,out hit))
                 {
-                    hit.transform.position = new Vector3(hit.transform.position.x, hit.transform.position.y, hit.transform.position.z + 2f);
+                    // hit.transform.position = new Vector3(hit.transform.position.x, hit.transform.position.y, hit.transform.position.z + 2f);
                 }
             }
             if(Input.GetMouseButtonUp(0))
