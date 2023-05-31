@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +9,8 @@ public class Match3TileSelector : MonoBehaviour
     public Material[] materialTypes = new Material[0];
     public GameObject explosionPrefab;
     private Dictionary<int, MeshRenderer> tileDict = new Dictionary<int, MeshRenderer>();
+    bool corutineControlFlag = true;
+    bool isCorutineRunning = false;
 
     // Start is called before the first frame update
     void Awake()
@@ -28,12 +31,13 @@ public class Match3TileSelector : MonoBehaviour
         }
     }
 
-    public void SetActiveTile(int typeIndex, int matIndex)
+    public void SetActiveTile(int typeIndex, int matIndex, bool isHumanControlled = false)
     {
         if (matIndex == -1)
         {
             AllTilesOff();
             emptyTile.SetActive(true);
+            corutineControlFlag = true;
         }
         else
         {
@@ -44,6 +48,11 @@ public class Match3TileSelector : MonoBehaviour
                 {
                     tileTypes[i].SetActive(true);
                     tileDict[i].sharedMaterial = materialTypes[matIndex];
+                    if(corutineControlFlag && isHumanControlled && !isCorutineRunning)
+                    {
+                        StartCoroutine(ScaleTile(tileDict[i].transform.localScale, i));
+                        corutineControlFlag = false;
+                    }
                 }
                 else
                 {
@@ -56,5 +65,19 @@ public class Match3TileSelector : MonoBehaviour
     {
         var tmp = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
         Destroy(tmp, 1f);
+    }
+    //corutine to scale the tile
+    public IEnumerator ScaleTile(Vector3 scale, int i)
+    {
+        float time = 0;
+        isCorutineRunning = true;
+        tileTypes[i].transform.localScale = transform.localScale * 0.1f;
+        while (time < 3)
+        {
+            time += Time.deltaTime;
+            tileTypes[i].transform.localScale = Vector3.Lerp(tileTypes[i].transform.localScale, scale, time / 6);
+            yield return null;
+        }
+        isCorutineRunning = false;
     }
 }
