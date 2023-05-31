@@ -62,6 +62,12 @@ namespace Unity.MLAgentsExamples
         public bool SaveFirebaseLog = false;
 
         private FirebaseLogger m_FirebaseLogger;
+        
+        [Header("")]
+        public AgentType agentType = AgentType.Agent;
+        public MouseInteraction m_mouseInput;
+        public int PopUpQuestionnaireTiming = 5;
+        int PopUpQuestionnaireCount = 0;
 
         protected void Awake()
         {
@@ -342,6 +348,8 @@ namespace Unity.MLAgentsExamples
                     break;
                 case State.WaitForMove:
                     bool isBoardSettled = false;
+                    nextState = State.WaitForMove;
+                    Move move = new Move();
                     
                     while (true)
                     {
@@ -360,13 +368,36 @@ namespace Unity.MLAgentsExamples
                         SettleCount += 1;
                     }
 
+
+                    switch(agentType)
+                    {
+                        case AgentType.Agent:
+                            move = GreedyMatch3Solver.GetAction(Board);
+                            Board.MakeMove(move);
+                            OnPlayerAction();
+
+                            nextState = State.FindMatches;
+                        break;
+                        case AgentType.Human:
+                            if(PopUpQuestionnaireCount == PopUpQuestionnaireTiming)
+                            {
+                                gameObject.transform.Find("QuestionBox").gameObject.SetActive(true);
+                                PopUpQuestionnaireCount = 0;
+                            }
+                            if(m_mouseInput.playerHadVaildAction == true)
+                            {
+                                move = m_mouseInput.GetMove();
+                                Board.MakeMove(move);
+                                OnPlayerAction();
+
+                                nextState = State.FindMatches;
+                                
+                                PopUpQuestionnaireCount += 1;
+                            }
+                        break;
+                    }
                     CheckKnowledgeReach();
 
-                    Move move = GreedyMatch3Solver.GetAction(Board);
-                    Board.MakeMove(move);
-                    OnPlayerAction();
-
-                    nextState = State.FindMatches;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

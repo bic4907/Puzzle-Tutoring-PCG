@@ -39,7 +39,17 @@ namespace Unity.MLAgentsExamples
             {
                 InitializeDict();
             }
-            currentAgentType = GetComponent<BoardPCGAgent>().agentType;
+            
+            // Get agent type but, if it's not a board agent, set it to BoardManualAgent
+            if (GetComponent<BoardPCGAgent>() != null)
+            {
+                currentAgentType = GetComponent<BoardPCGAgent>().agentType;
+            }
+            else
+            {
+                currentAgentType = GetComponent<BoardManualAgent>().agentType;
+
+            }
         }
 
         void InitializeDict()
