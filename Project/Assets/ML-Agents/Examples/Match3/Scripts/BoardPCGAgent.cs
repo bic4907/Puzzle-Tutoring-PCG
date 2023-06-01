@@ -285,6 +285,9 @@ namespace Unity.MLAgentsExamples
                     case GeneratorType.Sampling:
                         BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
                         break;
+                    case GeneratorType.GA:
+                        GeneticAlgorithm.Instance.FillEmpty(Board, m_SkillKnowledge, EvoluationNum);
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -381,6 +384,9 @@ namespace Unity.MLAgentsExamples
 
                         case GeneratorType.Sampling:
                             BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
+                            break;
+                        case GeneratorType.GA:
+                            GeneticAlgorithm.Instance.FillEmpty(Board, m_SkillKnowledge, EvoluationNum);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -617,6 +623,7 @@ namespace Unity.MLAgentsExamples
         Random = 0,
         MCTS = 1,
         Sampling = 2,
+        GA = 3,
     }
 
     public enum AgentType
@@ -631,7 +638,6 @@ namespace Unity.MLAgentsExamples
         WeighteScore = 3,
         Knowledge = 1,
         KnowledgePercentile = 2,
-
     }
 
 
