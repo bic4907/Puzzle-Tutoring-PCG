@@ -26,7 +26,10 @@ namespace Unity.MLAgentsExamples
         {
             int _simulation = 0;
 
-            Match3Board bestBoard = null;
+            Match3Board _tmpBoard = board.DeepCopy();
+            _tmpBoard.FillFromAbove();
+            Match3Board bestBoard = _tmpBoard;
+            
             float bestBoardScore = -99999f;
 
             for (_simulation = 0; _simulation < Simulation; _simulation++) {
@@ -56,7 +59,7 @@ namespace Unity.MLAgentsExamples
                     }
                 }
 
-                
+
                 if (score > bestBoardScore || bestBoard == null)
                 {
                     bestBoardScore = score;

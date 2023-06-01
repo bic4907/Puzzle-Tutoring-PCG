@@ -381,8 +381,7 @@ namespace Unity.MLAgentsExamples
 
                         case GeneratorType.Sampling:
                             // pause the editro
-                            var startTime2 = Time.realtimeSinceStartup;
-                            float score = BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
+                            BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
