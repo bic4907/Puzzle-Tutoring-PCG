@@ -93,7 +93,7 @@ public class MouseInteraction : MonoBehaviour
                         var row2 = (int)char.GetNumericValue(hit2.transform.name[1]);
                         var col2 = (int)char.GetNumericValue(hit2.transform.name[4]);
 
-                        if(Mathf.Abs((row + row2) - (col + col2)) == 1)
+                        if(Mathf.Abs((row + col) - (row2 + col2)) == 1)
                         {
                             GetDirection(row, col, row2, col2);
                             //Todo: Add None move on move
