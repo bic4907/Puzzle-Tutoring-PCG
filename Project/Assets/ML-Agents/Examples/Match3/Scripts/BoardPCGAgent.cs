@@ -44,7 +44,7 @@ namespace Unity.MLAgentsExamples
 
         public int MCTS_Simulation = 300;
         public int SamplingNum = 10;
-
+        public int EvoluationNum = 100;
         private SkillKnowledge m_SkillKnowledge;
         private SkillKnowledge m_ManualSkillKnowledge;
 
