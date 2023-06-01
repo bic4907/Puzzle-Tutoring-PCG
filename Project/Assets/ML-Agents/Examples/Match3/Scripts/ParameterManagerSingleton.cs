@@ -92,7 +92,10 @@ public class ParameterManagerSingleton
             {
                 ParsedArgs.Add("playerDepth", args[++idx]);
             }
-
+            else if (args[idx].Contains("--samplingNum"))
+            {
+                ParsedArgs.Add("samplingNum", args[++idx]);
+            }
 
             idx++;
         }
@@ -127,7 +130,8 @@ public class ParameterManagerSingleton
     public bool IsSimpleSpecialEffectMode()
     {
         // return true;
-        return ParsedArgs.ContainsKey("simpleEffect");
+        return true;
+        // return ParsedArgs.ContainsKey("simpleEffect");
     }
 
     // Update is called once per frame

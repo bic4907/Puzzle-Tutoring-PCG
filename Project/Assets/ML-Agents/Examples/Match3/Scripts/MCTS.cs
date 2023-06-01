@@ -120,7 +120,7 @@ namespace Unity.MLAgentsExamples
 
         private GeneratorReward RewardMode = GeneratorReward.Score;
         private SkillKnowledge PlayerKnowledge = null;
-        private Dictionary<PieceType, float> PieceScoreWeight = null;
+        public Dictionary<PieceType, float> PieceScoreWeight = null;
         private float KnowledgeAlmostRatio = 1.0f;
         private bool Verbose = false;
 

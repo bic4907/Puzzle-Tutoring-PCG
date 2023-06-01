@@ -1410,7 +1410,8 @@ MonoBehaviour:
   generatorType: 1
   generatorRewardType: 1
   PlayerNumber: 0
-  MCTS_Simulation: 100
+  MCTS_Simulation: 1000
+  SamplingNum: 10
   CurrentEpisodeCount: 0
   TotalStepCount: 0
   CurrentStepCount: 0
@@ -1426,9 +1427,9 @@ MonoBehaviour:
   PlayerDepthLimit: 1
   ComparisonCounts: 
   SaveFirebaseLog: 0
-  agentType: 1
+  agentType: 0
   m_mouseInput: {fileID: 1540485854}
-  PopUpQuestionnaireTiming: 5
+  PopUpQuestionnaireTiming: 999999999
 --- !u!114 &1540485852
 MonoBehaviour:
   m_ObjectHideFlags: 0

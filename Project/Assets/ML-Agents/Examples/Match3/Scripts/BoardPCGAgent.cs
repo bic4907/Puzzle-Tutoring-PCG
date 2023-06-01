@@ -43,6 +43,7 @@ namespace Unity.MLAgentsExamples
         public int PlayerNumber = -1;
 
         public int MCTS_Simulation = 300;
+        public int SamplingNum = 10;
 
         private SkillKnowledge m_SkillKnowledge;
         private SkillKnowledge m_ManualSkillKnowledge;
@@ -73,6 +74,7 @@ namespace Unity.MLAgentsExamples
         public MouseInteraction m_mouseInput;
         public int PopUpQuestionnaireTiming = 5;
         int PopUpQuestionnaireCount = 0;
+
 
         protected override void Awake()
         {
@@ -106,6 +108,9 @@ namespace Unity.MLAgentsExamples
                         break;
                     case "random":
                         generatorType = GeneratorType.Random;
+                        break;
+                    case "sampling":
+                        generatorType = GeneratorType.Sampling;
                         break;
                 }
             }
@@ -142,6 +147,11 @@ namespace Unity.MLAgentsExamples
             {
                 PlayerDepthLimit = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("playerDepth"));
             }
+            if(ParameterManagerSingleton.GetInstance().HasParam("samplingNum"))
+            {
+                SamplingNum = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("samplingNum"));
+            }
+
 
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
             m_ManualSkillKnowledge = new SkillKnowledge();
@@ -272,6 +282,9 @@ namespace Unity.MLAgentsExamples
                         ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
 
                         break;
+                    case GeneratorType.Sampling:
+                        BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -353,6 +366,8 @@ namespace Unity.MLAgentsExamples
                             Board.FillFromAbove();
                             break;
                         case GeneratorType.MCTS:
+
+                            var startTime = Time.realtimeSinceStartup;
                             bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge, PlayerDepthLimit);
 
                             if(_isChanged)
@@ -362,6 +377,12 @@ namespace Unity.MLAgentsExamples
 
                             ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
 
+                            break;
+
+                        case GeneratorType.Sampling:
+                            // pause the editro
+                            var startTime2 = Time.realtimeSinceStartup;
+                            float score = BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -597,6 +618,7 @@ namespace Unity.MLAgentsExamples
     {
         Random = 0,
         MCTS = 1,
+        Sampling = 2,
     }
 
     public enum AgentType
