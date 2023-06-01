@@ -16,7 +16,7 @@ namespace Unity.MLAgentsExamples
         private static GeneticAlgorithm _Instance = null;
         private float KnowledgeAlmostRatio = 1.0f;
         public int ChromosomeLength = 0;
-        public int PopulationSize = 10;
+        public int PopulationSize = 50;
         private List<Chromosome> Population;
 
         public Match3Board m_Board = null;
@@ -59,9 +59,10 @@ namespace Unity.MLAgentsExamples
             }
         }
 
-        private List<Chromosome> Crossover(List<Chromosome> offspring, double prob = 1)
+        private void Crossover(List<Chromosome> offspring, double prob = 1)
         {
-            offspring = offspring.Select(x => x.DeepCopy()).ToList();
+            // offspring = offspring.Select(x => x.DeepCopy()).ToList();
+        
             List<int> idx = Enumerable.Range(0, offspring.Count).ToList();
             List<Chromosome> shuffledOffspring = new List<Chromosome>();
             Shuffle(idx.ToArray());
@@ -97,12 +98,12 @@ namespace Unity.MLAgentsExamples
                 }
             }
 
-            return offspring;
+            // return offspring;
         }
 
-        private List<Chromosome> Mutation(List<Chromosome> offspring, double prob = 0.01)
+        private void Mutation(List<Chromosome> offspring, double prob = 0.01)
         {
-            offspring = offspring.Select(x => x.DeepCopy()).ToList();
+            // offspring = offspring.Select(x => x.DeepCopy()).ToList();
 
             for (int individual_index = 0; individual_index < offspring.Count; individual_index++)
             {
@@ -116,7 +117,7 @@ namespace Unity.MLAgentsExamples
                 }
             }
 
-            return offspring;
+            // return offspring;
         }
 
         public float CalcFitness(Chromosome chromosome)
@@ -181,7 +182,8 @@ namespace Unity.MLAgentsExamples
         {
             if (m_SelectMethod == SelectMethod.RouletteWheel)
             {
-                List<Chromosome> offspring = Population.Select(x => x.DeepCopy()).ToList();
+                var offspring = Population;
+                // List<Chromosome> offspring = Population.Select(x => x.DeepCopy()).ToList();
                 List<Chromosome> newPopulation = new List<Chromosome>();
 
                 float[] fitnessValues = offspring.Select(GetFitness).ToArray();
@@ -263,14 +265,14 @@ namespace Unity.MLAgentsExamples
 
         public void Evolution(int generation)
         {
-            List<Chromosome> offspring2 = Population.Select(x => x.DeepCopy()).ToList();
+            // List<Chromosome> offspring2 = Population.Select(x => x.DeepCopy()).ToList();
 
-            offspring2 = Sorting(offspring2);
+            Population = Sorting(Population);
             List<Chromosome> offspring = Selection();
-            offspring = Crossover(offspring, 0.9);
-            offspring = Mutation(offspring, 0.02);
+            Crossover(offspring, 0.9);
+            Mutation(offspring, 0.02);
 
-            offspring = Sorting(offspring);
+            Sorting(offspring);
             // for (int k = generation / 5; k < 200; k++)
             // {
             //     offspring2[k] = new Chromosome(offspring[k - generation / 5].Genes);
