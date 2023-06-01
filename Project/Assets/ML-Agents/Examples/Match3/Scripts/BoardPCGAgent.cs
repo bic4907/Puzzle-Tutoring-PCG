@@ -43,6 +43,7 @@ namespace Unity.MLAgentsExamples
         public int PlayerNumber = -1;
 
         public int MCTS_Simulation = 300;
+        public int SamplingCount = 1000;
 
         private SkillKnowledge m_SkillKnowledge;
         private SkillKnowledge m_ManualSkillKnowledge;
@@ -73,6 +74,7 @@ namespace Unity.MLAgentsExamples
         public MouseInteraction m_mouseInput;
         public int PopUpQuestionnaireTiming = 5;
         int PopUpQuestionnaireCount = 0;
+
 
         protected override void Awake()
         {
@@ -272,6 +274,9 @@ namespace Unity.MLAgentsExamples
                         ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
 
                         break;
+                    case GeneratorType.Sampling:
+                        BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingCount);
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -362,6 +367,10 @@ namespace Unity.MLAgentsExamples
 
                             ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
 
+                            break;
+
+                        case GeneratorType.Sampling:
+                            BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingCount);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -597,6 +606,7 @@ namespace Unity.MLAgentsExamples
     {
         Random = 0,
         MCTS = 1,
+        Sampling = 2,
     }
 
     public enum AgentType
