@@ -5,7 +5,7 @@ import copy
 ENV_ARGS = list()
 
 MCTS_SIMULATION_TIMES = [100, 1000]
-SAMPLING_NUMS = [100, 1000]
+SAMPLING_NUMS = [10, 20, 30]
 TARGET_PLAYER = list(range(0, 11))
 METHOD = ['sampling']
 OBJECTIVE = ['knowledge']

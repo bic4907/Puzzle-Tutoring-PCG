@@ -22,15 +22,15 @@ namespace Unity.MLAgentsExamples
             return _Instance;
         }}
 
-        public void FillEmpty(Match3Board board, SkillKnowledge knowledge, int Simulation = 100)
+        public float FillEmpty(Match3Board board, SkillKnowledge knowledge, int Simulation = 100)
         {
             int _simulation = 0;
 
             Match3Board bestBoard = null;
             float bestBoardScore = -99999f;
 
-            while (_simulation < Simulation) {
-                Debug.Log(_simulation);
+            for (_simulation = 0; _simulation < Simulation; _simulation++) {
+
                 Match3Board _completedBoard = board.DeepCopy();
                 SkillKnowledge playerKnowledge = knowledge.DeepCopy();
 
@@ -56,7 +56,7 @@ namespace Unity.MLAgentsExamples
                     }
                 }
 
-
+                
                 if (score > bestBoardScore || bestBoard == null)
                 {
                     bestBoardScore = score;
@@ -65,19 +65,17 @@ namespace Unity.MLAgentsExamples
 
                 _completedBoard = null;
                 _simulationBoard = null;
-
-                _simulation++;
-
-
             }
 
             board.m_Cells = ((int CellType, int SpecialType)[,])bestBoard.m_Cells.Clone();
 
+            return bestBoardScore;
         }
 
         private void SampleValidBoard(Match3Board board) // Use pointer reference
         {
-            Debug.Log("SampleValidBoard");
+            int trial = 0;
+            // Debug.Log("SampleValidBoard");
             while (true)
             {
                 Match3Board _tmpBoard = board.DeepCopy();
@@ -90,7 +88,15 @@ namespace Unity.MLAgentsExamples
 
                 if (madeMatch)
                 {
-                    Debug.Log("Made Match");
+                    trial += 1;
+
+                    if (trial > 5)
+                    {
+                        board.m_Cells = ((int CellType, int SpecialType)[,])_tmpBoard.m_Cells.Clone();
+                        _tmpBoard = null;
+                        break;
+                    }
+
                     _tmpBoard = null;
                     continue;
                 }
@@ -98,7 +104,6 @@ namespace Unity.MLAgentsExamples
                 {
                     board.m_Cells = ((int CellType, int SpecialType)[,])_tmpBoard.m_Cells.Clone();
                     _tmpBoard = null;
-                    Debug.Log("No Made Match");
                     break;
                 }
 

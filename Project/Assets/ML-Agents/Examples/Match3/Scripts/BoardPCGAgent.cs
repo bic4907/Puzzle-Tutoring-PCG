@@ -43,7 +43,7 @@ namespace Unity.MLAgentsExamples
         public int PlayerNumber = -1;
 
         public int MCTS_Simulation = 300;
-        public int SamplingNum = 100;
+        public int SamplingNum = 10;
 
         private SkillKnowledge m_SkillKnowledge;
         private SkillKnowledge m_ManualSkillKnowledge;
@@ -366,6 +366,8 @@ namespace Unity.MLAgentsExamples
                             Board.FillFromAbove();
                             break;
                         case GeneratorType.MCTS:
+
+                            var startTime = Time.realtimeSinceStartup;
                             bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge, PlayerDepthLimit);
 
                             if(_isChanged)
@@ -378,7 +380,9 @@ namespace Unity.MLAgentsExamples
                             break;
 
                         case GeneratorType.Sampling:
-                            BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
+                            // pause the editro
+                            var startTime2 = Time.realtimeSinceStartup;
+                            float score = BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
