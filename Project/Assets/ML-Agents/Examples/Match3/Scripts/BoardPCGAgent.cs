@@ -380,7 +380,6 @@ namespace Unity.MLAgentsExamples
                             break;
 
                         case GeneratorType.Sampling:
-                            // pause the editro
                             BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
                             break;
                         default:

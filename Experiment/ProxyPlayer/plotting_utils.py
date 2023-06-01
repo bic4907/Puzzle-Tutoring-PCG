@@ -8,6 +8,8 @@ def get_legend_name(x):
             return f"{x['method']}_{x['objective']}_{x['almostRatio']}_{x['simulation']}_{x['playerDepth']}"
         elif x['objective'] == 'kp':
             return f"{x['method']}_{x['objective']}_{x['almostRatio']}_{x['simulation']}_{x['playerDepth']}"
+    elif x['method'] == 'sampling':
+        return f"{x['method']}_{x['simulation']}"
     else:
         return f"{x['method']}"
 
