@@ -5,8 +5,9 @@ import copy
 ENV_ARGS = list()
 
 MCTS_SIMULATION_TIMES = [100, 1000]
-TARGET_PLAYER = [0]
-METHOD = ['mcts']
+SAMPLING_NUMS = [100, 1000]
+TARGET_PLAYER = list(range(0, 11))
+METHOD = ['sampling']
 OBJECTIVE = ['knowledge']
 TARGET_EPISODE_COUNT = 500
 INCLUDE_SIMPLE_EFFECT = [1]
@@ -94,6 +95,33 @@ for simple_effect in INCLUDE_SIMPLE_EFFECT:
 
                                 with open(os.path.join('generated', f'{_run_id}.yaml'), 'w') as f:
                                     yaml.dump(base_config, f)
+
+            elif i_method == 'sampling':
+                for i_simulation in SAMPLING_NUMS:
+                    _RUN_ID = RUN_ID.copy()
+                    _RUN_ID.append('sim'), _RUN_ID.append(i_simulation)
+
+                    _run_id = '_'.join(map(str, _RUN_ID))
+
+                    ENV_ARGS = list()
+                    ENV_ARGS.append('--runId'), ENV_ARGS.append(_run_id)
+                    ENV_ARGS.append('--method'), ENV_ARGS.append(i_method)
+                    ENV_ARGS.append('--targetPlayer'), ENV_ARGS.append(i_player)
+                    if simple_effect == 1:
+                        ENV_ARGS.append('--simpleEffect')
+                    ENV_ARGS.append('--logPath'), ENV_ARGS.append(f'/workspace/results/{_run_id}/')
+                    ENV_ARGS.append('--samplingNum'), ENV_ARGS.append(i_simulation)
+                    ENV_ARGS.append('--targetEpisodeCount'), ENV_ARGS.append(TARGET_EPISODE_COUNT)
+
+                    base_config['env_settings']['env_args'] = ENV_ARGS
+                    print(_RUN_ID)
+
+                    with open(os.path.join('generated', f'{_run_id}.yaml'), 'w') as f:
+                        yaml.dump(base_config, f)
+
+
+
+
             else:
                 ENV_ARGS = list()
                 _run_id = run_id
