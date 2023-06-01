@@ -92,7 +92,10 @@ public class ParameterManagerSingleton
             {
                 ParsedArgs.Add("playerDepth", args[++idx]);
             }
-
+            else if (args[idx].Contains("--samplingNum"))
+            {
+                ParsedArgs.Add("samplingNum", args[++idx]);
+            }
 
             idx++;
         }

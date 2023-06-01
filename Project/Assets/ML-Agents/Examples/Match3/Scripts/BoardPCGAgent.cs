@@ -43,7 +43,7 @@ namespace Unity.MLAgentsExamples
         public int PlayerNumber = -1;
 
         public int MCTS_Simulation = 300;
-        public int SamplingCount = 1000;
+        public int SamplingNum = 100;
 
         private SkillKnowledge m_SkillKnowledge;
         private SkillKnowledge m_ManualSkillKnowledge;
@@ -144,6 +144,11 @@ namespace Unity.MLAgentsExamples
             {
                 PlayerDepthLimit = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("playerDepth"));
             }
+            if(ParameterManagerSingleton.GetInstance().HasParam("samplingNum"))
+            {
+                SamplingNum = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("samplingNum"));
+            }
+
 
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
             m_ManualSkillKnowledge = new SkillKnowledge();
@@ -275,7 +280,7 @@ namespace Unity.MLAgentsExamples
 
                         break;
                     case GeneratorType.Sampling:
-                        BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingCount);
+                        BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -370,7 +375,7 @@ namespace Unity.MLAgentsExamples
                             break;
 
                         case GeneratorType.Sampling:
-                            BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingCount);
+                            BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
