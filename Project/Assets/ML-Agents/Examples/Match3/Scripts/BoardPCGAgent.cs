@@ -112,7 +112,11 @@ namespace Unity.MLAgentsExamples
                     case "sampling":
                         generatorType = GeneratorType.Sampling;
                         break;
+                    case "ga":
+                        generatorType = GeneratorType.GA;
+                        break;
                 }
+
             }
             if(ParameterManagerSingleton.GetInstance().HasParam("objective"))
             {

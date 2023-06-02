@@ -130,8 +130,8 @@ public class ParameterManagerSingleton
     public bool IsSimpleSpecialEffectMode()
     {
         // return true;
-        return true;
-        // return ParsedArgs.ContainsKey("simpleEffect");
+        // return true;
+        return ParsedArgs.ContainsKey("simpleEffect");
     }
 
     // Update is called once per frame

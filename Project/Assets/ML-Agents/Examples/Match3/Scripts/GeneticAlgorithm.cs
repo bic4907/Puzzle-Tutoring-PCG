@@ -16,7 +16,7 @@ namespace Unity.MLAgentsExamples
         private static GeneticAlgorithm _Instance = null;
         private float KnowledgeAlmostRatio = 1.0f;
         public int ChromosomeLength = 0;
-        public int PopulationSize = 50;
+        public int PopulationSize = 30;
         private List<Chromosome> Population;
 
         public Match3Board m_Board = null;
@@ -49,7 +49,6 @@ namespace Unity.MLAgentsExamples
 
             for (int i = 0; i < generation; i++)
             {
-                Debug.Log("Generation: " + i);
                 Evolution(generation);
             }
 
@@ -116,8 +115,16 @@ namespace Unity.MLAgentsExamples
                     }
                 }
             }
+        }
 
-            // return offspring;
+        public bool IsBoardMadeMatch(Match3Board board)
+        {
+            Match3Board _simulationBoard = board.DeepCopy();
+            bool madeMatch = _simulationBoard.MarkMatchedCells();
+
+            _simulationBoard = null;
+
+            return madeMatch;
         }
 
         public float CalcFitness(Chromosome chromosome)
@@ -131,23 +138,22 @@ namespace Unity.MLAgentsExamples
             }
             Debug.Assert(_simulationBoard.GetEmptyCellCount() == 0, "The value should not be zero");
 
-
             SkillKnowledge playerKnowledge = m_Knowledge.DeepCopy();
             
-            Move move = GreedyMatch3Solver.GetAction(_simulationBoard);
-            _simulationBoard.MakeMove(move);
-            bool madeMatch = _simulationBoard.MarkMatchedCells();
-            if (madeMatch)
+            if (IsBoardMadeMatch(_simulationBoard))
             {
                 _simulationBoard = null;
                 return -float.MaxValue;
             }
+            Move move = GreedyMatch3Solver.GetAction(_simulationBoard);
+            _simulationBoard.MakeMove(move);
+            _simulationBoard.MarkMatchedCells();
 
             _simulationBoard.ClearMatchedCells();
             _simulationBoard.SpawnSpecialCells();
             var createdPieces = _simulationBoard.GetLastCreatedPiece();
 
-            float score = 0;
+            float score = 0.0f;
             foreach ((int CellType, int SpecialType) piece in createdPieces)
             {
                 bool isReached = playerKnowledge.IsMatchCountAlmostReachedTarget((PieceType)piece.SpecialType, KnowledgeAlmostRatio);
@@ -265,20 +271,22 @@ namespace Unity.MLAgentsExamples
 
         public void Evolution(int generation)
         {
-            // List<Chromosome> offspring2 = Population.Select(x => x.DeepCopy()).ToList();
 
-            Population = Sorting(Population);
+            List<Chromosome> offspring2 = Population.Select(x => x.DeepCopy()).ToList();
+
+            offspring2 = Sorting(offspring2);
             List<Chromosome> offspring = Selection();
             Crossover(offspring, 0.9);
             Mutation(offspring, 0.02);
 
-            Sorting(offspring);
-            // for (int k = generation / 5; k < 200; k++)
-            // {
-            //     offspring2[k] = new Chromosome(offspring[k - generation / 5].Genes);
-            // }
-            // offspring = offspring2.Select(x => new Chromosome(x.Genes)).ToList();
+            offspring = Sorting(offspring);
+            for (int k = generation / 5; k < offspring2.Count; k++)
+            {
+                offspring2[k] = offspring[k - generation / 5].DeepCopy();
+            }
+            offspring = offspring2.Select(x => x.DeepCopy()).ToList();
             Population = offspring;
+
         }
 
         public float GetAverageFitness()
@@ -349,7 +357,16 @@ namespace Unity.MLAgentsExamples
             
         public class Chromosome
         {
-            public List<int> Genes { get; set; }
+            private List<int> genes;
+
+            public List<int> Genes { 
+                get { return genes; }
+                set {
+                    genes = value;
+                    IsFitnessCalced = false;
+                    Fitness = -float.MaxValue;
+                }
+            }
             public float Fitness { get; set; }
             public bool IsFitnessCalced { get; set; }
 
@@ -367,6 +384,20 @@ namespace Unity.MLAgentsExamples
                 copy.Fitness = Fitness;
                 copy.IsFitnessCalced = IsFitnessCalced;
                 return copy;
+            }
+            
+            public override string ToString()
+            {
+                string s = "";
+                foreach (int gene in Genes)
+                {
+                    s += gene.ToString() + " ";
+                }
+
+                // Add fitness value
+                s += "/ fitness: " + Fitness.ToString();
+
+                return s;
             }
 
         }
