@@ -1412,6 +1412,7 @@ MonoBehaviour:
   PlayerNumber: 0
   MCTS_Simulation: 1000
   SamplingNum: 10
+  EvoluationNum: 30
   CurrentEpisodeCount: 0
   TotalStepCount: 0
   CurrentStepCount: 0
@@ -1426,6 +1427,7 @@ MonoBehaviour:
   KnowledgeQ3ReachStep: -1
   PlayerDepthLimit: 1
   ComparisonCounts: 
+  GeneratingRuntimes: []
   SaveFirebaseLog: 0
   agentType: 0
   m_mouseInput: {fileID: 1540485854}

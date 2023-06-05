@@ -35,7 +35,13 @@ do
         exp_name=$(echo $random_file | sed "s/.yaml//")
         exp_name=$(echo $exp_name | sed "s/.\/generated\///")
 
-        nohup docker run --rm -t --name $container_prefix"_"$exp_name -v $(pwd):/config -v $(pwd)/../Build/Linux:/game -v /mnt/nas/inchang/PuzzlePCG/ProxyPlayer:/workspace/results inchang/ct_game /bin/bash -c "chmod -R 755 /game && CUDA_VISIBLE_DEVICES=$allocated_gpu mlagents-learn /config/$random_file --env /game/Game.x86_64 --no-graphics --run-id $exp_name" > ./exp_logs/$exp_name.log 2>&1 &
+        if [ "$1" ]; then
+            param_num_envs="--num-envs $1"
+        else
+            param_num_envs=""
+        fi
+
+        nohup docker run --rm -t --name $container_prefix"_"$exp_name -v $(pwd):/config -v $(pwd)/../Build/Linux:/game -v /mnt/nas/inchang/PuzzlePCG/ProxyPlayer:/workspace/results inchang/ct_game /bin/bash -c "chmod -R 755 /game && CUDA_VISIBLE_DEVICES=$allocated_gpu mlagents-learn /config/$random_file --env /game/Game.x86_64 --no-graphics --run-id $exp_name $param_num_envs" > ./exp_logs/$exp_name.log 2>&1 &
 
         unset "file_list[$random_index]"
         file_list=("${file_list[@]}")
