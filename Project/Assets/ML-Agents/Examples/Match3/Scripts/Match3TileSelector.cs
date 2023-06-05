@@ -9,7 +9,7 @@ public class Match3TileSelector : MonoBehaviour
     public Material[] materialTypes = new Material[0];
     public GameObject explosionPrefab;
     private Dictionary<int, MeshRenderer> tileDict = new Dictionary<int, MeshRenderer>();
-    bool corutineControlFlag = true;
+    int corutineControlFlag = 0;
     bool isCorutineRunning = false;
 
     // Start is called before the first frame update
@@ -37,7 +37,8 @@ public class Match3TileSelector : MonoBehaviour
         {
             AllTilesOff();
             emptyTile.SetActive(true);
-            corutineControlFlag = true;
+            corutineControlFlag += 1;
+            
         }
         else
         {
@@ -48,10 +49,10 @@ public class Match3TileSelector : MonoBehaviour
                 {
                     tileTypes[i].SetActive(true);
                     tileDict[i].sharedMaterial = materialTypes[matIndex];
-                    if(corutineControlFlag && isHumanControlled && !isCorutineRunning)
+                    if(corutineControlFlag >= 1 && isHumanControlled && !isCorutineRunning)
                     {
+                        isCorutineRunning = true;
                         StartCoroutine(ScaleTile(tileDict[i].transform.localScale, i));
-                        corutineControlFlag = false;
                     }
                 }
                 else
@@ -70,7 +71,6 @@ public class Match3TileSelector : MonoBehaviour
     public IEnumerator ScaleTile(Vector3 scale, int i)
     {
         float time = 0;
-        isCorutineRunning = true;
         tileTypes[i].transform.localScale = transform.localScale * 0.1f;
         while (time < 3)
         {
@@ -79,5 +79,6 @@ public class Match3TileSelector : MonoBehaviour
             yield return null;
         }
         isCorutineRunning = false;
+        corutineControlFlag = 0;
     }
 }

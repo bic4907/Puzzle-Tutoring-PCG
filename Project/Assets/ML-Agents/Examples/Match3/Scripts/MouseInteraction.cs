@@ -51,7 +51,7 @@ public class MouseInteraction : MonoBehaviour
                 direction = Direction.Right;
             }
         }
-        else if(col == col2)
+        if(col == col2)
         {
             if(row > row2 && row - row2 == 1)
             {
@@ -62,7 +62,6 @@ public class MouseInteraction : MonoBehaviour
                 direction = Direction.Up;
             }
         }
-
         return direction;
     }
     public void WaitForMouseInput()
@@ -83,7 +82,7 @@ public class MouseInteraction : MonoBehaviour
             {
                 ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
-                if (Physics.Raycast(ray,out hit2))
+                if (Physics.Raycast(ray,out hit2) && hit.collider != null)
                 {
                     if(hit.transform.GetInstanceID() != hit2.transform.GetInstanceID())
                     {
@@ -94,27 +93,24 @@ public class MouseInteraction : MonoBehaviour
                         var row2 = (int)char.GetNumericValue(hit2.transform.name[1]);
                         var col2 = (int)char.GetNumericValue(hit2.transform.name[4]);
 
-                        GetDirection(row, col, row2, col2);
-                        //Todo: Add None move on move
-                        move = Move.FromPositionAndDirection(row, col, direction, Board.GetCurrentBoardSize());
-                        
-                        if (ForceMove)
+                        if(Mathf.Abs((row + col) - (row2 + col2)) == 1)
                         {
-                            playerHadVaildAction = true;    
-                        } 
-                        else
-                        {
-                            if(Board.IsMoveValid(move))
+                            GetDirection(row, col, row2, col2);
+                            //Todo: Add None move on move
+                            move = Move.FromPositionAndDirection(row, col, direction, Board.GetCurrentBoardSize());
+                            
+                            if (ForceMove)
                             {
                                 playerHadVaildAction = true;    
-                            }                   
+                            } 
+                            else
+                            {
+                                if(Board.IsMoveValid(move))
+                                {
+                                    playerHadVaildAction = true;    
+                                }                   
+                            }
                         }
-         
-
-                    }
-                    else
-                    {
-                        
                     }
                 }
             }
