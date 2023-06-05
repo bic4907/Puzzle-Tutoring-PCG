@@ -129,8 +129,6 @@ public class ParameterManagerSingleton
 
     public bool IsSimpleSpecialEffectMode()
     {
-        // return true;
-        // return true;
         return ParsedArgs.ContainsKey("simpleEffect");
     }
 

@@ -66,6 +66,7 @@ namespace Unity.MLAgentsExamples
         public int PlayerDepthLimit = 1;
 
         public List<int> ComparisonCounts;
+        public List<float> GeneratingRuntimes;
         public bool SaveFirebaseLog = false;
         private FirebaseLogger m_FirebaseLogger;
         
@@ -115,6 +116,9 @@ namespace Unity.MLAgentsExamples
                     case "ga":
                         generatorType = GeneratorType.GA;
                         break;
+                    case "ga2":
+                        generatorType = GeneratorType.GA;
+                        break;
                 }
 
             }
@@ -161,6 +165,7 @@ namespace Unity.MLAgentsExamples
             m_ManualSkillKnowledge = new SkillKnowledge();
 
             ComparisonCounts = new List<int>();
+            GeneratingRuntimes = new List<float>();
         }
 
         public override void OnEpisodeBegin()
@@ -197,6 +202,7 @@ namespace Unity.MLAgentsExamples
 
             ResetKnowledgeReach();
             ComparisonCounts.Clear();
+            GeneratingRuntimes.Clear();
         }
 
         private void OnPlayerAction()
@@ -270,6 +276,8 @@ namespace Unity.MLAgentsExamples
 
                 Board.DropCells();
 
+                var startTime = Time.realtimeSinceStartup;
+
                 switch(generatorType)
                 {
                     case GeneratorType.Random:
@@ -295,7 +303,13 @@ namespace Unity.MLAgentsExamples
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+
+                GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
+
             }
+
+
+
 
             bool isBoardSettled = false;
             while (!HasValidMoves())
@@ -325,6 +339,7 @@ namespace Unity.MLAgentsExamples
 
         void AnimatedUpdate()
         {
+            var startTime = Time.realtimeSinceStartup;
             m_TimeUntilMove -= Time.deltaTime;
             if (m_TimeUntilMove > 0.0f)
             {
@@ -366,15 +381,15 @@ namespace Unity.MLAgentsExamples
                     nextState = State.FillEmpty;
                     break;
                 case State.FillEmpty:
-    
+                    startTime = Time.realtimeSinceStartup;
+
                     switch(generatorType)
                     {
                         case GeneratorType.Random:
                             Board.FillFromAbove();
+                            GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
                             break;
                         case GeneratorType.MCTS:
-
-                            var startTime = Time.realtimeSinceStartup;
                             bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge, PlayerDepthLimit);
 
                             if(_isChanged)
@@ -382,15 +397,18 @@ namespace Unity.MLAgentsExamples
                                 ChangedCount += 1;
                             }
 
+                            GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
                             ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
 
                             break;
 
                         case GeneratorType.Sampling:
                             BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
+                            GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
                             break;
                         case GeneratorType.GA:
                             GeneticAlgorithm.Instance.FillEmpty(Board, m_SkillKnowledge, EvoluationNum);
+                            GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -513,6 +531,10 @@ namespace Unity.MLAgentsExamples
             m_Logger.MeanComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)ComparisonCounts.Average();
             m_Logger.StdComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)CalculateStandardDeviation(ComparisonCounts);
 
+            m_Logger.MeanGenerateRuntimes = GeneratingRuntimes.Count == 0 ? 0 : (float)GeneratingRuntimes.Average();
+            m_Logger.StdGenerateRuntimes = GeneratingRuntimes.Count == 0 ? 0 : (float)CalculateStandardDeviation(GeneratingRuntimes);
+
+
             m_Logger.KnowledgeReachStep = KnowledgeReachStep;
             m_Logger.KnowledgeQ1ReachStep = KnowledgeQ1ReachStep;
             m_Logger.KnowledgeQ2ReachStep = KnowledgeQ2ReachStep;
@@ -521,6 +543,13 @@ namespace Unity.MLAgentsExamples
             FlushLog(GetMatchResultLogPath(), m_Logger);
         }
 
+        private double CalculateStandardDeviation(List<float> numbers) {
+            double mean = numbers.Average();
+            double sumOfSquaredDifferences = numbers.Select(num => Mathf.Pow(num - (float)mean, 2)).Sum();
+            double variance = sumOfSquaredDifferences / (numbers.Count - 1);
+            double stdDev = Mathf.Sqrt((float)variance);
+            return stdDev;
+        }
         private double CalculateStandardDeviation(List<int> numbers) {
             double mean = numbers.Average();
             double sumOfSquaredDifferences = numbers.Select(num => Mathf.Pow(num - (float)mean, 2)).Sum();
@@ -528,7 +557,6 @@ namespace Unity.MLAgentsExamples
             double stdDev = Mathf.Sqrt((float)variance);
             return stdDev;
         }
-
         private string GetMatchResultLogPath()
         {
             return ParameterManagerSingleton.GetInstance().GetParam("logPath") + 
@@ -543,7 +571,7 @@ namespace Unity.MLAgentsExamples
                 using (StreamWriter sw = File.CreateText(filePath))
                 {
                     string output = "";
-                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,MeanComparisonCount,StdComparisonCount,ReachedKnowledgeStep,Q1ReachedKnowledgeStep,Q2ReachedKnowledgeStep,Q3ReachedKnowledgeStep,";
+                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,MeanComparisonCount,StdComparisonCount,MeanGenerateRuntimes,StdGenerateRuntimes,ReachedKnowledgeStep,Q1ReachedKnowledgeStep,Q2ReachedKnowledgeStep,Q3ReachedKnowledgeStep,";
 
                     foreach (PieceType pieceType in BoardPCGAgent.PieceLogOrder)
                     {
@@ -581,6 +609,8 @@ namespace Unity.MLAgentsExamples
         public int ChangedCount;
         public float MeanComparisonCount;
         public float StdComparisonCount;
+        public float MeanGenerateRuntimes;
+        public float StdGenerateRuntimes;
         public int KnowledgeReachStep;
         public int KnowledgeQ1ReachStep;
         public int KnowledgeQ2ReachStep;
@@ -602,6 +632,8 @@ namespace Unity.MLAgentsExamples
             row += ChangedCount + ",";
             row += MeanComparisonCount + ",";
             row += StdComparisonCount + ",";
+            row += MeanGenerateRuntimes + ",";
+            row += StdGenerateRuntimes + ",";
             row += KnowledgeReachStep + ",";
             row += KnowledgeQ1ReachStep + ",";
             row += KnowledgeQ2ReachStep + ",";

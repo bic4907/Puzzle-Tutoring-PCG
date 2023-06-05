@@ -16,7 +16,7 @@ namespace Unity.MLAgentsExamples
         private static GeneticAlgorithm _Instance = null;
         private float KnowledgeAlmostRatio = 1.0f;
         public int ChromosomeLength = 0;
-        public int PopulationSize = 30;
+        public int PopulationSize = 20;
         private List<Chromosome> Population;
 
         public Match3Board m_Board = null;
@@ -56,6 +56,8 @@ namespace Unity.MLAgentsExamples
             {
                 board.SpawnColoredBlock(cellType);               
             }
+
+            // Debug.Log("Best Score: " + GetBestIndividual().Fitness);
         }
 
         private void Crossover(List<Chromosome> offspring, double prob = 1)
@@ -72,7 +74,6 @@ namespace Unity.MLAgentsExamples
             }
 
             offspring = shuffledOffspring;
-
 
             int median = offspring.Count / 2;
 
