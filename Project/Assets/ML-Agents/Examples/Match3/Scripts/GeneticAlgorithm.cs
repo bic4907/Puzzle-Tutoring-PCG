@@ -22,6 +22,7 @@ namespace Unity.MLAgentsExamples
         public Match3Board m_Board = null;
         public SkillKnowledge m_Knowledge = null;
         public int RefNumCellTypes;
+        public GeneratorReward RewardMode = GeneratorReward.Score;
 
 
         private SelectMethod m_SelectMethod = SelectMethod.RouletteWheel;
@@ -56,8 +57,6 @@ namespace Unity.MLAgentsExamples
             {
                 board.SpawnColoredBlock(cellType);               
             }
-
-            // Debug.Log("Best Score: " + GetBestIndividual().Fitness);
         }
 
         private void Crossover(List<Chromosome> offspring, double prob = 1)
@@ -155,15 +154,30 @@ namespace Unity.MLAgentsExamples
             var createdPieces = _simulationBoard.GetLastCreatedPiece();
 
             float score = 0.0f;
-            foreach ((int CellType, int SpecialType) piece in createdPieces)
+    
+
+            switch(RewardMode)
             {
-                bool isReached = playerKnowledge.IsMatchCountAlmostReachedTarget((PieceType)piece.SpecialType, KnowledgeAlmostRatio);
-                if (!isReached) // Have to learn
-                {
-                    score += (float)Math.Pow(MCTS.Instance.PieceScoreWeight[(PieceType)piece.SpecialType], 1);
-                    playerKnowledge.IncreaseMatchCount((PieceType)piece.SpecialType);
-                }
+                case GeneratorReward.Score:
+                    score += createdPieces.Count;
+                    break;
+                case GeneratorReward.Knowledge:
+
+                    foreach ((int CellType, int SpecialType) piece in createdPieces)
+                    {
+                        bool isReached = playerKnowledge.IsMatchCountAlmostReachedTarget((PieceType)piece.SpecialType, KnowledgeAlmostRatio);
+                        if (!isReached) // Have to learn
+                        {
+                            score += (float)Math.Pow(MCTS.Instance.PieceScoreWeight[(PieceType)piece.SpecialType], 1);
+                            playerKnowledge.IncreaseMatchCount((PieceType)piece.SpecialType);
+                        }
+                    }
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
+
 
             _simulationBoard = null;
 
@@ -309,6 +323,11 @@ namespace Unity.MLAgentsExamples
             int[] indices = Enumerable.Range(0, PopulationSize).ToArray();
             Array.Sort(fitnessValues, indices);
             return indices[PopulationSize - n];
+        }
+
+        public void SetRewardMode(GeneratorReward mode)
+        {
+            this.RewardMode = mode;
         }
 
         public Chromosome GetBestIndividual()

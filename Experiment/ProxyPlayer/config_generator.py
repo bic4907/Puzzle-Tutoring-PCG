@@ -7,8 +7,8 @@ ENV_ARGS = list()
 MCTS_SIMULATION_TIMES = [100, 1000]
 SAMPLING_NUMS = [10, 20, 30]
 TARGET_PLAYER = list(range(0, 11))
-METHOD = ['ga2']
-OBJECTIVE = ['knowledge']
+METHOD = ['ga']
+OBJECTIVE = ['score', 'knowledge']
 TARGET_EPISODE_COUNT = 500
 INCLUDE_SIMPLE_EFFECT = [1]
 KNOWLEDGE_ALMOST_RATIO = ['1.0']
@@ -120,24 +120,29 @@ for simple_effect in INCLUDE_SIMPLE_EFFECT:
                         yaml.dump(base_config, f)
 
             elif i_method == 'ga':
-                _RUN_ID = RUN_ID.copy()
 
-                _run_id = '_'.join(map(str, _RUN_ID))
+                for i_objective in OBJECTIVE:
 
-                ENV_ARGS = list()
-                ENV_ARGS.append('--runId'), ENV_ARGS.append(_run_id)
-                ENV_ARGS.append('--method'), ENV_ARGS.append(i_method)
-                ENV_ARGS.append('--targetPlayer'), ENV_ARGS.append(i_player)
-                if simple_effect == 1:
-                    ENV_ARGS.append('--simpleEffect')
-                ENV_ARGS.append('--logPath'), ENV_ARGS.append(f'/workspace/results/{_run_id}/')
-                ENV_ARGS.append('--targetEpisodeCount'), ENV_ARGS.append(TARGET_EPISODE_COUNT)
+                    _RUN_ID = RUN_ID.copy()
+                    _RUN_ID.append('obj'), _RUN_ID.append(i_objective)
+                    _run_id = '_'.join(map(str, _RUN_ID))
 
-                base_config['env_settings']['env_args'] = ENV_ARGS
-                print(_RUN_ID)
+                    ENV_ARGS = list()
+                    ENV_ARGS.append('--runId'), ENV_ARGS.append(_run_id)
+                    ENV_ARGS.append('--method'), ENV_ARGS.append(i_method)
+                    ENV_ARGS.append('--targetPlayer'), ENV_ARGS.append(i_player)
 
-                with open(os.path.join('generated', f'{_run_id}.yaml'), 'w') as f:
-                    yaml.dump(base_config, f)
+                    if simple_effect == 1:
+                        ENV_ARGS.append('--simpleEffect')
+                    ENV_ARGS.append('--logPath'), ENV_ARGS.append(f'/workspace/results/{_run_id}/')
+                    ENV_ARGS.append('--targetEpisodeCount'), ENV_ARGS.append(TARGET_EPISODE_COUNT)
+                    ENV_ARGS.append('--objective'), ENV_ARGS.append(i_objective)
+
+                    base_config['env_settings']['env_args'] = ENV_ARGS
+                    print(_RUN_ID)
+
+                    with open(os.path.join('generated', f'{_run_id}.yaml'), 'w') as f:
+                        yaml.dump(base_config, f)
 
 
 

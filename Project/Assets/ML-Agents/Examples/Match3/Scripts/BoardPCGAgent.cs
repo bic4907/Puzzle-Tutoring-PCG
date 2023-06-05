@@ -116,9 +116,6 @@ namespace Unity.MLAgentsExamples
                     case "ga":
                         generatorType = GeneratorType.GA;
                         break;
-                    case "ga2":
-                        generatorType = GeneratorType.GA;
-                        break;
                 }
 
             }
@@ -223,6 +220,12 @@ namespace Unity.MLAgentsExamples
 
         private void FixedUpdate()
         {
+            MCTS.Instance.SetRewardMode(generatorRewardType);
+            MCTS.Instance.SetSimulationLimit(MCTS_Simulation);
+            MCTS.Instance.SetKnowledgeAlmostRatio(KnowledgeAlmostRatio);
+
+            GeneticAlgorithm.Instance.SetRewardMode(generatorRewardType);
+
             // Make a move every step if we're training, or we're overriding models in CI.
             var useFast = Academy.Instance.IsCommunicatorOn || (m_ModelOverrider != null && m_ModelOverrider.HasOverrides);
             if (useFast)
@@ -247,9 +250,7 @@ namespace Unity.MLAgentsExamples
                 EpisodeInterrupted();
             }
 
-            MCTS.Instance.SetRewardMode(generatorRewardType);
-            MCTS.Instance.SetSimulationLimit(MCTS_Simulation);
-            MCTS.Instance.SetKnowledgeAlmostRatio(KnowledgeAlmostRatio);
+
         }
 
         void FastUpdate()
