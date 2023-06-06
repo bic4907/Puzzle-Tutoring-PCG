@@ -60,7 +60,7 @@ namespace Unity.MLAgentsExamples
 
         private BoardSize m_CurrentBoardSize;
 
-        System.Random m_Random;
+        public System.Random m_Random;
 
         void Awake()
         {

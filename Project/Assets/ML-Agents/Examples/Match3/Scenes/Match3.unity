@@ -1407,11 +1407,11 @@ MonoBehaviour:
   MoveTime: 0.1
   MaxMoves: 200
   useForcedFast: 0
-  generatorType: 3
+  generatorType: 2
   generatorRewardType: 1
   PlayerNumber: 0
   MCTS_Simulation: 1000
-  SamplingNum: 10
+  SamplingNum: 30
   EvoluationNum: 30
   CurrentEpisodeCount: 0
   TotalStepCount: 0

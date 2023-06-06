@@ -63,7 +63,7 @@ namespace Unity.MLAgentsExamples
                 if (score > bestBoardScore || bestBoard == null)
                 {
                     bestBoardScore = score;
-                    bestBoard = _completedBoard.DeepCopy();
+                    bestBoard = _completedBoard;
                 }
 
                 _completedBoard = null;
@@ -82,7 +82,7 @@ namespace Unity.MLAgentsExamples
             while (true)
             {
                 Match3Board _tmpBoard = board.DeepCopy();
-
+                _tmpBoard.m_Random = new System.Random();
                 _tmpBoard.FillFromAbove();
 
                 // Check if the spawned position made a special match
