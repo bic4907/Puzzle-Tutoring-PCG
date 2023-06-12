@@ -715,6 +715,7 @@ GameObject:
   - component: {fileID: 1540485847}
   - component: {fileID: 1540485851}
   - component: {fileID: 1540485852}
+  - component: {fileID: 1540485853}
   m_Layer: 0
   m_Name: Match3 PCG Agent
   m_TagString: Untagged
@@ -809,6 +810,9 @@ MonoBehaviour:
   SaveFirebaseLog: 0
   agentType: 1
   m_mouseInput: {fileID: 1540485852}
+  m_WaitingStartedTime: 0
+  LastDecisionTime: 32767
+  SelfMatchingThreshold: 5
 --- !u!114 &1540485852
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -826,3 +830,15 @@ MonoBehaviour:
   Board: {fileID: 0}
   playerHadVaildAction: 0
   ForceMove: 0
+--- !u!114 &1540485853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1540485843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9a38945767267408e1a16f16c3098e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
