@@ -1023,8 +1023,6 @@ namespace Unity.MLAgentsExamples
         {
             return m_SpecialMatchPositions;
         }
-
-
     }
 
 

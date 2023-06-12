@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEditor;
+using Unity.MLAgents.Integrations.Match3;
 
 namespace Unity.MLAgentsExamples
 {
@@ -31,6 +32,7 @@ namespace Unity.MLAgentsExamples
         private Match3Board m_Board;
         bool OnlyExplodeOnce = true;
         public GameObject explosionPrefab;
+        public GameObject glowPrefab;
         int matchedCellCount = 0;
 
         void Awake()
@@ -74,7 +76,7 @@ namespace Unity.MLAgentsExamples
                     go.AddComponent(typeof(BoxCollider));
 
                     tilesDict.Add((i, j), go.GetComponent<Match3TileSelector>());
-                    go.GetComponent<Match3TileSelector>().explosionPrefab = explosionPrefab;
+                    go.GetComponent<Match3TileSelector>().InstantiateTiles(explosionPrefab, glowPrefab);
                 }
             }
 
@@ -194,6 +196,15 @@ namespace Unity.MLAgentsExamples
 
 
             Profiler.EndSample();
+        }
+        public void GlowTiles(Move move, bool isTwoWay = false)
+        {
+            tilesDict[(move.Row, move.Column)].GlowTile();
+            if (isTwoWay)
+            {
+                var (otherRow, otherCol) = move.OtherCell();
+                tilesDict[(otherRow, otherCol)].GlowTile();
+            }
         }
     }
 }

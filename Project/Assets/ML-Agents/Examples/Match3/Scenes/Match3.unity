@@ -1246,6 +1246,7 @@ MonoBehaviour:
   TilePrefab: {fileID: 4007900521885639951, guid: faee4e805953b49e688bd00b45c55f2e,
     type: 3}
   explosionPrefab: {fileID: 0}
+  glowPrefab: {fileID: 0}
 --- !u!4 &1457479291
 Transform:
   m_ObjectHideFlags: 0
@@ -1336,6 +1337,8 @@ MonoBehaviour:
   TilePrefab: {fileID: 4007900521885639951, guid: faee4e805953b49e688bd00b45c55f2e,
     type: 3}
   explosionPrefab: {fileID: 5185188001891055889, guid: 417d2d02070b6d9489081cc02c599d57,
+    type: 3}
+  glowPrefab: {fileID: 5185188001891055889, guid: 3525266aa10906840bc2a2ffaf5b6b27,
     type: 3}
 --- !u!114 &1540485849
 MonoBehaviour:
@@ -1429,7 +1432,7 @@ MonoBehaviour:
   ComparisonCounts: 
   GeneratingRuntimes: []
   SaveFirebaseLog: 0
-  agentType: 0
+  agentType: 1
   m_mouseInput: {fileID: 1540485854}
   PopUpQuestionnaireTiming: 999999999
 --- !u!114 &1540485852

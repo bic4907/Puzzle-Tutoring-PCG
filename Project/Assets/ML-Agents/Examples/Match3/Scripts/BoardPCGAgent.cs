@@ -460,6 +460,7 @@ namespace Unity.MLAgentsExamples
                             {
                                 move = m_mouseInput.GetMove();
                                 Board.MakeMove(move);
+                                // GlowTiles(move,true);
                                 OnPlayerAction();
 
                                 nextState = State.FindMatches;
@@ -595,7 +596,10 @@ namespace Unity.MLAgentsExamples
                 sw.WriteLine(log.ToCSVRoW());
             }
         }
-
+        public void GlowTiles(Move move, bool isTwoWay = false)
+        {
+            GetComponent<Match3Drawer>().GlowTiles(move, isTwoWay);
+        }
 
     }
 
