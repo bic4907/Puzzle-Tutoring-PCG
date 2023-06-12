@@ -37,12 +37,11 @@ namespace Unity.MLAgentsExamples
 
         private PCGStepLog m_Logger;
  
-        public int PlayerNumber = 0;
+        public int PlayerNumber = 11;
 
         public int MCTS_Simulation = 300;
 
         private SkillKnowledge m_SkillKnowledge;
-        private SkillKnowledge m_ManualSkillKnowledge;
 
         private const float k_RewardMultiplier = 0.01f;
         
@@ -66,8 +65,15 @@ namespace Unity.MLAgentsExamples
         [Header("")]
         public AgentType agentType = AgentType.Agent;
         public MouseInteraction m_mouseInput;
-        public int PopUpQuestionnaireTiming = 5;
-        int PopUpQuestionnaireCount = 0;
+        
+        public float m_WaitingStartedTime;
+        int m_CntChainEffect = 0;
+        public float LastDecisionTime = Int16.MaxValue;
+
+        public float SelfMatchingThreshold = 5.0f;
+
+        private Move LastHintMove;
+        private Move LastPlayerMove;
 
         protected void Awake()
         {
@@ -89,6 +95,7 @@ namespace Unity.MLAgentsExamples
             {
                 PlayerNumber = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("targetPlayer"));
             }
+
             if(ParameterManagerSingleton.GetInstance().HasParam("method"))
             {
                 string _method = Convert.ToString(ParameterManagerSingleton.GetInstance().GetParam("method"));
@@ -134,7 +141,6 @@ namespace Unity.MLAgentsExamples
             }
 
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
-            m_ManualSkillKnowledge = new SkillKnowledge();
 
             ComparisonCounts = new List<int>();
         }
@@ -155,10 +161,19 @@ namespace Unity.MLAgentsExamples
             m_Logger = new PCGStepLog();
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
             
+            Debug.Log("Resetting Skill Knowledge");
+            Debug.Log(m_SkillKnowledge);
+
             CurrentEpisodeCount += 1;
             CurrentStepCount = 0;
             SettleCount = 0;
             ChangedCount = 0;
+            LastDecisionTime = Int16.MaxValue;
+            
+            m_WaitingStartedTime = Time.realtimeSinceStartup;
+            m_CntChainEffect = 0;
+            LastHintMove = new Move();
+            LastPlayerMove = new Move();
 
             if(TargetEpisodeCount != -1 && CurrentEpisodeCount > TargetEpisodeCount)
             {
@@ -173,6 +188,15 @@ namespace Unity.MLAgentsExamples
             ComparisonCounts.Clear();
         }
 
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                OnEpisodeBegin();
+            }
+        }
+
+
         private void OnPlayerAction()
         {
             if (SaveFirebaseLog)
@@ -183,7 +207,7 @@ namespace Unity.MLAgentsExamples
                 log.TotalStepCount = TotalStepCount;
                 log.Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
                 log.InstanceUUID = m_uuid;
-                log.SkillKnowledge = m_ManualSkillKnowledge;
+                log.SkillKnowledge = m_SkillKnowledge;
                 m_FirebaseLogger.Post(log);
             }
 
@@ -201,81 +225,12 @@ namespace Unity.MLAgentsExamples
             if (CurrentStepCount >= MaxMoves)
             {
                 // TODO OnGameEnd();
-                // EpisodeInterrupted();
+                // GOTO Questionnaire Scene
             }
 
             MCTS.Instance.SetRewardMode(generatorRewardType);
             MCTS.Instance.SetSimulationLimit(MCTS_Simulation);
             MCTS.Instance.SetKnowledgeAlmostRatio(KnowledgeAlmostRatio);
-        }
-
-        void FastUpdate()
-        {
-            while (true)
-            {
-                var hasMatched = Board.MarkMatchedCells();
-                if (!hasMatched)
-                {
-                    break;
-                }
-                var pointsEarned = Board.ClearMatchedCells();
-                // AddReward(k_RewardMultiplier * pointsEarned);
-
-                Board.SpawnSpecialCells();
-
-                var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());  
-                foreach (var (type, count) in createdPieces)
-                {
-                    m_SkillKnowledge.IncreaseMatchCount(type, count);
-                    m_ManualSkillKnowledge.IncreaseMatchCount(type, count);
-                }
-                Board.ExecuteSpecialEffect();
-
-                Board.DropCells();
-
-                switch(generatorType)
-                {
-                    case GeneratorType.Random:
-                        Board.FillFromAbove();
-                        break;
-                    case GeneratorType.MCTS:
-                        bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
-                        
-                        if(_isChanged)
-                        {
-                            ChangedCount += 1;
-                        }
-
-                        ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
-
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-                CurrentStepCount += 1;
-                TotalStepCount += 1;
-            }
-
-            bool isBoardSettled = false;
-            while (!HasValidMoves())
-            {
-                Board.InitSettled();
-                isBoardSettled = true;
-            }
-
-            if (isBoardSettled)
-            {
-                SettleCount += 1;
-            }
-            
-            CheckKnowledgeReach();
-            
-            // Simulate the board with greedy action
-            Move move = GreedyMatch3Solver.GetAction(Board);
-            Board.MakeMove(move);
-            OnPlayerAction();
-
-            m_MovesMade++;
         }
 
         void AnimatedUpdate()
@@ -290,6 +245,7 @@ namespace Unity.MLAgentsExamples
 
             State nextState;
 
+            // Check for the first findMatches after the move action.
             switch (m_CurrentState)
             {
                 case State.FindMatches:
@@ -297,22 +253,52 @@ namespace Unity.MLAgentsExamples
                     nextState = hasMatched ? State.ClearMatched : State.WaitForMove;
                     if (nextState == State.WaitForMove)
                     {
+                        m_WaitingStartedTime = Time.realtimeSinceStartup;
                         m_MovesMade++;
                     }
                     break;
                 case State.ClearMatched:
+                    m_CntChainEffect++;
+                    Debug.Log("Chain Effect: " + m_CntChainEffect);
+
                     var pointsEarned = Board.ClearMatchedCells();
                     // AddReward(k_RewardMultiplier * pointsEarned);
 
                     Board.SpawnSpecialCells();
 
-                    var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());  
-                    foreach (var (type, count) in createdPieces)
+                    if (m_CntChainEffect == 1)
                     {
-                        m_SkillKnowledge.IncreaseMatchCount(type, count);
-                        m_ManualSkillKnowledge.IncreaseMatchCount(type, count);
+                        var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());  
+                        foreach (var (type, count) in createdPieces)
+                        {
+                            m_SkillKnowledge.IncreaseMatchCount(type, count);
+
+                            if (m_SkillKnowledge.ManualCheck[type] == true || count == 0) continue;
+
+                            if (LastDecisionTime < SelfMatchingThreshold)
+                            {
+                                // Before hint
+                                Debug.Log("LastDecisionTime < SelfMatchingThreshold: " + type);
+                                m_SkillKnowledge.ManualCheck[type] = true;
+                            }
+                            else
+                            {
+                                // After hint
+                                if (LastHintMove.MoveIndex != LastPlayerMove.MoveIndex)
+                                {
+                                    Debug.Log("LastDecisionTime < SelfMatchingThreshold, but Ignored Hint: " + type);
+                                    m_SkillKnowledge.ManualCheck[type] = true;
+
+                                }
+                            }
+
+
+                        }
+                        Debug.Log(m_SkillKnowledge);
                     }
+
                     Board.ExecuteSpecialEffect();
+
 
                     nextState = State.Drop;
                     break;
@@ -330,13 +316,6 @@ namespace Unity.MLAgentsExamples
                         case GeneratorType.MCTS:
                             bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
 
-                            if(_isChanged)
-                            {
-                                ChangedCount += 1;
-                            }
-
-                            ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
-
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -347,10 +326,10 @@ namespace Unity.MLAgentsExamples
                     nextState = State.FindMatches;
                     break;
                 case State.WaitForMove:
+
                     bool isBoardSettled = false;
                     nextState = State.WaitForMove;
-                    Move move = new Move();
-                    
+
                     while (true)
                     {
                         // Shuffle the board until we have a valid move.
@@ -368,35 +347,27 @@ namespace Unity.MLAgentsExamples
                         SettleCount += 1;
                     }
 
-
+                    Move move = new Move();
                     switch(agentType)
                     {
-                        case AgentType.Agent:
-                            move = GreedyMatch3Solver.GetAction(Board);
-                            Board.MakeMove(move);
-                            OnPlayerAction();
-
-                            nextState = State.FindMatches;
-                        break;
                         case AgentType.Human:
-                            if(PopUpQuestionnaireCount == PopUpQuestionnaireTiming)
-                            {
-                                gameObject.transform.Find("QuestionBox").gameObject.SetActive(true);
-                                PopUpQuestionnaireCount = 0;
-                            }
                             if(m_mouseInput.playerHadVaildAction == true)
                             {
+                                LastHintMove = GreedyMatch3Solver.GetAction(Board);
+                                
                                 move = m_mouseInput.GetMove();
+                                LastPlayerMove = move;
+
                                 Board.MakeMove(move);
                                 OnPlayerAction();
 
+                                LastDecisionTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
+
+                                m_CntChainEffect = 0;
                                 nextState = State.FindMatches;
-                                
-                                PopUpQuestionnaireCount += 1;
                             }
                         break;
                     }
-                    CheckKnowledgeReach();
 
                     break;
                 default:

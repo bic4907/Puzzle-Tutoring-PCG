@@ -140,6 +140,18 @@ namespace Unity.MLAgentsExamples
             return result;
         }
 
+        public override string ToString()
+        {
+            string result = "(SkillKnowledge) ";
+            foreach (PieceType pieceType in PieceTypes)
+            {
+                result += pieceType.ToString() + ": " + CurrentMatchCounts[pieceType] + "/" + TargetMatchCounts[pieceType] + "/"  + ManualCheck[pieceType] + " | ";
+            }
+            result = result.Remove(result.Trim().Length - 2);
+
+            return result;
+        }
+
     }
 
     public class SkillKnowledgeExperimentSingleton
@@ -192,6 +204,8 @@ namespace Unity.MLAgentsExamples
             SkillKnowledges.Add(new SkillKnowledge(11, 7, 1, 1, 8, 3));
             SkillKnowledges.Add(new SkillKnowledge(10, 8, 7, 4, 9, 5));
             SkillKnowledges.Add(new SkillKnowledge(4, 9, 1, 2, 3, 2));
+            
+            SkillKnowledges.Add(new SkillKnowledge(2, 2, 2, 2, 2, 2)); // Dummy
         }
 
         public SkillKnowledge GetSkillKnowledge(int index)
