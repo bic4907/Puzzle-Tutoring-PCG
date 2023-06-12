@@ -45,12 +45,11 @@ namespace Unity.MLAgentsExamples
             board.SaveTo(filePath);
         }
 
-        public void LoadBoard()
+        public void LoadBoard(string filename)
         {
-            Debug.Log("BoardPresetManager: LoadBoard");
+            filename = filename + ".bin";
+            Debug.Log($"BoardPresetManager: LoadBoard ({filename})");
             // Get filename with date and time
-
-            string filename = "board_2023-06-13_00-50-41.bin";
             string filePath = System.IO.Path.Combine(Application.streamingAssetsPath, filename);
 
             board.LoadFrom(filePath);
