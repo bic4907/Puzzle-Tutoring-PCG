@@ -67,6 +67,7 @@ namespace Unity.MLAgentsExamples
 
         public List<int> ComparisonCounts;
         public List<float> GeneratingRuntimes;
+        public List<float> GeneratingScores;
         public bool SaveFirebaseLog = false;
         private FirebaseLogger m_FirebaseLogger;
         
@@ -156,6 +157,10 @@ namespace Unity.MLAgentsExamples
             {
                 SamplingNum = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("samplingNum"));
             }
+            if(ParameterManagerSingleton.GetInstance().HasParam("evolutionNum"))
+            {
+                EvoluationNum = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("evolutionNum"));
+            }
 
 
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
@@ -163,6 +168,7 @@ namespace Unity.MLAgentsExamples
 
             ComparisonCounts = new List<int>();
             GeneratingRuntimes = new List<float>();
+            GeneratingScores = new List<float>();
         }
 
         public override void OnEpisodeBegin()
@@ -279,32 +285,27 @@ namespace Unity.MLAgentsExamples
 
                 var startTime = Time.realtimeSinceStartup;
 
+                float score = 0.0f;
+
                 switch(generatorType)
                 {
                     case GeneratorType.Random:
                         Board.FillFromAbove();
                         break;
                     case GeneratorType.MCTS:
-                        bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge, PlayerDepthLimit);
-                        
-                        if(_isChanged)
-                        {
-                            ChangedCount += 1;
-                        }
-
-                        ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
-
+                        score = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge, PlayerDepthLimit);
                         break;
                     case GeneratorType.Sampling:
-                        BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
+                        score = BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
                         break;
                     case GeneratorType.GA:
-                        GeneticAlgorithm.Instance.FillEmpty(Board, m_SkillKnowledge, EvoluationNum);
+                        score = GeneticAlgorithm.Instance.FillEmpty(Board, m_SkillKnowledge, EvoluationNum);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
 
+                GeneratingScores.Add(Math.Max(score, 0.0f));
                 GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
 
             }
@@ -384,36 +385,29 @@ namespace Unity.MLAgentsExamples
                 case State.FillEmpty:
                     startTime = Time.realtimeSinceStartup;
 
+                    float score = 0.0f;
+
                     switch(generatorType)
                     {
                         case GeneratorType.Random:
                             Board.FillFromAbove();
-                            GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
                             break;
                         case GeneratorType.MCTS:
-                            bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge, PlayerDepthLimit);
-
-                            if(_isChanged)
-                            {
-                                ChangedCount += 1;
-                            }
-
-                            GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
-                            ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
-
+                            score = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge, PlayerDepthLimit);
                             break;
-
                         case GeneratorType.Sampling:
-                            BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
-                            GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
+                            score = BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
                             break;
                         case GeneratorType.GA:
-                            GeneticAlgorithm.Instance.FillEmpty(Board, m_SkillKnowledge, EvoluationNum);
-                            GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
+                            score = GeneticAlgorithm.Instance.FillEmpty(Board, m_SkillKnowledge, EvoluationNum);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
+
+                    GeneratingScores.Add(Math.Max(score, 0.0f));
+                    GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
+
                     CurrentStepCount += 1;
                     TotalStepCount += 1;
 
@@ -529,12 +523,11 @@ namespace Unity.MLAgentsExamples
             m_Logger.SettleCount = SettleCount;
             m_Logger.ChangedCount = ChangedCount;
 
-            m_Logger.MeanComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)ComparisonCounts.Average();
-            m_Logger.StdComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)CalculateStandardDeviation(ComparisonCounts);
-
             m_Logger.MeanGenerateRuntimes = GeneratingRuntimes.Count == 0 ? 0 : (float)GeneratingRuntimes.Average();
             m_Logger.StdGenerateRuntimes = GeneratingRuntimes.Count == 0 ? 0 : (float)CalculateStandardDeviation(GeneratingRuntimes);
 
+            m_Logger.MeanGenerateScores = GeneratingScores.Count == 0 ? 0 : (float)GeneratingScores.Average();
+            m_Logger.StdGenerateScores = GeneratingScores.Count == 0 ? 0 : (float)CalculateStandardDeviation(GeneratingScores);
 
             m_Logger.KnowledgeReachStep = KnowledgeReachStep;
             m_Logger.KnowledgeQ1ReachStep = KnowledgeQ1ReachStep;
@@ -572,7 +565,7 @@ namespace Unity.MLAgentsExamples
                 using (StreamWriter sw = File.CreateText(filePath))
                 {
                     string output = "";
-                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,MeanComparisonCount,StdComparisonCount,MeanGenerateRuntimes,StdGenerateRuntimes,ReachedKnowledgeStep,Q1ReachedKnowledgeStep,Q2ReachedKnowledgeStep,Q3ReachedKnowledgeStep,";
+                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,MeanGenerateRuntimes,StdGenerateRuntimes,MeanGenerateScores,StdGenerateScores,ReachedKnowledgeStep,Q1ReachedKnowledgeStep,Q2ReachedKnowledgeStep,Q3ReachedKnowledgeStep,";
 
                     foreach (PieceType pieceType in BoardPCGAgent.PieceLogOrder)
                     {
@@ -608,10 +601,10 @@ namespace Unity.MLAgentsExamples
         public SkillKnowledge SkillKnowledge;
         public int SettleCount;
         public int ChangedCount;
-        public float MeanComparisonCount;
-        public float StdComparisonCount;
         public float MeanGenerateRuntimes;
         public float StdGenerateRuntimes;
+        public float MeanGenerateScores;
+        public float StdGenerateScores;
         public int KnowledgeReachStep;
         public int KnowledgeQ1ReachStep;
         public int KnowledgeQ2ReachStep;
@@ -631,10 +624,13 @@ namespace Unity.MLAgentsExamples
             row += InstanceUUID + ","; 
             row += SettleCount + ",";
             row += ChangedCount + ",";
-            row += MeanComparisonCount + ",";
-            row += StdComparisonCount + ",";
+
             row += MeanGenerateRuntimes + ",";
             row += StdGenerateRuntimes + ",";
+
+            row += MeanGenerateScores + ",";
+            row += StdGenerateScores + ",";
+
             row += KnowledgeReachStep + ",";
             row += KnowledgeQ1ReachStep + ",";
             row += KnowledgeQ2ReachStep + ",";

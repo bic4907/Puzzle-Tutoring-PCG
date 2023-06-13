@@ -96,6 +96,10 @@ public class ParameterManagerSingleton
             {
                 ParsedArgs.Add("samplingNum", args[++idx]);
             }
+            else if (args[idx].Contains("--evolutionNum"))
+            {
+                ParsedArgs.Add("evolutionNum", args[++idx]);
+            }
 
             idx++;
         }

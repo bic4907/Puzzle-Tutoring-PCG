@@ -1407,12 +1407,12 @@ MonoBehaviour:
   MoveTime: 0.1
   MaxMoves: 200
   useForcedFast: 0
-  generatorType: 2
+  generatorType: 3
   generatorRewardType: 1
   PlayerNumber: 0
   MCTS_Simulation: 1000
-  SamplingNum: 30
-  EvoluationNum: 30
+  SamplingNum: 10
+  EvoluationNum: 10
   CurrentEpisodeCount: 0
   TotalStepCount: 0
   CurrentStepCount: 0
@@ -1428,6 +1428,7 @@ MonoBehaviour:
   PlayerDepthLimit: 1
   ComparisonCounts: 
   GeneratingRuntimes: []
+  GeneratingScores: []
   SaveFirebaseLog: 0
   agentType: 0
   m_mouseInput: {fileID: 1540485854}

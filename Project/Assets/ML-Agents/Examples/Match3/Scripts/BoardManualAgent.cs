@@ -239,15 +239,7 @@ namespace Unity.MLAgentsExamples
                         Board.FillFromAbove();
                         break;
                     case GeneratorType.MCTS:
-                        bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
-                        
-                        if(_isChanged)
-                        {
-                            ChangedCount += 1;
-                        }
-
-                        ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
-
+                        MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -328,15 +320,7 @@ namespace Unity.MLAgentsExamples
                             Board.FillFromAbove();
                             break;
                         case GeneratorType.MCTS:
-                            bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
-
-                            if(_isChanged)
-                            {
-                                ChangedCount += 1;
-                            }
-
-                            ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
-
+                            MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -448,8 +432,8 @@ namespace Unity.MLAgentsExamples
             m_Logger.SettleCount = SettleCount;
             m_Logger.ChangedCount = ChangedCount;
 
-            m_Logger.MeanComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)ComparisonCounts.Average();
-            m_Logger.StdComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)CalculateStandardDeviation(ComparisonCounts);
+            // m_Logger.MeanComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)ComparisonCounts.Average();
+            // m_Logger.StdComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)CalculateStandardDeviation(ComparisonCounts);
 
             m_Logger.KnowledgeReachStep = KnowledgeReachStep;
             // m_Logger.KnowledgeAlmostReachStep = KnowledgeAlmostReachStep;
