@@ -1413,7 +1413,7 @@ MonoBehaviour:
   generatorType: 2
   generatorRewardType: 1
   PlayerNumber: 0
-  MCTS_Simulation: 1000
+  MCTS_Simulation: 200
   SamplingNum: 30
   EvoluationNum: 30
   CurrentEpisodeCount: 0
@@ -1432,7 +1432,7 @@ MonoBehaviour:
   ComparisonCounts: 
   GeneratingRuntimes: []
   SaveFirebaseLog: 0
-  agentType: 1
+  agentType: 0
   m_mouseInput: {fileID: 1540485854}
   PopUpQuestionnaireTiming: 999999999
 --- !u!114 &1540485852

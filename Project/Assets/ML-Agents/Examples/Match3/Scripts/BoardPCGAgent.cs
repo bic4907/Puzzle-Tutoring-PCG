@@ -73,8 +73,6 @@ namespace Unity.MLAgentsExamples
         [Header("")]
         public AgentType agentType = AgentType.Agent;
         public MouseInteraction m_mouseInput;
-        public int PopUpQuestionnaireTiming = 5;
-        int PopUpQuestionnaireCount = 0;
 
 
         protected override void Awake()
@@ -451,21 +449,14 @@ namespace Unity.MLAgentsExamples
                             nextState = State.FindMatches;
                         break;
                         case AgentType.Human:
-                            if(PopUpQuestionnaireCount == PopUpQuestionnaireTiming)
-                            {
-                                gameObject.transform.Find("QuestionBox").gameObject.SetActive(true);
-                                PopUpQuestionnaireCount = 0;
-                            }
                             if(m_mouseInput.playerHadVaildAction == true)
                             {
                                 move = m_mouseInput.GetMove();
                                 Board.MakeMove(move);
-                                // GlowTiles(move,true);
                                 OnPlayerAction();
 
                                 nextState = State.FindMatches;
                                 
-                                PopUpQuestionnaireCount += 1;
                             }
                         break;
                     }
