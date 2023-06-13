@@ -64,6 +64,7 @@ namespace Unity.MLAgentsExamples
         public int KnowledgeQ2ReachStep = -1; // 3/4 percentqage of the target
         public int KnowledgeQ3ReachStep = -1; // 3/4 percentqage of the target
         public int PlayerDepthLimit = 1;
+        public float GreedyActionRatio = 1.0f;
 
         public List<int> ComparisonCounts;
         public List<float> GeneratingRuntimes;
@@ -74,6 +75,7 @@ namespace Unity.MLAgentsExamples
         public AgentType agentType = AgentType.Agent;
         public MouseInteraction m_mouseInput;
 
+        private System.Random m_Random = new System.Random();
 
         protected override void Awake()
         {
@@ -153,6 +155,10 @@ namespace Unity.MLAgentsExamples
             if(ParameterManagerSingleton.GetInstance().HasParam("samplingNum"))
             {
                 SamplingNum = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("samplingNum"));
+            }
+            if(ParameterManagerSingleton.GetInstance().HasParam("greedyActionRatio"))
+            {
+                GreedyActionRatio = (float)Convert.ToDouble(ParameterManagerSingleton.GetInstance().GetParam("greedyActionRatio"));
             }
 
 
@@ -304,7 +310,6 @@ namespace Unity.MLAgentsExamples
                 }
 
                 GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
-
             }
 
 
@@ -325,7 +330,15 @@ namespace Unity.MLAgentsExamples
             CheckKnowledgeReach();
             
             // Simulate the board with greedy action
-            Move move = GreedyMatch3Solver.GetAction(Board);
+            Move move = new Move();
+            if (m_Random.NextDouble() < GreedyActionRatio)
+            {
+                move = GreedyMatch3Solver.GetAction(Board);
+            }
+            else
+            {
+                move = RandomMatch3Solver.GetAction(Board);
+            }
             Board.MakeMove(move);
 
             CurrentStepCount += 1;
@@ -442,7 +455,16 @@ namespace Unity.MLAgentsExamples
                     switch(agentType)
                     {
                         case AgentType.Agent:
-                            move = GreedyMatch3Solver.GetAction(Board);
+                            // Get rand and compare if sample random match3 solver
+                            if (m_Random.NextDouble() < GreedyActionRatio)
+                            {
+                                move = GreedyMatch3Solver.GetAction(Board);
+                            }
+                            else
+                            {
+                                move = RandomMatch3Solver.GetAction(Board);
+                            }
+
                             Board.MakeMove(move);
                             OnPlayerAction();
 
