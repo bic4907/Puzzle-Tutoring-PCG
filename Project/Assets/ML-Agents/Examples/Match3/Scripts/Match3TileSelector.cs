@@ -8,9 +8,11 @@ public class Match3TileSelector : MonoBehaviour
     public GameObject[] tileTypes = new GameObject[0];
     public Material[] materialTypes = new Material[0];
     public GameObject explosionPrefab;
+    public GameObject glowPrefab;
     private Dictionary<int, MeshRenderer> tileDict = new Dictionary<int, MeshRenderer>();
     int corutineControlFlag = 0;
     bool isCorutineRunning = false;
+    int glowTileOnlyOnce = 0;
 
     // Start is called before the first frame update
     void Awake()
@@ -38,6 +40,7 @@ public class Match3TileSelector : MonoBehaviour
             AllTilesOff();
             emptyTile.SetActive(true);
             corutineControlFlag += 1;
+            glowTileOnlyOnce += 1;
             
         }
         else
@@ -62,10 +65,32 @@ public class Match3TileSelector : MonoBehaviour
             }
         }
     }
+    public void InstantiateTiles(GameObject explosionPrefab, GameObject glowPrefab)
+    {
+        var tmp = Instantiate(explosionPrefab, this.transform.position, Quaternion.identity);
+        tmp.transform.SetParent(this.transform);
+        this.explosionPrefab = tmp;
+
+        tmp = Instantiate(glowPrefab, this.transform.position, Quaternion.identity);
+        tmp.transform.SetParent(this.transform);
+        this.glowPrefab = tmp;
+        
+        this.explosionPrefab.SetActive(false);
+        this.glowPrefab.SetActive(false);
+    }
     public void ExplodeTile()
     {
-        var tmp = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
-        Destroy(tmp, 1f);
+        explosionPrefab.SetActive(false);
+        explosionPrefab.SetActive(true);
+    }
+    public void GlowTile()
+    {
+        glowPrefab.SetActive(false);
+        glowPrefab.SetActive(true);
+    }
+    public void StopGlow()
+    {
+        glowPrefab.SetActive(false);
     }
     //corutine to scale the tile
     public IEnumerator ScaleTile(Vector3 scale, int i)

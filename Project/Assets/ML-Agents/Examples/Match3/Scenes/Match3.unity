@@ -269,8 +269,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d6935a0b6cd17d64c945f8f0d90ccf25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   mainCamera: {fileID: 327661544}
   direction: 0
   Board: {fileID: 0}
@@ -1221,8 +1221,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d852a063770348b68caa91b8e7642a5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   MinRows: 9
   MaxRows: 9
   MinColumns: 8
@@ -1239,13 +1239,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: abebb7ad4a5547d7a3b04373784ff195, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   DebugMoveIndex: -1
   CubeSpacing: 1.25
   TilePrefab: {fileID: 4007900521885639951, guid: faee4e805953b49e688bd00b45c55f2e,
     type: 3}
   explosionPrefab: {fileID: 0}
+  glowPrefab: {fileID: 0}
 --- !u!4 &1457479291
 Transform:
   m_ObjectHideFlags: 0
@@ -1311,8 +1312,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d852a063770348b68caa91b8e7642a5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   MinRows: 9
   MaxRows: 9
   MinColumns: 8
@@ -1329,13 +1330,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: abebb7ad4a5547d7a3b04373784ff195, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   DebugMoveIndex: -1
   CubeSpacing: 1.25
   TilePrefab: {fileID: 4007900521885639951, guid: faee4e805953b49e688bd00b45c55f2e,
     type: 3}
   explosionPrefab: {fileID: 5185188001891055889, guid: 417d2d02070b6d9489081cc02c599d57,
+    type: 3}
+  glowPrefab: {fileID: 5185188001891055889, guid: 3525266aa10906840bc2a2ffaf5b6b27,
     type: 3}
 --- !u!114 &1540485849
 MonoBehaviour:
@@ -1347,8 +1350,8 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d982f0cd92214bd2b689be838fa40c44, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
@@ -1366,8 +1369,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5d1c4e0b1822b495aa52bc52839ecb30, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   m_BrainParameters:
     VectorObservationSize: 10
     NumStackedVectorObservations: 1
@@ -1397,8 +1400,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ddc5df1dd63f527469300ea78bdb64ad, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
@@ -1410,9 +1413,9 @@ MonoBehaviour:
   generatorType: 3
   generatorRewardType: 1
   PlayerNumber: 0
-  MCTS_Simulation: 1000
-  SamplingNum: 10
-  EvoluationNum: 10
+  MCTS_Simulation: 200
+  SamplingNum: 30
+  EvoluationNum: 30
   CurrentEpisodeCount: 0
   TotalStepCount: 0
   CurrentStepCount: 0
@@ -1426,7 +1429,7 @@ MonoBehaviour:
   KnowledgeQ2ReachStep: -1
   KnowledgeQ3ReachStep: -1
   PlayerDepthLimit: 1
-  ComparisonCounts: 
+  ComparisonCounts:
   GeneratingRuntimes: []
   GeneratingScores: []
   SaveFirebaseLog: 0
@@ -1443,8 +1446,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   DecisionPeriod: 20
   TakeActionsBetweenDecisions: 0
 --- !u!114 &1540485853
@@ -1457,8 +1460,8 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 88b6042bc9a5d4aa58d931eae49442e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
@@ -1473,8 +1476,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d6935a0b6cd17d64c945f8f0d90ccf25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   mainCamera: {fileID: 327661544}
   direction: 0
   Board: {fileID: 0}
@@ -3040,8 +3043,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b1ce0470e6c202245891c94f7718e13a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   mainCamera: {fileID: 327661544}
 --- !u!65 &9007117109137791538
 BoxCollider:

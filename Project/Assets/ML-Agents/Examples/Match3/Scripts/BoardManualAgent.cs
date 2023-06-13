@@ -36,8 +36,8 @@ namespace Unity.MLAgentsExamples
         private string m_uuid = System.Guid.NewGuid().ToString().Substring(0, 8);
 
         private PCGStepLog m_Logger;
- 
-        public int PlayerNumber = 0;
+
+        public int PlayerNumber = 11;
 
         public int MCTS_Simulation = 300;
 
@@ -45,7 +45,7 @@ namespace Unity.MLAgentsExamples
         private SkillKnowledge m_ManualSkillKnowledge;
 
         private const float k_RewardMultiplier = 0.01f;
-        
+
         public int CurrentEpisodeCount = 0;
         public int TotalStepCount = 0;
         public int CurrentStepCount = 0;
@@ -62,12 +62,21 @@ namespace Unity.MLAgentsExamples
         public bool SaveFirebaseLog = false;
 
         private FirebaseLogger m_FirebaseLogger;
-        
+
         [Header("")]
         public AgentType agentType = AgentType.Agent;
         public MouseInteraction m_mouseInput;
-        public int PopUpQuestionnaireTiming = 5;
-        int PopUpQuestionnaireCount = 0;
+
+        public float m_WaitingStartedTime;
+        int m_CntChainEffect = 0;
+        public float LastDecisionTime = Int16.MaxValue;
+
+        public float SelfMatchingThreshold = 5.0f;
+        public float HintStartTime = 5.0f; // Hint will be shown after this time
+        public bool m_HintGlowed = false;
+
+        private Move LastHintMove;
+        private Move LastPlayerMove;
 
         protected void Awake()
         {
@@ -89,6 +98,7 @@ namespace Unity.MLAgentsExamples
             {
                 PlayerNumber = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("targetPlayer"));
             }
+
             if(ParameterManagerSingleton.GetInstance().HasParam("method"))
             {
                 string _method = Convert.ToString(ParameterManagerSingleton.GetInstance().GetParam("method"));
@@ -134,7 +144,6 @@ namespace Unity.MLAgentsExamples
             }
 
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
-            m_ManualSkillKnowledge = new SkillKnowledge();
 
             ComparisonCounts = new List<int>();
         }
@@ -146,7 +155,7 @@ namespace Unity.MLAgentsExamples
             m_CurrentState = State.FindMatches;
             m_TimeUntilMove = MoveTime;
             m_MovesMade = 0;
-            
+
             if (m_Logger != null && CurrentEpisodeCount != 0)
             {
                 RecordResult();
@@ -154,11 +163,20 @@ namespace Unity.MLAgentsExamples
 
             m_Logger = new PCGStepLog();
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
-            
+
+            Debug.Log("Resetting Skill Knowledge");
+            Debug.Log(m_SkillKnowledge);
+
             CurrentEpisodeCount += 1;
             CurrentStepCount = 0;
             SettleCount = 0;
             ChangedCount = 0;
+            LastDecisionTime = Int16.MaxValue;
+
+            m_WaitingStartedTime = Time.realtimeSinceStartup;
+            m_CntChainEffect = 0;
+            LastHintMove = new Move();
+            LastPlayerMove = new Move();
 
             if(TargetEpisodeCount != -1 && CurrentEpisodeCount > TargetEpisodeCount)
             {
@@ -173,6 +191,15 @@ namespace Unity.MLAgentsExamples
             ComparisonCounts.Clear();
         }
 
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                OnEpisodeBegin();
+            }
+        }
+
+
         private void OnPlayerAction()
         {
             if (SaveFirebaseLog)
@@ -183,7 +210,7 @@ namespace Unity.MLAgentsExamples
                 log.TotalStepCount = TotalStepCount;
                 log.Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
                 log.InstanceUUID = m_uuid;
-                log.SkillKnowledge = m_ManualSkillKnowledge;
+                log.SkillKnowledge = m_SkillKnowledge;
                 m_FirebaseLogger.Post(log);
             }
 
@@ -201,7 +228,7 @@ namespace Unity.MLAgentsExamples
             if (CurrentStepCount >= MaxMoves)
             {
                 // TODO OnGameEnd();
-                // EpisodeInterrupted();
+                // GOTO Questionnaire Scene
             }
 
             MCTS.Instance.SetRewardMode(generatorRewardType);
@@ -223,7 +250,7 @@ namespace Unity.MLAgentsExamples
 
                 Board.SpawnSpecialCells();
 
-                var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());  
+                var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());
                 foreach (var (type, count) in createdPieces)
                 {
                     m_SkillKnowledge.IncreaseMatchCount(type, count);
@@ -259,9 +286,9 @@ namespace Unity.MLAgentsExamples
             {
                 SettleCount += 1;
             }
-            
+
             CheckKnowledgeReach();
-            
+
             // Simulate the board with greedy action
             Move move = GreedyMatch3Solver.GetAction(Board);
             Board.MakeMove(move);
@@ -282,6 +309,7 @@ namespace Unity.MLAgentsExamples
 
             State nextState;
 
+            // Check for the first findMatches after the move action.
             switch (m_CurrentState)
             {
                 case State.FindMatches:
@@ -289,22 +317,52 @@ namespace Unity.MLAgentsExamples
                     nextState = hasMatched ? State.ClearMatched : State.WaitForMove;
                     if (nextState == State.WaitForMove)
                     {
+                        m_WaitingStartedTime = Time.realtimeSinceStartup;
                         m_MovesMade++;
                     }
                     break;
                 case State.ClearMatched:
+                    m_CntChainEffect++;
+                    Debug.Log("Chain Effect: " + m_CntChainEffect);
+
                     var pointsEarned = Board.ClearMatchedCells();
                     // AddReward(k_RewardMultiplier * pointsEarned);
 
                     Board.SpawnSpecialCells();
 
-                    var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());  
-                    foreach (var (type, count) in createdPieces)
+                    if (m_CntChainEffect == 1)
                     {
-                        m_SkillKnowledge.IncreaseMatchCount(type, count);
-                        m_ManualSkillKnowledge.IncreaseMatchCount(type, count);
+                        var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());
+                        foreach (var (type, count) in createdPieces)
+                        {
+                            m_SkillKnowledge.IncreaseMatchCount(type, count);
+
+                            if (m_SkillKnowledge.ManualCheck[type] == true || count == 0) continue;
+
+                            if (LastDecisionTime < SelfMatchingThreshold)
+                            {
+                                // Before hint
+                                Debug.Log("LastDecisionTime < SelfMatchingThreshold: " + type);
+                                m_SkillKnowledge.ManualCheck[type] = true;
+                            }
+                            else
+                            {
+                                // After hint
+                                if (LastHintMove.MoveIndex != LastPlayerMove.MoveIndex)
+                                {
+                                    Debug.Log("LastDecisionTime < SelfMatchingThreshold, but Ignored Hint: " + type);
+                                    m_SkillKnowledge.ManualCheck[type] = true;
+
+                                }
+                            }
+
+
+                        }
+                        Debug.Log(m_SkillKnowledge);
                     }
+
                     Board.ExecuteSpecialEffect();
+
 
                     nextState = State.Drop;
                     break;
@@ -313,7 +371,7 @@ namespace Unity.MLAgentsExamples
                     nextState = State.FillEmpty;
                     break;
                 case State.FillEmpty:
-    
+
                     switch(generatorType)
                     {
                         case GeneratorType.Random:
@@ -331,10 +389,10 @@ namespace Unity.MLAgentsExamples
                     nextState = State.FindMatches;
                     break;
                 case State.WaitForMove:
+
                     bool isBoardSettled = false;
                     nextState = State.WaitForMove;
-                    Move move = new Move();
-                    
+
                     while (true)
                     {
                         // Shuffle the board until we have a valid move.
@@ -346,41 +404,43 @@ namespace Unity.MLAgentsExamples
                         Board.InitSettled();
                         isBoardSettled = true;
                     }
-                    
+
                     if (isBoardSettled)
                     {
                         SettleCount += 1;
                     }
 
 
+                    float WaitedTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
+                    if (WaitedTime > HintStartTime && m_HintGlowed == false)
+                    {
+                        GlowTiles(GreedyMatch3Solver.GetAction(Board), isTwoWay: true);
+                        m_HintGlowed = true;
+                    }
+
+                    Move move = new Move();
                     switch(agentType)
                     {
-                        case AgentType.Agent:
-                            move = GreedyMatch3Solver.GetAction(Board);
-                            Board.MakeMove(move);
-                            OnPlayerAction();
-
-                            nextState = State.FindMatches;
-                        break;
                         case AgentType.Human:
-                            if(PopUpQuestionnaireCount == PopUpQuestionnaireTiming)
-                            {
-                                gameObject.transform.Find("QuestionBox").gameObject.SetActive(true);
-                                PopUpQuestionnaireCount = 0;
-                            }
                             if(m_mouseInput.playerHadVaildAction == true)
                             {
+                                LastHintMove = GreedyMatch3Solver.GetAction(Board);
+
                                 move = m_mouseInput.GetMove();
+                                LastPlayerMove = move;
+
                                 Board.MakeMove(move);
                                 OnPlayerAction();
 
+                                LastDecisionTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
+
+                                m_CntChainEffect = 0;
                                 nextState = State.FindMatches;
-                                
-                                PopUpQuestionnaireCount += 1;
+                                m_HintGlowed = false; // Reset
+                                StopGlowingTiles();
                             }
                         break;
                     }
-                    CheckKnowledgeReach();
 
                     break;
                 default:
@@ -419,6 +479,15 @@ namespace Unity.MLAgentsExamples
             return false;
         }
 
+        public void GlowTiles(Move move, bool isTwoWay = false)
+        {
+            GetComponent<Match3Drawer>().GlowTiles(move, isTwoWay);
+        }
+        public void StopGlowingTiles()
+        {
+            GetComponent<Match3Drawer>().StopGlowingTiles();
+        }
+
         public void RecordResult()
         {
             // Make a new PCG Log file with the parameters
@@ -437,7 +506,7 @@ namespace Unity.MLAgentsExamples
 
             m_Logger.KnowledgeReachStep = KnowledgeReachStep;
             // m_Logger.KnowledgeAlmostReachStep = KnowledgeAlmostReachStep;
-    
+
             FlushLog(GetMatchResultLogPath(), m_Logger);
         }
 
@@ -451,7 +520,7 @@ namespace Unity.MLAgentsExamples
 
         private string GetMatchResultLogPath()
         {
-            return ParameterManagerSingleton.GetInstance().GetParam("logPath") + 
+            return ParameterManagerSingleton.GetInstance().GetParam("logPath") +
             "MatchResult_" + ParameterManagerSingleton.GetInstance().GetParam("runId") + "_" + m_uuid + ".csv";
         }
 
@@ -480,7 +549,7 @@ namespace Unity.MLAgentsExamples
                 }
             }
 
-            // Append a file to write to csv file 
+            // Append a file to write to csv file
             using (StreamWriter sw = File.AppendText(filePath))
             {
                 sw.WriteLine(log.ToCSVRoW());
