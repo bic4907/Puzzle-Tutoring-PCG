@@ -40,7 +40,7 @@ public class ParameterManagerSingleton
         // If not, add default value
         if (!ParsedArgs.ContainsKey("runId")) { ParsedArgs.Add("runId", "default-id"); }
         if (!ParsedArgs.ContainsKey("logPath")) { ParsedArgs.Add("logPath", Application.dataPath + "/ML-Agents/Examples/Match3/Logs/"); }
-        if (!ParsedArgs.ContainsKey("objective")) { ParsedArgs.Add("objective", "score"); }
+        // if (!ParsedArgs.ContainsKey("objective")) { ParsedArgs.Add("objective", "score"); }
     }
     
     private void ParseCommandlineArgs()

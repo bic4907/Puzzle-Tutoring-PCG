@@ -71,6 +71,8 @@ namespace Unity.MLAgentsExamples
         public float LastDecisionTime = Int16.MaxValue;
 
         public float SelfMatchingThreshold = 5.0f;
+        public float HintStartTime = 5.0f; // Hint will be shown after this time
+        public bool m_HintGlowed = false;
 
         private Move LastHintMove;
         private Move LastPlayerMove;
@@ -347,6 +349,14 @@ namespace Unity.MLAgentsExamples
                         SettleCount += 1;
                     }
 
+
+                    float WaitedTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
+                    if (WaitedTime > HintStartTime && m_HintGlowed == false)
+                    {
+                        GlowTiles(GreedyMatch3Solver.GetAction(Board), isTwoWay: true);
+                        m_HintGlowed = true;
+                    }
+
                     Move move = new Move();
                     switch(agentType)
                     {
@@ -365,6 +375,8 @@ namespace Unity.MLAgentsExamples
 
                                 m_CntChainEffect = 0;
                                 nextState = State.FindMatches;
+                                m_HintGlowed = false; // Reset
+                                StopGlowingTiles();
                             }
                         break;
                     }
@@ -404,6 +416,15 @@ namespace Unity.MLAgentsExamples
             }
 
             return false;
+        }
+
+        public void GlowTiles(Move move, bool isTwoWay = false)
+        {
+            GetComponent<Match3Drawer>().GlowTiles(move, isTwoWay);
+        }
+        public void StopGlowingTiles()
+        {
+            GetComponent<Match3Drawer>().StopGlowingTiles();
         }
 
         public void RecordResult()

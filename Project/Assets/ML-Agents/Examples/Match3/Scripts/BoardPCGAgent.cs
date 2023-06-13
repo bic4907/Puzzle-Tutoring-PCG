@@ -596,10 +596,7 @@ namespace Unity.MLAgentsExamples
                 sw.WriteLine(log.ToCSVRoW());
             }
         }
-        public void GlowTiles(Move move, bool isTwoWay = false)
-        {
-            GetComponent<Match3Drawer>().GlowTiles(move, isTwoWay);
-        }
+
 
     }
 

@@ -88,6 +88,10 @@ public class Match3TileSelector : MonoBehaviour
         glowPrefab.SetActive(false);
         glowPrefab.SetActive(true);
     }
+    public void StopGlow()
+    {
+        glowPrefab.SetActive(false);
+    }
     //corutine to scale the tile
     public IEnumerator ScaleTile(Vector3 scale, int i)
     {
