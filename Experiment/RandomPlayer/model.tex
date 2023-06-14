@@ -1,0 +1,14 @@
+\begin{tabular}{lllllrrrrrrrrrrrr}
+\toprule
+       &   &   &   &   & method & Q1ReachedKnowledgeStep & Q2ReachedKnowledgeStep & Q3ReachedKnowledgeStep & ReachedKnowledgeStep & Matched\_HorizontalPiece & Matched\_VerticalPiece & Matched\_CrossPiece & Matched\_RocketPiece & Matched\_BombPiece & Matched\_RainbowPiece & Sum\_Matched \\
+       &   &   &   &   &  count &                   mean &                   mean &                   mean &                 mean &                    mean &                  mean &               mean &                mean &              mean &                 mean &        mean \\
+method & simpleEffect & objective & playerDepth & simulation &        &                        &                        &                        &                      &                         &                       &                    &                     &                   &                      &             \\
+\midrule
+mcts & 1 & knowledge & 1 & 100 &    210 &              37.904762 &              44.585714 &              54.152381 &            58.152381 &               46.119048 &             34.533333 &          10.214286 &          112.642857 &          8.766667 &            14.285714 &  276.714286 \\
+       &   &   &   & 1000 &    204 &              34.318627 &              40.348039 &              51.098039 &            54.313725 &               46.426471 &             34.573529 &          10.284314 &          112.593137 &          8.656863 &            14.343137 &  278.558824 \\
+       &   & score & 1 & 100 &   4627 &              40.180463 &              47.687054 &              62.514804 &            67.014912 &               65.451264 &             53.254376 &          14.693106 &          164.445429 &         11.846337 &            18.386427 &  392.707586 \\
+       &   &   &   & 200 &   4638 &              38.492022 &              45.649418 &              59.152868 &            63.800129 &               68.401682 &             55.410953 &          15.713023 &          170.345408 &         12.452781 &            19.597025 &  410.410091 \\
+       &   &   &   & 1000 &   4670 &              36.842398 &              43.984582 &              57.321627 &            61.482441 &               72.327623 &             56.992077 &          16.761670 &          178.221413 &         13.262313 &            21.000642 &  433.965739 \\
+random & 1 & - & - & - &   4901 &              68.554377 &              80.708223 &             107.124056 &           114.829219 &               39.449908 &             32.614160 &           8.243420 &          112.943889 &          7.646399 &            11.873291 &  236.699449 \\
+\bottomrule
+\end{tabular}
