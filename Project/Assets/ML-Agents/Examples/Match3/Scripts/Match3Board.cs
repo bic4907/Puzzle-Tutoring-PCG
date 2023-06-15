@@ -4,10 +4,12 @@ using Unity.MLAgents.Integrations.Match3;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEditor;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization; 
 
 namespace Unity.MLAgentsExamples
 {
-
 
     public class Match3Board : AbstractBoard
     {
@@ -1022,6 +1024,34 @@ namespace Unity.MLAgentsExamples
         public List<(PieceType SpecialType, List<int[]> Positions)> GetSpecialMatchPositions()
         {
             return m_SpecialMatchPositions;
+        }
+
+        public void SaveTo(string path)
+        {
+            SerializableBoard board = new SerializableBoard(this);
+
+            IFormatter formatter = new BinaryFormatter();
+            Stream streamFileWrite = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
+            formatter.Serialize(streamFileWrite, board);
+            streamFileWrite.Close();
+        }
+
+        public bool LoadFrom(string path)
+        {
+            bool IsSuccess = false;
+            try
+            {
+                IFormatter formatter = new BinaryFormatter();
+                Stream streamFileRead = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                SerializableBoard loadedBoard = (SerializableBoard)formatter.Deserialize(streamFileRead);
+                m_Cells = ((int CellType, int SpecialType)[,])loadedBoard.m_Cells.Clone();
+                IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+            return IsSuccess;
         }
     }
 
