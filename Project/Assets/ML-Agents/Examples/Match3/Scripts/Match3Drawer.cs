@@ -197,6 +197,7 @@ namespace Unity.MLAgentsExamples
 
             Profiler.EndSample();
         }
+
         public void GlowTiles(Move move, bool isTwoWay = false)
         {
             tilesDict[(move.Row, move.Column)].GlowTile();
@@ -204,6 +205,14 @@ namespace Unity.MLAgentsExamples
             {
                 var (otherRow, otherCol) = move.OtherCell();
                 tilesDict[(otherRow, otherCol)].GlowTile();
+            }
+        }
+
+        public void StopGlowingTiles()
+        {
+            foreach (var item in tilesDict)
+            {
+                item.Value.StopGlow();
             }
         }
     }

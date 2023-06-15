@@ -754,7 +754,7 @@ MonoBehaviour:
   MaxRows: 9
   MinColumns: 8
   MaxColumns: 8
-  NumCellTypes: 6
+  NumCellTypes: 5
   RandomSeed: -1
 --- !u!114 &1540485848
 MonoBehaviour:
@@ -790,10 +790,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Board: {fileID: 0}
   MoveTime: 0.2
-  MaxMoves: 200
+  MaxMoves: 150
   useForcedFast: 0
   generatorType: 1
-  generatorRewardType: 0
+  generatorRewardType: 1
   PlayerNumber: 11
   MCTS_Simulation: 200
   CurrentEpisodeCount: 0
@@ -812,7 +812,9 @@ MonoBehaviour:
   m_mouseInput: {fileID: 1540485852}
   m_WaitingStartedTime: 0
   LastDecisionTime: 32767
-  SelfMatchingThreshold: 5
+  SelfMatchingThreshold: 6
+  HintStartTime: 5
+  m_HintGlowed: 0
 --- !u!114 &1540485852
 MonoBehaviour:
   m_ObjectHideFlags: 0

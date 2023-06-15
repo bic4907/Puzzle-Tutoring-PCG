@@ -1410,10 +1410,10 @@ MonoBehaviour:
   MoveTime: 0.1
   MaxMoves: 200
   useForcedFast: 0
-  generatorType: 2
+  generatorType: 1
   generatorRewardType: 1
   PlayerNumber: 0
-  MCTS_Simulation: 1000
+  MCTS_Simulation: 200
   SamplingNum: 30
   EvoluationNum: 30
   CurrentEpisodeCount: 0
@@ -1429,12 +1429,13 @@ MonoBehaviour:
   KnowledgeQ2ReachStep: -1
   KnowledgeQ3ReachStep: -1
   PlayerDepthLimit: 1
+  GreedyActionRatio: 1
   ComparisonCounts: 
   GeneratingRuntimes: []
+  GeneratingScores: []
   SaveFirebaseLog: 0
-  agentType: 1
+  agentType: 0
   m_mouseInput: {fileID: 1540485854}
-  PopUpQuestionnaireTiming: 999999999
 --- !u!114 &1540485852
 MonoBehaviour:
   m_ObjectHideFlags: 0

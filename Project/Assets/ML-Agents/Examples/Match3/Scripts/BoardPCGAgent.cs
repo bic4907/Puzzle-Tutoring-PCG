@@ -19,7 +19,7 @@ namespace Unity.MLAgentsExamples
     {
         [HideInInspector]
         public Match3Board Board;
-        
+
         public float MoveTime = 0.0f;
         public int MaxMoves = 500;
 
@@ -39,7 +39,7 @@ namespace Unity.MLAgentsExamples
         private string m_uuid = System.Guid.NewGuid().ToString().Substring(0, 8);
 
         private PCGStepLog m_Logger;
- 
+
         public int PlayerNumber = -1;
 
         public int MCTS_Simulation = 300;
@@ -49,7 +49,7 @@ namespace Unity.MLAgentsExamples
         private SkillKnowledge m_ManualSkillKnowledge;
 
         private const float k_RewardMultiplier = 0.01f;
-        
+
         public int CurrentEpisodeCount = 0;
         public int TotalStepCount = 0;
         public int CurrentStepCount = 0;
@@ -64,18 +64,19 @@ namespace Unity.MLAgentsExamples
         public int KnowledgeQ2ReachStep = -1; // 3/4 percentqage of the target
         public int KnowledgeQ3ReachStep = -1; // 3/4 percentqage of the target
         public int PlayerDepthLimit = 1;
+        public float GreedyActionRatio = 1.0f;
 
         public List<int> ComparisonCounts;
         public List<float> GeneratingRuntimes;
+        public List<float> GeneratingScores;
         public bool SaveFirebaseLog = false;
         private FirebaseLogger m_FirebaseLogger;
-        
+
         [Header("")]
         public AgentType agentType = AgentType.Agent;
         public MouseInteraction m_mouseInput;
-        public int PopUpQuestionnaireTiming = 5;
-        int PopUpQuestionnaireCount = 0;
 
+        private System.Random m_Random = new System.Random();
 
         protected override void Awake()
         {
@@ -83,7 +84,7 @@ namespace Unity.MLAgentsExamples
             Board = GetComponent<Match3Board>();
             m_ModelOverrider = GetComponent<ModelOverrider>();
             m_Logger = new PCGStepLog();
-                                    
+
             if (SaveFirebaseLog)
             {
                 // Add FirebaseLogger component in this game objct
@@ -156,6 +157,14 @@ namespace Unity.MLAgentsExamples
             {
                 SamplingNum = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("samplingNum"));
             }
+            if(ParameterManagerSingleton.GetInstance().HasParam("greedyActionRatio"))
+            {
+                GreedyActionRatio = (float)Convert.ToDouble(ParameterManagerSingleton.GetInstance().GetParam("greedyActionRatio"));
+            }
+            if(ParameterManagerSingleton.GetInstance().HasParam("evolutionNum"))
+            {
+                EvoluationNum = Convert.ToInt32(ParameterManagerSingleton.GetInstance().GetParam("evolutionNum"));
+            }
 
 
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
@@ -163,6 +172,7 @@ namespace Unity.MLAgentsExamples
 
             ComparisonCounts = new List<int>();
             GeneratingRuntimes = new List<float>();
+            GeneratingScores = new List<float>();
         }
 
         public override void OnEpisodeBegin()
@@ -174,7 +184,7 @@ namespace Unity.MLAgentsExamples
             m_CurrentState = State.FindMatches;
             m_TimeUntilMove = MoveTime;
             m_MovesMade = 0;
-            
+
             if (m_Logger != null && CurrentEpisodeCount != 0)
             {
                 RecordResult();
@@ -182,7 +192,7 @@ namespace Unity.MLAgentsExamples
 
             m_Logger = new PCGStepLog();
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
-            
+
             CurrentEpisodeCount += 1;
             CurrentStepCount = 0;
             SettleCount = 0;
@@ -267,7 +277,7 @@ namespace Unity.MLAgentsExamples
 
                 Board.SpawnSpecialCells();
 
-                var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());  
+                var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());
                 foreach (var (type, count) in createdPieces)
                 {
                     m_SkillKnowledge.IncreaseMatchCount(type, count);
@@ -279,34 +289,28 @@ namespace Unity.MLAgentsExamples
 
                 var startTime = Time.realtimeSinceStartup;
 
+                float score = 0.0f;
+
                 switch(generatorType)
                 {
                     case GeneratorType.Random:
                         Board.FillFromAbove();
                         break;
                     case GeneratorType.MCTS:
-                        bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge, PlayerDepthLimit);
-                        
-                        if(_isChanged)
-                        {
-                            ChangedCount += 1;
-                        }
-
-                        ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
-
+                        score = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge, PlayerDepthLimit);
                         break;
                     case GeneratorType.Sampling:
-                        BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
+                        score = BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
                         break;
                     case GeneratorType.GA:
-                        GeneticAlgorithm.Instance.FillEmpty(Board, m_SkillKnowledge, EvoluationNum);
+                        score = GeneticAlgorithm.Instance.FillEmpty(Board, m_SkillKnowledge, EvoluationNum);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
 
+                GeneratingScores.Add(Math.Max(score, 0.0f));
                 GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
-
             }
 
 
@@ -323,16 +327,24 @@ namespace Unity.MLAgentsExamples
             {
                 SettleCount += 1;
             }
-            
+
             CheckKnowledgeReach();
-            
+
             // Simulate the board with greedy action
-            Move move = GreedyMatch3Solver.GetAction(Board);
+            Move move = new Move();
+            if (m_Random.NextDouble() < GreedyActionRatio)
+            {
+                move = GreedyMatch3Solver.GetAction(Board);
+            }
+            else
+            {
+                move = RandomMatch3Solver.GetAction(Board);
+            }
             Board.MakeMove(move);
 
             CurrentStepCount += 1;
             TotalStepCount += 1;
-            
+
             OnPlayerAction();
 
             m_MovesMade++;
@@ -367,7 +379,7 @@ namespace Unity.MLAgentsExamples
 
                     Board.SpawnSpecialCells();
 
-                    var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());  
+                    var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());
                     foreach (var (type, count) in createdPieces)
                     {
                         m_SkillKnowledge.IncreaseMatchCount(type, count);
@@ -384,36 +396,29 @@ namespace Unity.MLAgentsExamples
                 case State.FillEmpty:
                     startTime = Time.realtimeSinceStartup;
 
+                    float score = 0.0f;
+
                     switch(generatorType)
                     {
                         case GeneratorType.Random:
                             Board.FillFromAbove();
-                            GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
                             break;
                         case GeneratorType.MCTS:
-                            bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge, PlayerDepthLimit);
-
-                            if(_isChanged)
-                            {
-                                ChangedCount += 1;
-                            }
-
-                            GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
-                            ComparisonCounts.Add(MCTS.Instance.GetComparisonCount());
-
+                            score = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge, PlayerDepthLimit);
                             break;
-
                         case GeneratorType.Sampling:
-                            BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
-                            GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
+                            score = BoardSampler.Instance.FillEmpty(Board, m_SkillKnowledge, SamplingNum);
                             break;
                         case GeneratorType.GA:
-                            GeneticAlgorithm.Instance.FillEmpty(Board, m_SkillKnowledge, EvoluationNum);
-                            GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
+                            score = GeneticAlgorithm.Instance.FillEmpty(Board, m_SkillKnowledge, EvoluationNum);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
+
+                    GeneratingScores.Add(Math.Max(score, 0.0f));
+                    GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
+
                     CurrentStepCount += 1;
                     TotalStepCount += 1;
 
@@ -434,7 +439,7 @@ namespace Unity.MLAgentsExamples
                         Board.InitSettled();
                         isBoardSettled = true;
                     }
-                    
+
                     if (isBoardSettled)
                     {
                         SettleCount += 1;
@@ -444,28 +449,30 @@ namespace Unity.MLAgentsExamples
                     switch(agentType)
                     {
                         case AgentType.Agent:
-                            move = GreedyMatch3Solver.GetAction(Board);
+                            // Get rand and compare if sample random match3 solver
+                            if (m_Random.NextDouble() < GreedyActionRatio)
+                            {
+                                move = GreedyMatch3Solver.GetAction(Board);
+                            }
+                            else
+                            {
+                                move = RandomMatch3Solver.GetAction(Board);
+                            }
+
                             Board.MakeMove(move);
                             OnPlayerAction();
 
                             nextState = State.FindMatches;
                         break;
                         case AgentType.Human:
-                            if(PopUpQuestionnaireCount == PopUpQuestionnaireTiming)
-                            {
-                                gameObject.transform.Find("QuestionBox").gameObject.SetActive(true);
-                                PopUpQuestionnaireCount = 0;
-                            }
                             if(m_mouseInput.playerHadVaildAction == true)
                             {
                                 move = m_mouseInput.GetMove();
                                 Board.MakeMove(move);
-                                // GlowTiles(move,true);
                                 OnPlayerAction();
 
                                 nextState = State.FindMatches;
-                                
-                                PopUpQuestionnaireCount += 1;
+
                             }
                         break;
                     }
@@ -483,7 +490,7 @@ namespace Unity.MLAgentsExamples
             KnowledgeQ1ReachStep = -1;
             KnowledgeQ2ReachStep = -1;
             KnowledgeQ3ReachStep = -1;
-            
+
         }
 
 
@@ -530,18 +537,17 @@ namespace Unity.MLAgentsExamples
             m_Logger.SettleCount = SettleCount;
             m_Logger.ChangedCount = ChangedCount;
 
-            m_Logger.MeanComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)ComparisonCounts.Average();
-            m_Logger.StdComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)CalculateStandardDeviation(ComparisonCounts);
-
             m_Logger.MeanGenerateRuntimes = GeneratingRuntimes.Count == 0 ? 0 : (float)GeneratingRuntimes.Average();
             m_Logger.StdGenerateRuntimes = GeneratingRuntimes.Count == 0 ? 0 : (float)CalculateStandardDeviation(GeneratingRuntimes);
 
+            m_Logger.MeanGenerateScores = GeneratingScores.Count == 0 ? 0 : (float)GeneratingScores.Average();
+            m_Logger.StdGenerateScores = GeneratingScores.Count == 0 ? 0 : (float)CalculateStandardDeviation(GeneratingScores);
 
             m_Logger.KnowledgeReachStep = KnowledgeReachStep;
             m_Logger.KnowledgeQ1ReachStep = KnowledgeQ1ReachStep;
             m_Logger.KnowledgeQ2ReachStep = KnowledgeQ2ReachStep;
             m_Logger.KnowledgeQ3ReachStep = KnowledgeQ3ReachStep;
-    
+
             FlushLog(GetMatchResultLogPath(), m_Logger);
         }
 
@@ -561,7 +567,7 @@ namespace Unity.MLAgentsExamples
         }
         private string GetMatchResultLogPath()
         {
-            return ParameterManagerSingleton.GetInstance().GetParam("logPath") + 
+            return ParameterManagerSingleton.GetInstance().GetParam("logPath") +
             "MatchResult_" + ParameterManagerSingleton.GetInstance().GetParam("runId") + "_" + m_uuid + ".csv";
         }
 
@@ -573,7 +579,7 @@ namespace Unity.MLAgentsExamples
                 using (StreamWriter sw = File.CreateText(filePath))
                 {
                     string output = "";
-                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,MeanComparisonCount,StdComparisonCount,MeanGenerateRuntimes,StdGenerateRuntimes,ReachedKnowledgeStep,Q1ReachedKnowledgeStep,Q2ReachedKnowledgeStep,Q3ReachedKnowledgeStep,";
+                    output += "EpisodeCount,StepCount,Time,InstanceUUID,SettleCount,ChangedCount,MeanGenerateRuntimes,StdGenerateRuntimes,MeanGenerateScores,StdGenerateScores,ReachedKnowledgeStep,Q1ReachedKnowledgeStep,Q2ReachedKnowledgeStep,Q3ReachedKnowledgeStep,";
 
                     foreach (PieceType pieceType in BoardPCGAgent.PieceLogOrder)
                     {
@@ -590,16 +596,13 @@ namespace Unity.MLAgentsExamples
                 }
             }
 
-            // Append a file to write to csv file 
+            // Append a file to write to csv file
             using (StreamWriter sw = File.AppendText(filePath))
             {
                 sw.WriteLine(log.ToCSVRoW());
             }
         }
-        public void GlowTiles(Move move, bool isTwoWay = false)
-        {
-            GetComponent<Match3Drawer>().GlowTiles(move, isTwoWay);
-        }
+
 
     }
 
@@ -612,18 +615,18 @@ namespace Unity.MLAgentsExamples
         public SkillKnowledge SkillKnowledge;
         public int SettleCount;
         public int ChangedCount;
-        public float MeanComparisonCount;
-        public float StdComparisonCount;
         public float MeanGenerateRuntimes;
         public float StdGenerateRuntimes;
+        public float MeanGenerateScores;
+        public float StdGenerateScores;
         public int KnowledgeReachStep;
         public int KnowledgeQ1ReachStep;
         public int KnowledgeQ2ReachStep;
         public int KnowledgeQ3ReachStep;
-        
+
         public PCGStepLog()
         {
-           
+
         }
 
         public string ToCSVRoW()
@@ -632,13 +635,16 @@ namespace Unity.MLAgentsExamples
             row += EpisodeCount + ",";
             row += StepCount + ",";
             row += Time + ",";
-            row += InstanceUUID + ","; 
+            row += InstanceUUID + ",";
             row += SettleCount + ",";
             row += ChangedCount + ",";
-            row += MeanComparisonCount + ",";
-            row += StdComparisonCount + ",";
+
             row += MeanGenerateRuntimes + ",";
             row += StdGenerateRuntimes + ",";
+
+            row += MeanGenerateScores + ",";
+            row += StdGenerateScores + ",";
+
             row += KnowledgeReachStep + ",";
             row += KnowledgeQ1ReachStep + ",";
             row += KnowledgeQ2ReachStep + ",";
@@ -651,7 +657,7 @@ namespace Unity.MLAgentsExamples
                     row += table[pieceType] + ",";
                 }
             }
-        
+
             // Remove the last comma
             row = row.Substring(0, row.Length - 1);
 
