@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEditor;
 using Unity.MLAgents.Integrations.Match3;
-
+using TMPro;
 
 namespace Unity.MLAgentsExamples
 {
@@ -77,11 +78,22 @@ namespace Unity.MLAgentsExamples
         private Move LastHintMove;
         private Move LastPlayerMove;
 
+        private TextMeshProUGUI m_LearningProgressText;
+        private TextMeshProUGUI m_QuizProgressText;
+        public List<Quiz> m_QuizList;
+        public List<Quiz> m_SolvedQuizList;
+        public Quiz m_CurrentQuiz;
+        public int LearningStepCount = 0;
+        BoardPresetManager m_presetManager;
+
+        public ExperimentMode m_ExperimentMode = ExperimentMode.Learning;
+
         protected void Awake()
         {
             Board = GetComponent<Match3Board>();
             m_ModelOverrider = GetComponent<ModelOverrider>();
             m_Logger = new PCGStepLog();
+            m_presetManager = GetComponent<BoardPresetManager>();
 
             if (SaveFirebaseLog)
             {
@@ -145,6 +157,32 @@ namespace Unity.MLAgentsExamples
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
 
             ComparisonCounts = new List<int>();
+            InitializeQuiz();
+            InitializeUI();
+            
+        }
+        
+        private void InitializeQuiz()
+        {
+            m_QuizList = new List<Quiz>();
+            m_SolvedQuizList = new List<Quiz>();
+
+            // Load quiz data
+            m_QuizList.Add(new Quiz("board_2023-06-13_01-14-11", PieceType.HorizontalPiece));
+            m_QuizList.Add(new Quiz("board_2023-06-14_22-21-02", PieceType.HorizontalPiece));
+            m_QuizList.Add(new Quiz("board_2023-06-14_22-21-58", PieceType.HorizontalPiece));
+        }
+
+        private void InitializeUI()
+        {
+            if (GameObject.Find("LearningProgressTxt"))
+            {
+                m_LearningProgressText = GameObject.Find("LearningProgressTxt").GetComponent<TextMeshProUGUI>();
+            }
+            if (GameObject.Find("QuizProgressTxt"))
+            {
+                m_QuizProgressText = GameObject.Find("QuizProgressTxt").GetComponent<TextMeshProUGUI>();
+            }
         }
 
         public void OnEpisodeBegin()
@@ -170,6 +208,7 @@ namespace Unity.MLAgentsExamples
             CurrentStepCount = 0;
             SettleCount = 0;
             ChangedCount = 0;
+            LearningStepCount = 0;
             LastDecisionTime = Int16.MaxValue;
             
             m_WaitingStartedTime = Time.realtimeSinceStartup;
@@ -196,8 +235,43 @@ namespace Unity.MLAgentsExamples
             {
                 OnEpisodeBegin();
             }
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                Debug.Log(m_ExperimentMode);
+            }
+            if (m_LearningProgressText != null)
+            {
+                m_LearningProgressText.text = GetLearningProgressText();
+            }
+            if (m_QuizProgressText != null)
+            {
+                m_QuizProgressText.text = GetQuizProgressText();
+            }
+
+            if (LearningStepCount >= MaxMoves)
+            {
+                if (m_ExperimentMode == ExperimentMode.Learning)
+                {
+                    InitializeQuizMode();
+                }
+             
+            }
+
         }
 
+        private string GetLearningProgressText()
+        {
+            return LearningStepCount + " / " + MaxMoves;
+        }
+        private string GetQuizProgressText()
+        {
+            return m_SolvedQuizList.Count + " / " + GetTotalQuizCount();
+        }
+
+        private int GetTotalQuizCount()
+        {
+            return m_QuizList.Count + m_SolvedQuizList.Count + (m_CurrentQuiz != null ? 1 : 0);
+        }
 
         private void OnPlayerAction()
         {
@@ -215,6 +289,40 @@ namespace Unity.MLAgentsExamples
 
         }
 
+        private void InitializeQuizMode()
+        {
+            m_ExperimentMode = ExperimentMode.Quiz;  
+            NextQuiz();
+        }
+
+        private void NextQuiz()
+        {
+            if (m_CurrentQuiz != null)
+            {
+                m_SolvedQuizList.Add(m_CurrentQuiz);
+            }
+            m_CurrentQuiz = null;
+            if (m_QuizList.Count > 0)
+            {
+                m_CurrentQuiz = m_QuizList[0];
+                m_QuizList.RemoveAt(0);
+            } else
+            {
+                Update();
+                SetEmptyBoard();
+            }
+
+            if (m_CurrentQuiz != null)
+            {
+                m_presetManager.LoadBoard(m_CurrentQuiz.FileName);
+            }
+        }
+
+        private void SetEmptyBoard()
+        {
+            this.gameObject.SetActive(false);
+        }
+
         private void FixedUpdate()
         {
             // Make a move every step if we're training, or we're overriding models in CI.
@@ -224,11 +332,6 @@ namespace Unity.MLAgentsExamples
             // We can't use the normal MaxSteps system to decide when to end an episode,
             // since different agents will make moves at different frequencies (depending on the number of
             // chained moves). So track a number of moves per Agent and manually interrupt the episode.
-            if (CurrentStepCount >= MaxMoves)
-            {
-                // TODO OnGameEnd();
-                // GOTO Questionnaire Scene
-            }
 
             MCTS.Instance.SetRewardMode(generatorRewardType);
             MCTS.Instance.SetSimulationLimit(MCTS_Simulation);
@@ -261,7 +364,6 @@ namespace Unity.MLAgentsExamples
                     break;
                 case State.ClearMatched:
                     m_CntChainEffect++;
-                    Debug.Log("Chain Effect: " + m_CntChainEffect);
 
                     var pointsEarned = Board.ClearMatchedCells();
                     // AddReward(k_RewardMultiplier * pointsEarned);
@@ -322,8 +424,6 @@ namespace Unity.MLAgentsExamples
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
-                    CurrentStepCount += 1;
-                    TotalStepCount += 1;
 
                     nextState = State.FindMatches;
                     break;
@@ -351,7 +451,7 @@ namespace Unity.MLAgentsExamples
 
 
                     float WaitedTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
-                    if (WaitedTime > HintStartTime && m_HintGlowed == false)
+                    if (WaitedTime > HintStartTime && m_HintGlowed == false && m_ExperimentMode == ExperimentMode.Learning)
                     {
                         GlowTiles(GreedyMatch3Solver.GetAction(Board), isTwoWay: true);
                         m_HintGlowed = true;
@@ -369,6 +469,10 @@ namespace Unity.MLAgentsExamples
                                 LastPlayerMove = move;
 
                                 Board.MakeMove(move);
+
+                                CurrentStepCount += 1;
+                                TotalStepCount += 1;
+
                                 OnPlayerAction();
 
                                 LastDecisionTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
@@ -377,6 +481,17 @@ namespace Unity.MLAgentsExamples
                                 nextState = State.FindMatches;
                                 m_HintGlowed = false; // Reset
                                 StopGlowingTiles();
+                        
+                                if (m_ExperimentMode == ExperimentMode.Learning)
+                                {
+                                    LearningStepCount += 1;
+                                }
+                                else if (m_ExperimentMode == ExperimentMode.Quiz)
+                                {
+                                    m_CurrentQuiz.PlayerAction = move.MoveIndex;
+                                    NextQuiz();
+                                }
+
                             }
                         break;
                     }
@@ -498,5 +613,28 @@ namespace Unity.MLAgentsExamples
 
     }
 
+    public enum ExperimentMode
+    {
+        Learning = 1,
+        Quiz = 2
+    }
 
+    public class Quiz
+    {
+        public string FileName;
+        public PieceType PieceType;
+        public int PlayerAction;
+
+        public Quiz(string fileName, PieceType pieceType)
+        {
+            FileName = fileName;
+            PieceType = pieceType;
+            PlayerAction = -1;
+        }
+
+        public bool IsSolved()
+        {
+            return PlayerAction != -1;
+        }
+    }
 }
