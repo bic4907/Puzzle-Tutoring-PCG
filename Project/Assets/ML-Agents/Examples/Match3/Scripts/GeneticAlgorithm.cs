@@ -16,7 +16,7 @@ namespace Unity.MLAgentsExamples
         private static GeneticAlgorithm _Instance = null;
         private float KnowledgeAlmostRatio = 1.0f;
         public int ChromosomeLength = 0;
-        public int PopulationSize = 20;
+        public int PopulationSize = 30;
         private List<Chromosome> Population;
 
         public Match3Board m_Board = null;
@@ -37,7 +37,7 @@ namespace Unity.MLAgentsExamples
         }}
 
      
-        public void FillEmpty(Match3Board board, SkillKnowledge knowledge, int generation)
+        public float FillEmpty(Match3Board board, SkillKnowledge knowledge, int generation)
         {
             int _emptyCellCount = board.GetEmptyCellCount();
             
@@ -53,10 +53,14 @@ namespace Unity.MLAgentsExamples
                 Evolution(generation);
             }
 
-            foreach (int cellType in GetBestIndividual().Genes)
+            Chromosome chromosome = GetBestIndividual();
+
+            foreach (int cellType in chromosome.Genes)
             {
                 board.SpawnColoredBlock(cellType);               
             }
+
+            return chromosome.Fitness;
         }
 
         private void Crossover(List<Chromosome> offspring, double prob = 1)

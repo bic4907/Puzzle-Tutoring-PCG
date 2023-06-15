@@ -37,15 +37,16 @@ namespace Unity.MLAgentsExamples
         private string m_uuid = System.Guid.NewGuid().ToString().Substring(0, 8);
 
         private PCGStepLog m_Logger;
- 
+
         public int PlayerNumber = 11;
 
         public int MCTS_Simulation = 300;
 
         private SkillKnowledge m_SkillKnowledge;
+        private SkillKnowledge m_ManualSkillKnowledge;
 
         private const float k_RewardMultiplier = 0.01f;
-        
+
         public int CurrentEpisodeCount = 0;
         public int TotalStepCount = 0;
         public int CurrentStepCount = 0;
@@ -62,11 +63,11 @@ namespace Unity.MLAgentsExamples
         public bool SaveFirebaseLog = false;
 
         private FirebaseLogger m_FirebaseLogger;
-        
+
         [Header("")]
         public AgentType agentType = AgentType.Agent;
         public MouseInteraction m_mouseInput;
-        
+
         public float m_WaitingStartedTime;
         int m_CntChainEffect = 0;
         public float LastDecisionTime = Int16.MaxValue;
@@ -192,7 +193,7 @@ namespace Unity.MLAgentsExamples
             m_CurrentState = State.FindMatches;
             m_TimeUntilMove = MoveTime;
             m_MovesMade = 0;
-            
+
             if (m_Logger != null && CurrentEpisodeCount != 0)
             {
                 RecordResult();
@@ -200,7 +201,7 @@ namespace Unity.MLAgentsExamples
 
             m_Logger = new PCGStepLog();
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
-            
+
             Debug.Log("Resetting Skill Knowledge");
             Debug.Log(m_SkillKnowledge);
 
@@ -210,7 +211,7 @@ namespace Unity.MLAgentsExamples
             ChangedCount = 0;
             LearningStepCount = 0;
             LastDecisionTime = Int16.MaxValue;
-            
+
             m_WaitingStartedTime = Time.realtimeSinceStartup;
             m_CntChainEffect = 0;
             LastHintMove = new Move();
@@ -338,6 +339,67 @@ namespace Unity.MLAgentsExamples
             MCTS.Instance.SetKnowledgeAlmostRatio(KnowledgeAlmostRatio);
         }
 
+        void FastUpdate()
+        {
+            while (true)
+            {
+                var hasMatched = Board.MarkMatchedCells();
+                if (!hasMatched)
+                {
+                    break;
+                }
+                var pointsEarned = Board.ClearMatchedCells();
+                // AddReward(k_RewardMultiplier * pointsEarned);
+
+                Board.SpawnSpecialCells();
+
+                var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());
+                foreach (var (type, count) in createdPieces)
+                {
+                    m_SkillKnowledge.IncreaseMatchCount(type, count);
+                    m_ManualSkillKnowledge.IncreaseMatchCount(type, count);
+                }
+                Board.ExecuteSpecialEffect();
+
+                Board.DropCells();
+
+                switch(generatorType)
+                {
+                    case GeneratorType.Random:
+                        Board.FillFromAbove();
+                        break;
+                    case GeneratorType.MCTS:
+                        MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                CurrentStepCount += 1;
+                TotalStepCount += 1;
+            }
+
+            bool isBoardSettled = false;
+            while (!HasValidMoves())
+            {
+                Board.InitSettled();
+                isBoardSettled = true;
+            }
+
+            if (isBoardSettled)
+            {
+                SettleCount += 1;
+            }
+
+            CheckKnowledgeReach();
+
+            // Simulate the board with greedy action
+            Move move = GreedyMatch3Solver.GetAction(Board);
+            Board.MakeMove(move);
+            OnPlayerAction();
+
+            m_MovesMade++;
+        }
+
         void AnimatedUpdate()
         {
             m_TimeUntilMove -= Time.deltaTime;
@@ -372,7 +434,7 @@ namespace Unity.MLAgentsExamples
 
                     if (m_CntChainEffect == 1)
                     {
-                        var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());  
+                        var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());
                         foreach (var (type, count) in createdPieces)
                         {
                             m_SkillKnowledge.IncreaseMatchCount(type, count);
@@ -411,15 +473,14 @@ namespace Unity.MLAgentsExamples
                     nextState = State.FillEmpty;
                     break;
                 case State.FillEmpty:
-    
+
                     switch(generatorType)
                     {
                         case GeneratorType.Random:
                             Board.FillFromAbove();
                             break;
                         case GeneratorType.MCTS:
-                            bool _isChanged = MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
-
+                            MCTS.Instance.FillEmpty(Board, m_SkillKnowledge);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -443,7 +504,7 @@ namespace Unity.MLAgentsExamples
                         Board.InitSettled();
                         isBoardSettled = true;
                     }
-                    
+
                     if (isBoardSettled)
                     {
                         SettleCount += 1;
@@ -464,7 +525,7 @@ namespace Unity.MLAgentsExamples
                             if(m_mouseInput.playerHadVaildAction == true)
                             {
                                 LastHintMove = GreedyMatch3Solver.GetAction(Board);
-                                
+
                                 move = m_mouseInput.GetMove();
                                 LastPlayerMove = move;
 
@@ -555,12 +616,12 @@ namespace Unity.MLAgentsExamples
             m_Logger.SettleCount = SettleCount;
             m_Logger.ChangedCount = ChangedCount;
 
-            m_Logger.MeanComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)ComparisonCounts.Average();
-            m_Logger.StdComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)CalculateStandardDeviation(ComparisonCounts);
+            // m_Logger.MeanComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)ComparisonCounts.Average();
+            // m_Logger.StdComparisonCount = ComparisonCounts.Count == 0 ? 0 : (float)CalculateStandardDeviation(ComparisonCounts);
 
             m_Logger.KnowledgeReachStep = KnowledgeReachStep;
             // m_Logger.KnowledgeAlmostReachStep = KnowledgeAlmostReachStep;
-    
+
             FlushLog(GetMatchResultLogPath(), m_Logger);
         }
 
@@ -574,7 +635,7 @@ namespace Unity.MLAgentsExamples
 
         private string GetMatchResultLogPath()
         {
-            return ParameterManagerSingleton.GetInstance().GetParam("logPath") + 
+            return ParameterManagerSingleton.GetInstance().GetParam("logPath") +
             "MatchResult_" + ParameterManagerSingleton.GetInstance().GetParam("runId") + "_" + m_uuid + ".csv";
         }
 
@@ -603,7 +664,7 @@ namespace Unity.MLAgentsExamples
                 }
             }
 
-            // Append a file to write to csv file 
+            // Append a file to write to csv file
             using (StreamWriter sw = File.AppendText(filePath))
             {
                 sw.WriteLine(log.ToCSVRoW());

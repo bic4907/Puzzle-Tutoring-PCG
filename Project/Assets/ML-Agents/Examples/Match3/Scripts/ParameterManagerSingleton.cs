@@ -30,11 +30,11 @@ public class ParameterManagerSingleton
         if (!System.IO.Directory.Exists(ParsedArgs["logPath"].ToString())) {
             System.IO.Directory.CreateDirectory(ParsedArgs["logPath"].ToString());
         }
-        
+
         Debug.Log(this);
     }
 
-    private void RegisterDefaultValues() 
+    private void RegisterDefaultValues()
     {
         // Check key existance in ParsedArgs
         // If not, add default value
@@ -42,7 +42,7 @@ public class ParameterManagerSingleton
         if (!ParsedArgs.ContainsKey("logPath")) { ParsedArgs.Add("logPath", Application.dataPath + "/ML-Agents/Examples/Match3/Logs/"); }
         // if (!ParsedArgs.ContainsKey("objective")) { ParsedArgs.Add("objective", "score"); }
     }
-    
+
     private void ParseCommandlineArgs()
     {
         // Parse command line arguments and save it on a hashtable
@@ -52,31 +52,31 @@ public class ParameterManagerSingleton
         int idx = 0;
         while (idx < args.Length)
         {
-            if (args[idx].Contains("--runId")) 
+            if (args[idx].Contains("--runId"))
             {
                 ParsedArgs.Add("runId", args[++idx]);
             }
-            else if (args[idx].Contains("--logPath")) 
+            else if (args[idx].Contains("--logPath"))
             {
                 ParsedArgs.Add("logPath", args[++idx]);
             }
-            else if (args[idx].Contains("--targetPlayer")) 
+            else if (args[idx].Contains("--targetPlayer"))
             {
                 ParsedArgs.Add("targetPlayer", args[++idx]);
             }
-            else if (args[idx].Contains("--method")) 
+            else if (args[idx].Contains("--method"))
             {
                 ParsedArgs.Add("method",  args[++idx]);
             }
-            else if (args[idx].Contains("--mctsSimulation")) 
+            else if (args[idx].Contains("--mctsSimulation"))
             {
                 ParsedArgs.Add("mctsSimulation",  args[++idx]);
             }
-            else if (args[idx].Contains("--objective")) 
+            else if (args[idx].Contains("--objective"))
             {
                 ParsedArgs.Add("objective",  args[++idx]);
             }
-            else if (args[idx].Contains("--targetEpisodeCount")) 
+            else if (args[idx].Contains("--targetEpisodeCount"))
             {
                 ParsedArgs.Add("targetEpisodeCount", args[++idx]);
             }
@@ -100,12 +100,16 @@ public class ParameterManagerSingleton
             {
                 ParsedArgs.Add("greedyActionRatio", args[++idx]);
             }
+            else if (args[idx].Contains("--evolutionNum"))
+            {
+                ParsedArgs.Add("evolutionNum", args[++idx]);
+            }
 
             idx++;
         }
    }
 
-    public override string ToString() 
+    public override string ToString()
     {
         string result = "[ParameterManagerSingleton]\n";
         foreach (DictionaryEntry entry in ParsedArgs)
@@ -116,7 +120,7 @@ public class ParameterManagerSingleton
     }
 
     #nullable enable
-    public object? GetParam(string key) 
+    public object? GetParam(string key)
     {
         if(ParsedArgs.ContainsKey(key)) {
             return ParsedArgs[key].ToString();
@@ -125,8 +129,8 @@ public class ParameterManagerSingleton
         }
     }
     #nullable disable
-    
-    public bool HasParam(string key) 
+
+    public bool HasParam(string key)
     {
         return ParsedArgs.ContainsKey(key);
     }
@@ -139,7 +143,7 @@ public class ParameterManagerSingleton
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
 }

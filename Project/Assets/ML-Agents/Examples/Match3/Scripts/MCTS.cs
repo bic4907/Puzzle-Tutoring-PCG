@@ -198,7 +198,7 @@ namespace Unity.MLAgentsExamples
             }
         }
 
-        public bool FillEmpty(Match3Board board, SkillKnowledge knowledge, int playerDepthLimit = 1)
+        public float FillEmpty(Match3Board board, SkillKnowledge knowledge, int playerDepthLimit = 1)
         {
             int _emptyCellCount = board.GetEmptyCellCount();
             // Print the empty cell count
@@ -238,11 +238,8 @@ namespace Unity.MLAgentsExamples
             }
             if (Verbose) Debug.Log(_log);
 
-
-
-            return IsChanged;
+            return BestBoardScore;
         }
-
 
         private void PrepareSearch()
         {

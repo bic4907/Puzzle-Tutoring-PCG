@@ -22,7 +22,6 @@ namespace Unity.MLAgentsExamples
      
         public static Move GetAction(Match3Board board)
         {
-            Debug.Log("RandomMatch3Solver: GetAction");
             List<Move> validMovesList = new List<Move>(board.ValidMoves());
             // Sample random moves from validMovesList
             Move optimalMove = validMovesList[Random.Range(0, validMovesList.Count)];
