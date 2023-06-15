@@ -154,9 +154,10 @@ for simple_effect in INCLUDE_SIMPLE_EFFECT:
 
 
             else:
-                ENV_ARGS = list()
+
 
                 for i_g_ratio in GREEDY_RATIO:
+                    ENV_ARGS = list()
                     _run_id = f'{run_id}_gp_{i_g_ratio}'
                     ENV_ARGS.append('--runId'), ENV_ARGS.append(_run_id)
                     ENV_ARGS.append('--method'), ENV_ARGS.append(i_method)
