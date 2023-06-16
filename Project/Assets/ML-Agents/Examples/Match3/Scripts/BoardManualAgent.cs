@@ -421,7 +421,6 @@ namespace Unity.MLAgentsExamples
                     if (nextState == State.WaitForMove)
                     {
                         m_WaitingStartedTime = Time.realtimeSinceStartup;
-                        m_MovesMade++;
                     }
                     break;
                 case State.ClearMatched:
@@ -535,8 +534,10 @@ namespace Unity.MLAgentsExamples
                                 TotalStepCount += 1;
 
                                 OnPlayerAction();
-
+                                m_MovesMade++;
+                                
                                 LastDecisionTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
+
 
                                 m_CntChainEffect = 0;
                                 nextState = State.FindMatches;

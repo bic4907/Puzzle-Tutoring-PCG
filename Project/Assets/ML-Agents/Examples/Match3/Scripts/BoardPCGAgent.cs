@@ -65,7 +65,7 @@ namespace Unity.MLAgentsExamples
         public int KnowledgeQ3ReachStep = -1; // 3/4 percentqage of the target
         public int PlayerDepthLimit = 1;
         public float GreedyActionRatio = 1.0f;
-
+        int m_CntChainEffect = 0;
         public List<int> ComparisonCounts;
         public List<float> GeneratingRuntimes;
         public List<float> GeneratingScores;
@@ -197,6 +197,7 @@ namespace Unity.MLAgentsExamples
             CurrentStepCount = 0;
             SettleCount = 0;
             ChangedCount = 0;
+            m_CntChainEffect = 0;
 
             if(TargetEpisodeCount != -1 && CurrentEpisodeCount > TargetEpisodeCount)
             {
@@ -265,6 +266,8 @@ namespace Unity.MLAgentsExamples
 
         void FastUpdate()
         {
+            m_CntChainEffect = 0;
+
             while (true)
             {
                 var hasMatched = Board.MarkMatchedCells();
@@ -272,16 +275,20 @@ namespace Unity.MLAgentsExamples
                 {
                     break;
                 }
+
+                m_CntChainEffect++;
                 var pointsEarned = Board.ClearMatchedCells();
                 AddReward(k_RewardMultiplier * pointsEarned);
 
                 Board.SpawnSpecialCells();
 
-                var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());
-                foreach (var (type, count) in createdPieces)
+                if (m_CntChainEffect == 1)
                 {
-                    m_SkillKnowledge.IncreaseMatchCount(type, count);
-                    m_ManualSkillKnowledge.IncreaseMatchCount(type, count);
+                    var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());
+                    foreach (var (type, count) in createdPieces)
+                    {
+                        m_SkillKnowledge.IncreaseMatchCount(type, count);
+                    }
                 }
                 Board.ExecuteSpecialEffect();
 
@@ -370,20 +377,27 @@ namespace Unity.MLAgentsExamples
                     nextState = hasMatched ? State.ClearMatched : State.WaitForMove;
                     if (nextState == State.WaitForMove)
                     {
-                        m_MovesMade++;
+
                     }
                     break;
                 case State.ClearMatched:
+                    m_CntChainEffect++;
+
                     var pointsEarned = Board.ClearMatchedCells();
                     AddReward(k_RewardMultiplier * pointsEarned);
 
                     Board.SpawnSpecialCells();
 
-                    var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());
-                    foreach (var (type, count) in createdPieces)
+
+                    if (m_CntChainEffect == 1)
                     {
-                        m_SkillKnowledge.IncreaseMatchCount(type, count);
-                        m_ManualSkillKnowledge.IncreaseMatchCount(type, count);
+
+                        var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());
+
+                        foreach (var (type, count) in createdPieces)
+                        {
+                            m_SkillKnowledge.IncreaseMatchCount(type, count); 
+                        }
                     }
                     Board.ExecuteSpecialEffect();
 
@@ -461,7 +475,7 @@ namespace Unity.MLAgentsExamples
 
                             Board.MakeMove(move);
                             OnPlayerAction();
-
+                            m_MovesMade++;
                             nextState = State.FindMatches;
                         break;
                         case AgentType.Human:
@@ -470,7 +484,8 @@ namespace Unity.MLAgentsExamples
                                 move = m_mouseInput.GetMove();
                                 Board.MakeMove(move);
                                 OnPlayerAction();
-
+                                m_MovesMade++;
+                                m_CntChainEffect = 0;
                                 nextState = State.FindMatches;
 
                             }
