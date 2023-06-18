@@ -86,6 +86,8 @@ namespace Unity.MLAgentsExamples
         public Quiz m_CurrentQuiz;
         public int LearningStepCount = 0;
         BoardPresetManager m_presetManager;
+        QuizUIManager m_QuizUIManager;
+        TutoringUIManager m_TutoringUIManager;
 
         public ExperimentMode m_ExperimentMode = ExperimentMode.Learning;
 
@@ -170,8 +172,8 @@ namespace Unity.MLAgentsExamples
 
             // Load quiz data
             m_QuizList.Add(new Quiz("board_2023-06-13_01-14-11", PieceType.HorizontalPiece));
-            m_QuizList.Add(new Quiz("board_2023-06-14_22-21-02", PieceType.HorizontalPiece));
-            m_QuizList.Add(new Quiz("board_2023-06-14_22-21-58", PieceType.HorizontalPiece));
+            m_QuizList.Add(new Quiz("board_2023-06-14_22-21-02", PieceType.RainbowPiece));
+            m_QuizList.Add(new Quiz("board_2023-06-14_22-21-58", PieceType.VerticalPiece));
         }
 
         private void InitializeUI()
@@ -183,6 +185,17 @@ namespace Unity.MLAgentsExamples
             if (GameObject.Find("QuizProgressTxt"))
             {
                 m_QuizProgressText = GameObject.Find("QuizProgressTxt").GetComponent<TextMeshProUGUI>();
+            }
+            if (GameObject.Find("QuizUIManager"))
+            {
+                m_QuizUIManager = GameObject.Find("QuizUIManager").GetComponent<QuizUIManager>();
+                m_QuizUIManager.SetActive(false);
+            }
+            if (GameObject.Find("TutoringUIManager"))
+            {
+                m_TutoringUIManager = GameObject.Find("TutoringUIManager").GetComponent<TutoringUIManager>();
+                m_TutoringUIManager.SetNumber(MaxMoves);
+                m_TutoringUIManager.SetActive(true);
             }
         }
 
@@ -236,18 +249,17 @@ namespace Unity.MLAgentsExamples
             {
                 OnEpisodeBegin();
             }
-            if (Input.GetKeyDown(KeyCode.D))
-            {
-                Debug.Log(m_ExperimentMode);
-            }
+
             if (m_LearningProgressText != null)
             {
                 m_LearningProgressText.text = GetLearningProgressText();
+                Debug.Log(m_LearningProgressText.text);
             }
             if (m_QuizProgressText != null)
             {
                 m_QuizProgressText.text = GetQuizProgressText();
             }
+            Debug.Log(m_LearningProgressText);
 
             if (LearningStepCount >= MaxMoves)
             {
@@ -293,6 +305,7 @@ namespace Unity.MLAgentsExamples
         private void InitializeQuizMode()
         {
             m_ExperimentMode = ExperimentMode.Quiz;  
+            m_TutoringUIManager.SetActive(false);
             NextQuiz();
         }
 
@@ -316,12 +329,19 @@ namespace Unity.MLAgentsExamples
             if (m_CurrentQuiz != null)
             {
                 m_presetManager.LoadBoard(m_CurrentQuiz.FileName);
+                m_QuizUIManager.SetNumber(m_SolvedQuizList.Count + 1);
+                m_QuizUIManager.SetPieceType(m_CurrentQuiz.PieceType);
+                m_QuizUIManager.SetActive(true);
+            } 
+            else
+            {
+                m_QuizUIManager.SetActive(false);
             }
         }
 
         private void SetEmptyBoard()
         {
-            this.gameObject.SetActive(false);
+            // this.gameObject.SetActive(false);
         }
 
         private void FixedUpdate()
