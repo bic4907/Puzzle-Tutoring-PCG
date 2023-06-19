@@ -91,6 +91,12 @@ namespace Unity.MLAgentsExamples
 
         public ExperimentMode m_ExperimentMode = ExperimentMode.Learning;
 
+        // MessageBox
+        public GameObject PreExperimentMessageBox;
+        public GameObject MidExperimentMessageBox;
+        public GameObject PostExperimentMessageBox;
+
+
         protected void Awake()
         {
             Board = GetComponent<Match3Board>();
@@ -163,6 +169,13 @@ namespace Unity.MLAgentsExamples
             InitializeQuiz();
             InitializeUI();
             
+            // Show the PreExperimentMsg game object
+            if (PreExperimentMessageBox)
+            {
+                PreExperimentMessageBox.SetActive(true);
+            }
+
+
         }
         
         private void InitializeQuiz()
@@ -174,6 +187,7 @@ namespace Unity.MLAgentsExamples
             m_QuizList.Add(new Quiz("board_2023-06-13_01-14-11", PieceType.HorizontalPiece));
             m_QuizList.Add(new Quiz("board_2023-06-14_22-21-02", PieceType.RainbowPiece));
             m_QuizList.Add(new Quiz("board_2023-06-14_22-21-58", PieceType.VerticalPiece));
+        
         }
 
         private void InitializeUI()
@@ -306,6 +320,10 @@ namespace Unity.MLAgentsExamples
         {
             m_ExperimentMode = ExperimentMode.Quiz;  
             m_TutoringUIManager.SetActive(false);
+            if (MidExperimentMessageBox)
+            {
+                MidExperimentMessageBox.SetActive(true);
+            }
             NextQuiz();
         }
 
@@ -342,6 +360,12 @@ namespace Unity.MLAgentsExamples
         private void SetEmptyBoard()
         {
             this.gameObject.SetActive(false);
+            if (PostExperimentMessageBox)
+            {
+                PostExperimentMessageBox.SetActive(true);
+                GameObject.Find("SurveyCodeInput").GetComponent<TMP_InputField>().text = $"ci{m_uuid}";
+
+            }
         }
 
         private void FixedUpdate()
@@ -689,6 +713,11 @@ namespace Unity.MLAgentsExamples
             {
                 sw.WriteLine(log.ToCSVRoW());
             }
+        }
+
+        public void SetDecisionStartTimeToNow()
+        {
+            m_WaitingStartedTime = Time.realtimeSinceStartup;
         }
 
 

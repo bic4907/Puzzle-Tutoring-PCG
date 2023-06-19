@@ -64,6 +64,14 @@ public class MouseInteraction : MonoBehaviour
         }
         return direction;
     }
+
+    public bool IsMessageActive()
+    {
+        // Check there is any gameobject which has "MessageBox" tag
+        GameObject messageBox = GameObject.FindGameObjectWithTag("MessageBox");
+        return messageBox != null;
+    }
+
     public void WaitForMouseInput()
     {
         // Vector3 mousePos = Input.mousePosition;
@@ -71,6 +79,8 @@ public class MouseInteraction : MonoBehaviour
         // Debug.DrawRay(transform.position, mousePos -  transform.position, Color.blue);
             if (Input.GetMouseButtonDown(0))
             {
+                if (IsMessageActive()) return;
+                
                 ray = mainCamera.ScreenPointToRay(Input.mousePosition);
                 
                 if (Physics.Raycast(ray,out hit))
