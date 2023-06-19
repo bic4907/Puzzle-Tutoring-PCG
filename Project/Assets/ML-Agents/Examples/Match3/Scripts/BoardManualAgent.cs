@@ -341,7 +341,7 @@ namespace Unity.MLAgentsExamples
 
         private void SetEmptyBoard()
         {
-            // this.gameObject.SetActive(false);
+            this.gameObject.SetActive(false);
         }
 
         private void FixedUpdate()
