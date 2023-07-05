@@ -19,7 +19,6 @@ public class UIButtonHandler : MonoBehaviour
 
     public void OnClick()
     {
-        Debug.Log("Button Clicked");
         switch (buttonType)
         {
             case ButtonType.Next:

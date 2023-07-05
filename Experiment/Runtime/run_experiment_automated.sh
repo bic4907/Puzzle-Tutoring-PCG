@@ -20,7 +20,6 @@ while :
 do
     container_count=$(docker ps -a --format '{{.Names}}' | grep -c "^$container_prefix")
 
-
     echo [$(date)] "Count of container ($container_prefix): " $container_count"/"$max_container_count
     echo [$(date)] "Count of remained tasks: " ${#file_list[@]}
 

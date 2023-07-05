@@ -6,14 +6,15 @@ ENV_ARGS = list()
 
 MCTS_SIMULATION_TIMES = [100, 200, 400, 1000]
 SAMPLING_NUMS = [10, 20, 30, 40]
-EVOLUTION_NUMS = [10, 20, 30, 40]
-TARGET_PLAYER = list(range(1, 2))
-METHOD = ['random', 'sampling', 'mcts', 'ga']
+TARGET_PLAYER = list([5])
+METHOD = ['sampling', 'ga', 'mcts']
 OBJECTIVE = ['knowledge']
-TARGET_EPISODE_COUNT = 1
+TARGET_EPISODE_COUNT = 10
 INCLUDE_SIMPLE_EFFECT = [1]
 KNOWLEDGE_ALMOST_RATIO = ['1.0']
+GREEDY_RATIO = ['1.0']
 PLAYER_DEPTH = [1]
+GA_EVOLUTION = [2, 4, 8, 16]
 os.makedirs('generated', exist_ok=True)
 
 
@@ -43,32 +44,37 @@ for simple_effect in INCLUDE_SIMPLE_EFFECT:
 
                             for i_ratio in KNOWLEDGE_ALMOST_RATIO:
                                 for i_simulation in MCTS_SIMULATION_TIMES:
-                                    _RUN_ID = RUN_ID.copy()
-                                    _RUN_ID.append('obj'), _RUN_ID.append(i_objective)
-                                    _RUN_ID.append('sim'), _RUN_ID.append(i_simulation)
-                                    _RUN_ID.append('rat'), _RUN_ID.append(i_ratio)
-                                    _RUN_ID.append('pdep'), _RUN_ID.append(i_p_depth)
 
-                                    _run_id = '_'.join(map(str, _RUN_ID))
+                                    for i_g_ratio in GREEDY_RATIO:
 
-                                    ENV_ARGS = list()
-                                    ENV_ARGS.append('--runId'), ENV_ARGS.append(_run_id)
-                                    ENV_ARGS.append('--method'), ENV_ARGS.append(i_method)
-                                    ENV_ARGS.append('--targetPlayer'), ENV_ARGS.append(i_player)
-                                    if simple_effect == 1:
-                                        ENV_ARGS.append('--simpleEffect')
-                                    ENV_ARGS.append('--logPath'), ENV_ARGS.append(f'/workspace/results/{_run_id}/')
-                                    ENV_ARGS.append('--mctsSimulation'), ENV_ARGS.append(i_simulation)
-                                    ENV_ARGS.append('--objective'), ENV_ARGS.append(i_objective)
-                                    ENV_ARGS.append('--targetEpisodeCount'), ENV_ARGS.append(TARGET_EPISODE_COUNT)
-                                    ENV_ARGS.append('--knowledgeAlmostRatio'), ENV_ARGS.append(i_ratio)
-                                    ENV_ARGS.append('--playerDepth'), ENV_ARGS.append(i_p_depth)
+                                        _RUN_ID = RUN_ID.copy()
+                                        _RUN_ID.append('obj'), _RUN_ID.append(i_objective)
+                                        _RUN_ID.append('sim'), _RUN_ID.append(i_simulation)
+                                        _RUN_ID.append('rat'), _RUN_ID.append(i_ratio)
+                                        _RUN_ID.append('pdep'), _RUN_ID.append(i_p_depth)
+                                        _RUN_ID.append('gp'), _RUN_ID.append(i_g_ratio)
 
-                                    base_config['env_settings']['env_args'] = ENV_ARGS
-                                    print(_RUN_ID)
+                                        _run_id = '_'.join(map(str, _RUN_ID))
 
-                                    with open(os.path.join('generated', f'{_run_id}.yaml'), 'w') as f:
-                                        yaml.dump(base_config, f)
+                                        ENV_ARGS = list()
+                                        ENV_ARGS.append('--runId'), ENV_ARGS.append(_run_id)
+                                        ENV_ARGS.append('--method'), ENV_ARGS.append(i_method)
+                                        ENV_ARGS.append('--targetPlayer'), ENV_ARGS.append(i_player)
+                                        if simple_effect == 1:
+                                            ENV_ARGS.append('--simpleEffect')
+                                        ENV_ARGS.append('--logPath'), ENV_ARGS.append(f'/workspace/results/{_run_id}/')
+                                        ENV_ARGS.append('--mctsSimulation'), ENV_ARGS.append(i_simulation)
+                                        ENV_ARGS.append('--objective'), ENV_ARGS.append(i_objective)
+                                        ENV_ARGS.append('--targetEpisodeCount'), ENV_ARGS.append(TARGET_EPISODE_COUNT)
+                                        ENV_ARGS.append('--knowledgeAlmostRatio'), ENV_ARGS.append(i_ratio)
+                                        ENV_ARGS.append('--playerDepth'), ENV_ARGS.append(i_p_depth)
+                                        ENV_ARGS.append('--greedyActionRatio'), ENV_ARGS.append(i_g_ratio)
+
+                                        base_config['env_settings']['env_args'] = ENV_ARGS
+                                        print(_RUN_ID)
+
+                                        with open(os.path.join('generated', f'{_run_id}.yaml'), 'w') as f:
+                                            yaml.dump(base_config, f)
                         else:
 
                             for i_simulation in MCTS_SIMULATION_TIMES:
@@ -124,44 +130,58 @@ for simple_effect in INCLUDE_SIMPLE_EFFECT:
 
                 for i_objective in OBJECTIVE:
 
-                    for i_evolution in EVOLUTION_NUMS:
+                    for i_evolution in GA_EVOLUTION:
+
                         _RUN_ID = RUN_ID.copy()
+
                         _RUN_ID.append('obj'), _RUN_ID.append(i_objective)
+
                         _RUN_ID.append('evo'), _RUN_ID.append(i_evolution)
+
                         _run_id = '_'.join(map(str, _RUN_ID))
 
                         ENV_ARGS = list()
+
                         ENV_ARGS.append('--runId'), ENV_ARGS.append(_run_id)
+
                         ENV_ARGS.append('--method'), ENV_ARGS.append(i_method)
+
                         ENV_ARGS.append('--targetPlayer'), ENV_ARGS.append(i_player)
-                        ENV_ARGS.append('--evolutionNum'), ENV_ARGS.append(i_evolution)
 
                         if simple_effect == 1:
                             ENV_ARGS.append('--simpleEffect')
+
                         ENV_ARGS.append('--logPath'), ENV_ARGS.append(f'/workspace/results/{_run_id}/')
+
                         ENV_ARGS.append('--targetEpisodeCount'), ENV_ARGS.append(TARGET_EPISODE_COUNT)
+
                         ENV_ARGS.append('--objective'), ENV_ARGS.append(i_objective)
 
+                        ENV_ARGS.append('--evolutionNum'), ENV_ARGS.append(i_evolution)
+
                         base_config['env_settings']['env_args'] = ENV_ARGS
+
                         print(_RUN_ID)
 
                         with open(os.path.join('generated', f'{_run_id}.yaml'), 'w') as f:
+
                             yaml.dump(base_config, f)
 
-
-
-
             else:
-                ENV_ARGS = list()
-                _run_id = run_id
 
-                ENV_ARGS.append('--runId'), ENV_ARGS.append(_run_id)
-                ENV_ARGS.append('--method'), ENV_ARGS.append(i_method)
-                ENV_ARGS.append('--targetPlayer'), ENV_ARGS.append(i_player)
-                if simple_effect == 1:
-                    ENV_ARGS.append('--simpleEffect')
-                ENV_ARGS.append('--logPath'), ENV_ARGS.append(f'/workspace/results/{_run_id}/')
-                ENV_ARGS.append('--targetEpisodeCount'), ENV_ARGS.append(TARGET_EPISODE_COUNT)
-                base_config['env_settings']['env_args'] = ENV_ARGS
-                with open(os.path.join('generated', f'{_run_id}.yaml'), 'w') as f:
-                    yaml.dump(base_config, f)
+
+                for i_g_ratio in GREEDY_RATIO:
+                    ENV_ARGS = list()
+                    _run_id = f'{run_id}_gp_{i_g_ratio}'
+                    ENV_ARGS.append('--runId'), ENV_ARGS.append(_run_id)
+                    ENV_ARGS.append('--method'), ENV_ARGS.append(i_method)
+                    ENV_ARGS.append('--targetPlayer'), ENV_ARGS.append(i_player)
+                    if simple_effect == 1:
+                        ENV_ARGS.append('--simpleEffect')
+                    ENV_ARGS.append('--logPath'), ENV_ARGS.append(f'/workspace/results/{_run_id}/')
+                    ENV_ARGS.append('--targetEpisodeCount'), ENV_ARGS.append(TARGET_EPISODE_COUNT)
+                    ENV_ARGS.append('--greedyActionRatio'), ENV_ARGS.append(i_g_ratio)
+
+                    base_config['env_settings']['env_args'] = ENV_ARGS
+                    with open(os.path.join('generated', f'{_run_id}.yaml'), 'w') as f:
+                        yaml.dump(base_config, f)
