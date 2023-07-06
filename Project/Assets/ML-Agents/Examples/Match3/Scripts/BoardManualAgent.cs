@@ -229,8 +229,7 @@ namespace Unity.MLAgentsExamples
             m_Logger = new PCGStepLog();
             m_SkillKnowledge = SkillKnowledgeExperimentSingleton.Instance.GetSkillKnowledge(PlayerNumber);
 
-            Debug.Log("Resetting Skill Knowledge");
-            Debug.Log(m_SkillKnowledge);
+            Debug.Log($"Resetting Skill Knowledge: {m_SkillKnowledge}");
 
             CurrentEpisodeCount += 1;
             CurrentStepCount = 0;
@@ -267,13 +266,11 @@ namespace Unity.MLAgentsExamples
             if (m_LearningProgressText != null)
             {
                 m_LearningProgressText.text = GetLearningProgressText();
-                Debug.Log(m_LearningProgressText.text);
             }
             if (m_QuizProgressText != null)
             {
                 m_QuizProgressText.text = GetQuizProgressText();
             }
-            Debug.Log(m_LearningProgressText);
 
             if (LearningStepCount >= MaxMoves)
             {

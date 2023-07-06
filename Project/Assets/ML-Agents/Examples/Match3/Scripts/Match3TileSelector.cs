@@ -51,7 +51,10 @@ public class Match3TileSelector : MonoBehaviour
                 if (i == typeIndex)
                 {
                     tileTypes[i].SetActive(true);
-                    tileDict[i].sharedMaterial = materialTypes[matIndex];
+                    if (i != 6)
+                    {
+                        tileDict[i].sharedMaterial = materialTypes[matIndex];
+                    }
                     if(corutineControlFlag >= 1 && isHumanControlled && !isCorutineRunning)
                     {
                         isCorutineRunning = true;

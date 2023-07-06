@@ -25,7 +25,7 @@ namespace Unity.MLAgentsExamples
             {
                 board = GetComponent<BoardPCGAgent>().Board;
             }
-            Debug.Log("BoardPresetManager: " + board);
+            // Debug.Log("BoardPresetManager: " + board);
         }
 
         // Update is called once per frame
