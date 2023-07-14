@@ -125,9 +125,11 @@ namespace Unity.MLAgentsExamples
             return DestroyScores[pieceType];
         }
 
-        public static Dictionary<PieceType, int> GetMatchCount(List<(int CellType, int SpecialType)> pieceList)
+        public static Dictionary<PieceType, int> GetMatchCount(List<(int CellType, int SpecialType)> pieceList, bool includeNormalPiece = false)
         {
-            PieceType[] targetPieces = {PieceType.HorizontalPiece, PieceType.VerticalPiece, PieceType.CrossPiece, PieceType.BombPiece, PieceType.RocketPiece, PieceType.RainbowPiece};
+            List<PieceType> targetPieces = new List<PieceType> {PieceType.HorizontalPiece, PieceType.VerticalPiece, PieceType.CrossPiece, PieceType.BombPiece, PieceType.RocketPiece, PieceType.RainbowPiece};
+            if (includeNormalPiece) targetPieces.Add(PieceType.NormalPiece);
+            
             Dictionary<PieceType, int> matchCount = new Dictionary<PieceType, int>();
             
             foreach (var piece in targetPieces) // Initialize

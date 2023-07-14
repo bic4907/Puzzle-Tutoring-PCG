@@ -110,6 +110,7 @@ namespace Unity.MLAgentsExamples
                 if (this.gameObject.GetComponent<FirebaseLogger>() == null)
                 {
                     m_FirebaseLogger = this.gameObject.AddComponent<FirebaseLogger>();
+                    m_FirebaseLogger.SetUUID(m_uuid);
                 }
             }
 
@@ -301,14 +302,21 @@ namespace Unity.MLAgentsExamples
         {
             if (SaveFirebaseLog)
             {
-                FirebaseLog log = new FirebaseLog();
-                log.EpisodeCount = CurrentEpisodeCount;
-                log.EpisodeStepCount = CurrentStepCount;
-                log.TotalStepCount = TotalStepCount;
-                log.Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                log.InstanceUUID = m_uuid;
-                log.SkillKnowledge = m_SkillKnowledge;
-                m_FirebaseLogger.Post(log);
+                if (m_ExperimentMode == ExperimentMode.Learning)
+                {
+                    FirebaseLog.LearningLog log = new FirebaseLog.LearningLog();
+                    log.EpisodeCount = CurrentEpisodeCount;
+                    log.EpisodeStepCount = CurrentStepCount;
+                    log.TotalStepCount = TotalStepCount;
+                    log.DecisionTime = LastDecisionTime;
+                    log.HintAction = LastHintMove.MoveIndex;
+                    log.HintShown = m_HintGlowed;
+                    log.PlayerAction = LastPlayerMove.MoveIndex;
+                    log.Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                    log.InstanceUUID = m_uuid;
+                    log.SkillKnowledge = m_SkillKnowledge;
+                    m_FirebaseLogger.Post(log);
+                }
             }
 
         }
@@ -337,8 +345,14 @@ namespace Unity.MLAgentsExamples
                 m_QuizList.RemoveAt(0);
             } else
             {
+                if (m_FirebaseLogger)
+                {
+                    m_FirebaseLogger.PostDoneSignal();
+                }
+ 
                 Update();
                 SetEmptyBoard();
+            
             }
 
             if (m_CurrentQuiz != null)
@@ -354,8 +368,22 @@ namespace Unity.MLAgentsExamples
             }
         }
 
+        private void PostQuizLog(Quiz quiz)
+        {
+
+            FirebaseLog.QuizLog log = new FirebaseLog.QuizLog();
+            log.QuestionNumber = m_SolvedQuizList.Count;
+            log.QuizFile = quiz.FileName;
+            log.PlayerAction = quiz.PlayerAction;
+            log.DecisionTime = LastDecisionTime;
+            log.Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            m_FirebaseLogger.Post(log);
+ 
+        }
+
         private void SetEmptyBoard()
         {
+
             this.gameObject.SetActive(false);
             if (PostExperimentMessageBox)
             {
@@ -473,11 +501,18 @@ namespace Unity.MLAgentsExamples
 
                     Board.SpawnSpecialCells();
 
+                    var createdPieces = Board.GetLastCreatedPiece();
+                    foreach (var (type, count) in SpecialMatch.GetMatchCount(createdPieces, true))
+                    {
+                        m_SkillKnowledge.IncreaseSeenMatches(type, count);
+                    }
+
+
                     if (m_CntChainEffect == 1)
                     {
-                        var createdPieces = SpecialMatch.GetMatchCount(Board.GetLastCreatedPiece());
-                        foreach (var (type, count) in createdPieces)
+                        foreach (var (type, count) in SpecialMatch.GetMatchCount(createdPieces))
                         {
+                            
                             m_SkillKnowledge.IncreaseMatchCount(type, count);
 
                             if (m_SkillKnowledge.ManualCheck[type] == true || count == 0) continue;
@@ -506,6 +541,12 @@ namespace Unity.MLAgentsExamples
 
                     Board.ExecuteSpecialEffect();
 
+                    var destroyedPieces = SpecialMatch.GetMatchCount(Board.GetLastDestroyedPiece(), true);
+                    foreach (var (type, count) in destroyedPieces)
+                    {
+                        if (type == PieceType.NormalPiece) continue;
+                        m_SkillKnowledge.IncreaseSeenDestroys(type, count);
+                    }
 
                     nextState = State.Drop;
                     break;
@@ -575,9 +616,9 @@ namespace Unity.MLAgentsExamples
                                 CurrentStepCount += 1;
                                 TotalStepCount += 1;
 
-                                OnPlayerAction();
-
                                 LastDecisionTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
+
+                                OnPlayerAction();
 
                                 m_CntChainEffect = 0;
                                 nextState = State.FindMatches;
@@ -591,6 +632,11 @@ namespace Unity.MLAgentsExamples
                                 else if (m_ExperimentMode == ExperimentMode.Quiz)
                                 {
                                     m_CurrentQuiz.PlayerAction = move.MoveIndex;
+                                    
+                                    if (m_FirebaseLogger != null) 
+                                    {
+                                        PostQuizLog(m_CurrentQuiz);
+                                    }
                                     NextQuiz();
                                 }
 

@@ -5135,7 +5135,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Board: {fileID: 0}
   MoveTime: 0.2
-  MaxMoves: 3
+  MaxMoves: 10
   useForcedFast: 0
   generatorType: 1
   generatorRewardType: 1
@@ -5152,7 +5152,7 @@ MonoBehaviour:
   KnowledgeReachStep: -1
   KnowledgeAlmostReachStep: -1
   ComparisonCounts: 
-  SaveFirebaseLog: 0
+  SaveFirebaseLog: 1
   agentType: 1
   m_mouseInput: {fileID: 1540485852}
   m_WaitingStartedTime: 0
