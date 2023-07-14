@@ -91,6 +91,7 @@ namespace Unity.MLAgentsExamples
                 if (this.gameObject.GetComponent<FirebaseLogger>() == null)
                 {
                     m_FirebaseLogger = this.gameObject.AddComponent<FirebaseLogger>();
+                    m_FirebaseLogger.SetUUID(m_uuid);
                 }
             }
 
@@ -216,7 +217,7 @@ namespace Unity.MLAgentsExamples
         {
             if (SaveFirebaseLog && CurrentEpisodeCount != 0)
             {
-                FirebaseLog log = new FirebaseLog();
+                FirebaseLog.LearningLog log = new FirebaseLog.LearningLog();
                 log.EpisodeCount = CurrentEpisodeCount;
                 log.EpisodeStepCount = CurrentStepCount;
                 log.TotalStepCount = TotalStepCount;

@@ -11,6 +11,9 @@ namespace Unity.MLAgentsExamples
         public Dictionary<PieceType, int> CurrentMatchCounts;
         public Dictionary<PieceType, int> TargetMatchCounts;
         public Dictionary<PieceType, bool> ManualCheck;
+        public Dictionary<PieceType, int> SeenMatches;
+        public Dictionary<PieceType, int> SeenDestroys;
+
         
         public PieceType[] PieceTypes = new PieceType[] {PieceType.HorizontalPiece, PieceType.VerticalPiece, PieceType.CrossPiece, PieceType.BombPiece, PieceType.RocketPiece, PieceType.RainbowPiece};
 
@@ -21,13 +24,19 @@ namespace Unity.MLAgentsExamples
             CurrentMatchCounts = new Dictionary<PieceType, int>();
             TargetMatchCounts = new Dictionary<PieceType, int>();
             ManualCheck = new Dictionary<PieceType, bool>();
+            SeenMatches = new Dictionary<PieceType, int>();
+            SeenDestroys = new Dictionary<PieceType, int>();
 
             for (int i = 0; i < PieceTypes.Length; i++)
             {
                 CurrentMatchCounts.Add(PieceTypes[i], 0);
                 TargetMatchCounts.Add(PieceTypes[i], DefaultTargetValue);
                 ManualCheck.Add(PieceTypes[i], false);
+                SeenMatches.Add(PieceTypes[i], 0);
+                SeenDestroys.Add(PieceTypes[i], 0);
             }
+            SeenMatches.Add(PieceType.NormalPiece, 0);
+            SeenDestroys.Add(PieceType.NormalPiece, 0);
         }
         
         public SkillKnowledge(int HorizontalPieceCount, 
@@ -63,6 +72,16 @@ namespace Unity.MLAgentsExamples
         public void IncreaseMatchCount(PieceType type, int count)
         {
             CurrentMatchCounts[type] += count;
+        }
+
+        public void IncreaseSeenMatches(PieceType type, int count)
+        {
+            SeenMatches[type] += count;
+        }
+
+        public void IncreaseSeenDestroys(PieceType type, int count)
+        {
+            SeenDestroys[type] += count;
         }
 
         public bool IsMatchCountReachedTarget(PieceType pieceType)
