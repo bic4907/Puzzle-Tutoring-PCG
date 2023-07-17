@@ -197,6 +197,7 @@ namespace Unity.MLAgentsExamples
                 Debug.Log($"Loading initial board: {_boardName}");
                 m_presetManager.LoadBoard(Board, _boardName);
             }
+            GlowTiles(GreedyMatch3Solver.GetAction(Board), isTwoWay: true);
         }
 
         private void InitializeQuiz()
