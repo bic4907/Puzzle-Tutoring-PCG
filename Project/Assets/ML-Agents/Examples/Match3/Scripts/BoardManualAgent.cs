@@ -96,6 +96,7 @@ namespace Unity.MLAgentsExamples
         public GameObject MidExperimentMessageBox;
         public GameObject PostExperimentMessageBox;
 
+        public List<string> m_InitialBoardList;
 
         protected void Awake()
         {
@@ -176,19 +177,51 @@ namespace Unity.MLAgentsExamples
                 PreExperimentMessageBox.SetActive(true);
             }
 
+            m_InitialBoardList = new List<string>();            
+            m_InitialBoardList.Add("init_0");
+            m_InitialBoardList.Add("init_1");
+            m_InitialBoardList.Add("init_2");
+            m_InitialBoardList.Add("init_3");
+            m_InitialBoardList.Add("init_4");
 
         }
-        
+
+        public void SetRandomInitialBoard()
+        {
+            if (m_InitialBoardList.Count > 0)
+            {
+
+                var _random = new System.Random(DateTime.Now.Millisecond);
+
+                string _boardName = m_InitialBoardList[_random.Next() % m_InitialBoardList.Count];
+                Debug.Log($"Loading initial board: {_boardName}");
+                m_presetManager.LoadBoard(Board, _boardName);
+            }
+        }
+
         private void InitializeQuiz()
         {
             m_QuizList = new List<Quiz>();
             m_SolvedQuizList = new List<Quiz>();
 
-            // Load quiz data
-            m_QuizList.Add(new Quiz("board_2023-06-13_01-14-11", PieceType.HorizontalPiece));
-            m_QuizList.Add(new Quiz("board_2023-06-14_22-21-02", PieceType.RainbowPiece));
-            m_QuizList.Add(new Quiz("board_2023-06-14_22-21-58", PieceType.VerticalPiece));
-        
+
+            m_QuizList.Add(new Quiz("horizon_0", PieceType.HorizontalPiece));
+            m_QuizList.Add(new Quiz("horizon_1", PieceType.HorizontalPiece));
+
+            m_QuizList.Add(new Quiz("vertical_0", PieceType.VerticalPiece));
+            m_QuizList.Add(new Quiz("vertical_1", PieceType.VerticalPiece));
+
+            m_QuizList.Add(new Quiz("cross_0", PieceType.CrossPiece));
+            m_QuizList.Add(new Quiz("cross_1", PieceType.CrossPiece));
+
+            m_QuizList.Add(new Quiz("bomb_0", PieceType.BombPiece));
+            m_QuizList.Add(new Quiz("bomb_1", PieceType.BombPiece));
+
+            m_QuizList.Add(new Quiz("rocket_0", PieceType.RocketPiece));
+            m_QuizList.Add(new Quiz("rocket_0", PieceType.RocketPiece));
+
+            m_QuizList.Add(new Quiz("rainbow_0", PieceType.RainbowPiece));
+            m_QuizList.Add(new Quiz("rainbow_0", PieceType.RainbowPiece));
         }
 
         private void InitializeUI()
@@ -218,6 +251,7 @@ namespace Unity.MLAgentsExamples
         {
             Board.UpdateCurrentBoardSize();
             Board.InitSettled();
+
             m_CurrentState = State.FindMatches;
             m_TimeUntilMove = MoveTime;
             m_MovesMade = 0;
@@ -254,15 +288,20 @@ namespace Unity.MLAgentsExamples
             }
 
             ResetKnowledgeReach();
+
             ComparisonCounts.Clear();
+
+
+
+
         }
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                OnEpisodeBegin();
-            }
+            // if (Input.GetKeyDown(KeyCode.R))
+            // {
+            //     OnEpisodeBegin();
+            // }
 
             if (m_LearningProgressText != null)
             {
@@ -762,6 +801,7 @@ namespace Unity.MLAgentsExamples
         {
             m_WaitingStartedTime = Time.realtimeSinceStartup;
         }
+
 
 
     }

@@ -52,8 +52,26 @@ namespace Unity.MLAgentsExamples
             // Get filename with date and time
             string filePath = System.IO.Path.Combine(Application.streamingAssetsPath, filename);
 
+            if (board != null)
+            {
+                board.LoadFrom(filePath);
+            }
+            else
+            {
+                Debug.Log("BoardPresetManager: board is null");
+            }
+        }
+
+        public void LoadBoard(Match3Board board, string filename)
+        {
+            filename = filename + ".bin";
+            Debug.Log($"BoardPresetManager: LoadBoard ({filename})");
+            // Get filename with date and time
+            string filePath = System.IO.Path.Combine(Application.streamingAssetsPath, filename);
+
             board.LoadFrom(filePath);
         }
+
     }
 
 

@@ -30,6 +30,10 @@ public class UIButtonHandler : MonoBehaviour
             case ButtonType.Okay:
                 // SetActive to false to the parent of parent game object
                 transform.parent.parent.gameObject.SetActive(false);
+
+                
+
+
                 break;
             default:
                 break;
