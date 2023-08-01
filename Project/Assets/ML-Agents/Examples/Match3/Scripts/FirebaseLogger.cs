@@ -122,7 +122,7 @@ namespace Unity.MLAgentsExamples
 
         public void SetUUID(string uuid)
         {
-            m_UUID = "ci" + uuid;
+            m_UUID = uuid;
         }
 
     }

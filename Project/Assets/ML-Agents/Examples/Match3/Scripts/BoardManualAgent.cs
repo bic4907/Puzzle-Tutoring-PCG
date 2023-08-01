@@ -98,6 +98,36 @@ namespace Unity.MLAgentsExamples
 
         public List<string> m_InitialBoardList;
 
+        private string GetMethodPostfix()
+        {
+            // Concat the generatorType and the reward
+            string _postfix = "";
+
+            switch (generatorType)
+            {
+                case GeneratorType.MCTS:
+                    _postfix += "MC";
+                    // Add the reward type
+                    
+                    switch(generatorRewardType)
+                    {
+                        case GeneratorReward.Score:
+                            _postfix += "SC";
+                            break;
+                        case GeneratorReward.Knowledge:
+                            _postfix += "KN";
+                            break;
+                    }
+
+                    break;
+                case GeneratorType.Random:
+                    _postfix += "RD";
+                    break;
+            }
+            
+            return _postfix;
+        }
+
         protected void Awake()
         {
             Board = GetComponent<Match3Board>();
@@ -105,13 +135,15 @@ namespace Unity.MLAgentsExamples
             m_Logger = new PCGStepLog();
             m_presetManager = GetComponent<BoardPresetManager>();
 
+            SetRandomGenerationMethod();
+
             if (SaveFirebaseLog)
             {
                 // Add FirebaseLogger component in this game objct
                 if (this.gameObject.GetComponent<FirebaseLogger>() == null)
                 {
                     m_FirebaseLogger = this.gameObject.AddComponent<FirebaseLogger>();
-                    m_FirebaseLogger.SetUUID(m_uuid);
+                    m_FirebaseLogger.SetUUID(this.GetMethodPostfix() + "_" + m_uuid);
                 }
             }
 
@@ -184,7 +216,6 @@ namespace Unity.MLAgentsExamples
             m_InitialBoardList.Add("init_3");
             m_InitialBoardList.Add("init_4");
 
-            SetRandomGenerationMethod();
 
         }
 
@@ -459,7 +490,7 @@ namespace Unity.MLAgentsExamples
             if (PostExperimentMessageBox)
             {
                 PostExperimentMessageBox.SetActive(true);
-                GameObject.Find("SurveyCodeInput").GetComponent<TMP_InputField>().text = $"ci{m_uuid}";
+                GameObject.Find("SurveyCodeInput").GetComponent<TMP_InputField>().text = this.GetMethodPostfix() + "_" + m_uuid;
 
             }
         }
@@ -577,6 +608,7 @@ namespace Unity.MLAgentsExamples
                     if (m_CntChainEffect == 1)
                     {
 
+
                         foreach (var (type, count) in SpecialMatch.GetMatchCount(createdPieces))
                         {
                             
@@ -654,26 +686,6 @@ namespace Unity.MLAgentsExamples
                         SettleCount += 1;
                     }
 
-                    var _destroyedPieces = SpecialMatch.GetMatchCount(Board.GetLastDestroyedPiece(), true);
-                    foreach (var (type, count) in _destroyedPieces)
-                    {
-                        if (type == PieceType.NormalPiece) continue;
-                        m_SkillKnowledge.IncreaseSeenDestroys(type, count);
-                    }
-                    
-                    var _createdPieces = Board.GetLastCreatedPiece();
-                    foreach (var (type, count) in SpecialMatch.GetMatchCount(_createdPieces, true))
-                    {
-                        m_SkillKnowledge.IncreaseSeenMatches(type, count);
-                    }
-
-                    float WaitedTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
-                    if (WaitedTime > HintStartTime && m_HintGlowed == false && m_ExperimentMode == ExperimentMode.Learning)
-                    {
-                        GlowTiles(GreedyMatch3Solver.GetAction(Board), isTwoWay: true);
-                        m_HintGlowed = true;
-                    }
-
                     Move move = new Move();
                     switch(agentType)
                     {
@@ -685,6 +697,8 @@ namespace Unity.MLAgentsExamples
                                 move = m_mouseInput.GetMove();
                                 LastPlayerMove = move;
 
+
+
                                 Board.MakeMove(move);
 
                                 CurrentStepCount += 1;
@@ -692,7 +706,32 @@ namespace Unity.MLAgentsExamples
 
                                 LastDecisionTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
 
+
+                                /* Log */
+                                      
+                                foreach (var (type, count) in SpecialMatch.GetMatchCount(Board.GetLastSeenCreatedPiece(), true))
+                                {
+                                    m_SkillKnowledge.IncreaseSeenMatches(type, count);
+                                }
+                                // Move Event Log
+                                foreach (var (type, count) in SpecialMatch.GetMatchCount(Board.GetLastSeenDestroyedPiece(), true))
+                                {
+                                    if (type == PieceType.NormalPiece) continue;
+                                    m_SkillKnowledge.IncreaseSeenDestroys(type, count);
+                                }
+                                Board.ClearLastSeenPieceLog();
+                                
+
+
+
                                 OnPlayerAction();
+
+                                float WaitedTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
+                                if (WaitedTime > HintStartTime && m_HintGlowed == false && m_ExperimentMode == ExperimentMode.Learning)
+                                {
+                                    GlowTiles(GreedyMatch3Solver.GetAction(Board), isTwoWay: true);
+                                    m_HintGlowed = true;
+                                }
 
                                 m_CntChainEffect = 0;
                                 nextState = State.FindMatches;

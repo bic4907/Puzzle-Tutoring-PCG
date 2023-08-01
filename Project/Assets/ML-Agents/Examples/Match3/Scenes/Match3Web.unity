@@ -5200,7 +5200,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Board: {fileID: 0}
   MoveTime: 0.2
-  MaxMoves: 10
+  MaxMoves: 50
   useForcedFast: 0
   generatorType: 1
   generatorRewardType: 1

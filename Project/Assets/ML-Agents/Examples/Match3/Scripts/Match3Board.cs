@@ -55,6 +55,8 @@ namespace Unity.MLAgentsExamples
         private List<SpecialEffect> m_SpecialEffects;
         private List<(int CellType, int SpecialType)> m_LastCreatedPiece;
         private List<(int CellType, int SpecialType)> m_LastDestroyedPiece;
+        private List<(int CellType, int SpecialType)> m_LastSeenCreatedPiece;
+        private List<(int CellType, int SpecialType)> m_LastSeenDestroyedPiece;
         private List<(PieceType SpecialType, List<int[]> Positions)> m_SpecialMatchPositions;
 
 
@@ -80,6 +82,10 @@ namespace Unity.MLAgentsExamples
 
             m_LastCreatedPiece = new List<(int CellType, int SpecialType)>();
             m_LastDestroyedPiece = new List<(int CellType, int SpecialType)>();
+
+            m_LastSeenCreatedPiece = new List<(int CellType, int SpecialType)>();
+            m_LastSeenDestroyedPiece = new List<(int CellType, int SpecialType)>();
+
             m_SpecialEffects = new List<SpecialEffect>();
             m_SpecialMatchPositions = new List<(PieceType SpecialType, List<int[]> Positions)>();
         
@@ -104,12 +110,30 @@ namespace Unity.MLAgentsExamples
             return m_LastDestroyedPiece;
         }
 
+        public List<(int CellType, int SpecialType)> GetLastSeenCreatedPiece()
+        {
+            return m_LastSeenCreatedPiece;
+        }
+
+        public List<(int CellType, int SpecialType)> GetLastSeenDestroyedPiece()
+        {
+            return m_LastSeenDestroyedPiece;
+        }
+
 
         public void ClearLastPieceLog()
         {
             m_LastCreatedPiece.Clear();
             m_LastDestroyedPiece.Clear();
         }
+
+        public void ClearLastSeenPieceLog()
+        {
+            m_LastSeenCreatedPiece.Clear();
+            m_LastSeenDestroyedPiece.Clear();
+        }
+
+
 
         public void ClearSpecialEffects()
         {
@@ -455,12 +479,10 @@ namespace Unity.MLAgentsExamples
                                         m_SpecialMatchPositions.Add((_pieceType, matchedPositions));
                                     }
                             
-                                    m_LastDestroyedPiece.Add((cellType, (int)matchedType));
-
+     
                                     m_Matched[position[0], position[1]] = true;
                                     madeMatch = true;
                                 }
-
                             }
                         }
                     }
@@ -503,6 +525,8 @@ namespace Unity.MLAgentsExamples
                     if (m_CreatedCells[j, i].CellType != k_EmptyCell)
                     {
                         m_LastCreatedPiece.Add((m_CreatedCells[j, i].CellType, m_CreatedCells[j, i].SpecialType));
+                        m_LastSeenCreatedPiece.Add((m_CreatedCells[j, i].CellType, m_CreatedCells[j, i].SpecialType));
+                        
                         m_Cells[j, i] = m_CreatedCells[j, i];
                     }
                 }
@@ -738,6 +762,8 @@ namespace Unity.MLAgentsExamples
                     default:
                         throw new Exception("Invalid Special Type");
                 }
+                m_LastSeenDestroyedPiece.Add((cellType, (int)specialEffect.SpecialType));
+
             }
             ClearSpecialEffects();
         }
