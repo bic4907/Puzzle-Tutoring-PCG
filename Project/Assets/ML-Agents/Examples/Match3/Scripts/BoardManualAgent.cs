@@ -285,6 +285,9 @@ namespace Unity.MLAgentsExamples
 
             m_QuizList.Add(new Quiz("rainbow_0", PieceType.RainbowPiece));
             m_QuizList.Add(new Quiz("rainbow_0", PieceType.RainbowPiece));
+
+            // Shuffle m_QuizList
+            m_QuizList = m_QuizList.OrderBy(x => Guid.NewGuid()).ToList();
         }
 
         private void InitializeUI()
