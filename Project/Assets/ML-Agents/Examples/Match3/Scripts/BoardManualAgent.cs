@@ -720,10 +720,7 @@ namespace Unity.MLAgentsExamples
                                     m_SkillKnowledge.IncreaseSeenDestroys(type, count);
                                 }
                                 Board.ClearLastSeenPieceLog();
-                                
-
-
-
+                            
                                 OnPlayerAction();
 
                                 float WaitedTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
