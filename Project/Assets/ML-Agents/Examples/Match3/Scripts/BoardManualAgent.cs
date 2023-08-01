@@ -573,14 +573,10 @@ namespace Unity.MLAgentsExamples
                     Board.SpawnSpecialCells();
 
                     var createdPieces = Board.GetLastCreatedPiece();
-                    foreach (var (type, count) in SpecialMatch.GetMatchCount(createdPieces, true))
-                    {
-                        m_SkillKnowledge.IncreaseSeenMatches(type, count);
-                    }
-
 
                     if (m_CntChainEffect == 1)
                     {
+
                         foreach (var (type, count) in SpecialMatch.GetMatchCount(createdPieces))
                         {
                             
@@ -612,12 +608,7 @@ namespace Unity.MLAgentsExamples
 
                     Board.ExecuteSpecialEffect();
 
-                    var destroyedPieces = SpecialMatch.GetMatchCount(Board.GetLastDestroyedPiece(), true);
-                    foreach (var (type, count) in destroyedPieces)
-                    {
-                        if (type == PieceType.NormalPiece) continue;
-                        m_SkillKnowledge.IncreaseSeenDestroys(type, count);
-                    }
+
 
                     nextState = State.Drop;
                     break;
@@ -663,6 +654,18 @@ namespace Unity.MLAgentsExamples
                         SettleCount += 1;
                     }
 
+                    var _destroyedPieces = SpecialMatch.GetMatchCount(Board.GetLastDestroyedPiece(), true);
+                    foreach (var (type, count) in _destroyedPieces)
+                    {
+                        if (type == PieceType.NormalPiece) continue;
+                        m_SkillKnowledge.IncreaseSeenDestroys(type, count);
+                    }
+                    
+                    var _createdPieces = Board.GetLastCreatedPiece();
+                    foreach (var (type, count) in SpecialMatch.GetMatchCount(_createdPieces, true))
+                    {
+                        m_SkillKnowledge.IncreaseSeenMatches(type, count);
+                    }
 
                     float WaitedTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
                     if (WaitedTime > HintStartTime && m_HintGlowed == false && m_ExperimentMode == ExperimentMode.Learning)

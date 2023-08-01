@@ -167,7 +167,7 @@ namespace Unity.MLAgentsExamples
                 result += pieceType.ToString() + ": " + CurrentMatchCounts[pieceType] + "/" + TargetMatchCounts[pieceType] + "/"  + ManualCheck[pieceType] + " | ";
             }
             result = result.Remove(result.Trim().Length - 2);
-
+            
             return result;
         }
 
