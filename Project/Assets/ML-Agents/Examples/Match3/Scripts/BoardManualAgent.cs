@@ -184,7 +184,38 @@ namespace Unity.MLAgentsExamples
             m_InitialBoardList.Add("init_3");
             m_InitialBoardList.Add("init_4");
 
+            SetRandomGenerationMethod();
+
         }
+
+        public void SetRandomGenerationMethod()
+        {
+            // Randomly select the generation method
+            var _random = new System.Random(DateTime.Now.Millisecond);
+
+            string[] _methods = new string[] { "mcts_knowledge", "mcts_score", "random" };
+
+            // Sample one of method and write the case
+            string _method = _methods[_random.Next() % _methods.Length];
+            
+            switch(_method)
+            {
+                case "mcts_knowledge":
+                    generatorType = GeneratorType.MCTS;
+                    generatorRewardType = GeneratorReward.Knowledge;
+                    break;
+                case "mcts_score":
+                    generatorType = GeneratorType.MCTS;
+                    generatorRewardType = GeneratorReward.Score;
+                    break;
+                case "random":
+                    generatorType = GeneratorType.Random;
+                    break;
+            }
+
+            Debug.Log($"Randomly selected generation method!\nGeneratorType: {generatorType}, GeneratorRewardType: {generatorRewardType}");
+        }
+
 
         public void SetRandomInitialBoard()
         {
