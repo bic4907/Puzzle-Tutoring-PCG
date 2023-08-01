@@ -689,6 +689,15 @@ namespace Unity.MLAgentsExamples
                         SettleCount += 1;
                     }
 
+
+                    float WaitedTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
+                    if (WaitedTime > HintStartTime && m_HintGlowed == false && m_ExperimentMode == ExperimentMode.Learning)
+                    {
+                        GlowTiles(GreedyMatch3Solver.GetAction(Board), isTwoWay: true);
+                        m_HintGlowed = true;
+                    }
+
+
                     Move move = new Move();
                     switch(agentType)
                     {
@@ -725,13 +734,6 @@ namespace Unity.MLAgentsExamples
                                 Board.ClearLastSeenPieceLog();
                             
                                 OnPlayerAction();
-
-                                float WaitedTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
-                                if (WaitedTime > HintStartTime && m_HintGlowed == false && m_ExperimentMode == ExperimentMode.Learning)
-                                {
-                                    GlowTiles(GreedyMatch3Solver.GetAction(Board), isTwoWay: true);
-                                    m_HintGlowed = true;
-                                }
 
                                 m_CntChainEffect = 0;
                                 nextState = State.FindMatches;
