@@ -1063,46 +1063,48 @@ namespace Unity.MLAgentsExamples
             streamFileWrite.Close();
         }
 
-
+        private void OnLoadComplete(byte[] assetBundleData)
+        {       
+            if (assetBundleData != null)
+            {
+                // Create a memory stream from the downloaded data
+                MemoryStream stream = new MemoryStream(assetBundleData);
+                IFormatter formatter = new BinaryFormatter();
+                SerializableBoard loadedBoard = (SerializableBoard)formatter.Deserialize(stream);
+                m_Cells = ((int CellType, int SpecialType)[,])loadedBoard.m_Cells.Clone();
+            }
+        }
 
         public bool LoadFrom(string path)
         {
             bool IsSuccess = false;
             Debug.Log("LoadFrom: " + path);
-            try
-            {
+
+            // try
+            // {
                 // If path includes http
-                if (path.Contains("http"))
-                {
-                    // Download the assets
-                    AssetLoader assetLoader = new AssetLoader();
-                    byte[] downloadedData = assetLoader.LoadAssetBundle(path);
-                    if (downloadedData != null)
-                    {
-                        // Create a memory stream from the downloaded data
-                        MemoryStream stream = new MemoryStream(downloadedData);
-                        IFormatter formatter = new BinaryFormatter();
-                        SerializableBoard loadedBoard = (SerializableBoard)formatter.Deserialize(stream);
-                        m_Cells = ((int CellType, int SpecialType)[,])loadedBoard.m_Cells.Clone();
-                        IsSuccess = true;
-                    }
-                }
-                else
-                {
-                    IFormatter formatter = new BinaryFormatter();
-                    Stream streamFileRead = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    SerializableBoard loadedBoard = (SerializableBoard)formatter.Deserialize(streamFileRead);
-                    m_Cells = ((int CellType, int SpecialType)[,])loadedBoard.m_Cells.Clone();
-                    IsSuccess = true;
-                }
-
-
-
-            }
-            catch (Exception e)
+            if (path.Contains("http"))
             {
-                Debug.Log(e);
+                AssetLoader assetLoader = GameObject.Find("AssetLoader").GetComponent<AssetLoader>();
+                assetLoader.LoadAssetBundle(path, OnLoadComplete);
+                IsSuccess = true;
             }
+            else
+            {
+                IFormatter formatter = new BinaryFormatter();
+                Stream streamFileRead = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                SerializableBoard loadedBoard = (SerializableBoard)formatter.Deserialize(streamFileRead);
+                m_Cells = ((int CellType, int SpecialType)[,])loadedBoard.m_Cells.Clone();
+                IsSuccess = true;
+            }
+
+
+
+            // }
+            // catch (Exception e)
+            // {
+            //     Debug.Log(e);
+            // }
             return IsSuccess;
         }
     }

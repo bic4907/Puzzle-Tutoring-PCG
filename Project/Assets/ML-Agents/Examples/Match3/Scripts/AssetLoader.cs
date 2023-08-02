@@ -1,23 +1,24 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Threading;
+using System;
 
 public class AssetLoader : MonoBehaviour 
 {
     byte[] results;
-    bool IsDone = false;
 
-    public byte[] LoadAssetBundle(string path)
+    public byte[] LoadAssetBundle(string path, Action<byte[]> onLoaded)
     {
         // Start the coroutine using the static method
-        StartCoroutine(GetAssetBundle(path));
 
-        while(!IsDone) {
-        }
+        StartCoroutine(GetAssetBundle(path, onLoaded));
+
+
         return results;
     }
 
-    private IEnumerator GetAssetBundle(string path)
+    private IEnumerator GetAssetBundle(string path, Action<byte[]> onLoaded)
     {
         Debug.Log("Fecthing:" + path);
 
@@ -26,15 +27,16 @@ public class AssetLoader : MonoBehaviour
 
         if (www.result != UnityWebRequest.Result.Success) {
             Debug.Log("Error Fecthing:" + www.error);
-            IsDone = true;
+
         }
         else {
             // Show results as text
-            Debug.Log("Error Fecthing:" + path);
+            Debug.Log("Good Fecthing:" + path);
  
             // Or retrieve results as binary data
             results = www.downloadHandler.data;
-            IsDone = true;
+
+            onLoaded?.Invoke(results);
         }
     }
 }
