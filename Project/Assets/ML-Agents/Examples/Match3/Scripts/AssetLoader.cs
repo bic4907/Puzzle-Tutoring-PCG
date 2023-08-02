@@ -23,12 +23,12 @@ public class AssetLoader : MonoBehaviour
         yield return www.SendWebRequest();
 
         if (www.result != UnityWebRequest.Result.Success) {
-            Debug.Log(www.error);
+            Debug.Log("Error Fecthing:" + www.error);
             IsDone = true;
         }
         else {
             // Show results as text
-            Debug.Log(www.downloadHandler.text);
+            Debug.Log("Error Fecthing:" + path);
  
             // Or retrieve results as binary data
             results = www.downloadHandler.data;

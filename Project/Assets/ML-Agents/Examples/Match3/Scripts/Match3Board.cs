@@ -1068,6 +1068,7 @@ namespace Unity.MLAgentsExamples
         public bool LoadFrom(string path)
         {
             bool IsSuccess = false;
+            Debug.Log("LoadFrom: " + path);
             try
             {
                 // If path includes http
