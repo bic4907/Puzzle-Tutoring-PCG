@@ -7,6 +7,7 @@ using UnityEditor;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization; 
+using UnityEngine.Networking;
 
 namespace Unity.MLAgentsExamples
 {
@@ -1067,11 +1068,48 @@ namespace Unity.MLAgentsExamples
             bool IsSuccess = false;
             try
             {
-                IFormatter formatter = new BinaryFormatter();
-                Stream streamFileRead = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-                SerializableBoard loadedBoard = (SerializableBoard)formatter.Deserialize(streamFileRead);
-                m_Cells = ((int CellType, int SpecialType)[,])loadedBoard.m_Cells.Clone();
-                IsSuccess = true;
+                // If path includes http
+                if (path.Contains("http"))
+                {
+                    // Download the assets
+                    using (UnityWebRequest webRequest = UnityWebRequest.Get(path))
+                    {
+                        webRequest.SendWebRequest();
+
+                        while (!webRequest.isDone)
+                        {
+                            Debug.Log("Downloading...");
+                        }
+
+                        if (webRequest.isNetworkError)
+                        {
+                            Debug.Log("Error: " + webRequest.error);
+                        }
+                        else
+                        {
+                            Debug.Log("Downloaded");
+                            byte[] results = webRequest.downloadHandler.data;
+                            // Convert to serializable board
+                            IFormatter formatter = new BinaryFormatter();
+                            Stream streamFileRead = new MemoryStream(results);
+                            SerializableBoard loadedBoard = (SerializableBoard)formatter.Deserialize(streamFileRead);
+                            m_Cells = ((int CellType, int SpecialType)[,])loadedBoard.m_Cells.Clone();
+                            IsSuccess = true;
+
+                        }
+                    }
+                }
+                else
+                {
+                    IFormatter formatter = new BinaryFormatter();
+                    Stream streamFileRead = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    SerializableBoard loadedBoard = (SerializableBoard)formatter.Deserialize(streamFileRead);
+                    m_Cells = ((int CellType, int SpecialType)[,])loadedBoard.m_Cells.Clone();
+                    IsSuccess = true;
+                }
+
+
+
             }
             catch (Exception e)
             {
