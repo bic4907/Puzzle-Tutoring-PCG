@@ -98,6 +98,10 @@ namespace Unity.MLAgentsExamples
 
         public List<string> m_InitialBoardList;
 
+        public List<string> m_KnowledgeEventList;
+
+        private int LastPCGTime = 0;
+
         private string GetMethodPostfix()
         {
             // Concat the generatorType and the reward
@@ -134,6 +138,7 @@ namespace Unity.MLAgentsExamples
             m_ModelOverrider = GetComponent<ModelOverrider>();
             m_Logger = new PCGStepLog();
             m_presetManager = GetComponent<BoardPresetManager>();
+            m_KnowledgeEventList = new List<string>();
 
             SetRandomGenerationMethod();
 
@@ -420,6 +425,9 @@ namespace Unity.MLAgentsExamples
                     log.Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
                     log.InstanceUUID = m_uuid;
                     log.SkillKnowledge = m_SkillKnowledge;
+                    log.Board = Board.m_Cells;
+                    log.MatchEvent = m_KnowledgeEventList.ToArray();
+                    log.LastPCGTime = LastPCGTime;
                     m_FirebaseLogger.Post(log);
                 }
             }
@@ -623,6 +631,7 @@ namespace Unity.MLAgentsExamples
                             {
                                 // Before hint
                                 Debug.Log("LastDecisionTime < SelfMatchingThreshold: " + type);
+                                m_KnowledgeEventList.Add("MatchNoHint");
                                 m_SkillKnowledge.ManualCheck[type] = true;
                             }
                             else
@@ -630,7 +639,8 @@ namespace Unity.MLAgentsExamples
                                 // After hint
                                 if (LastHintMove.MoveIndex != LastPlayerMove.MoveIndex)
                                 {
-                                    Debug.Log("LastDecisionTime < SelfMatchingThreshold, but Ignored Hint: " + type);
+                                    Debug.Log("LastDecisionTime >= SelfMatchingThreshold, but Ignored Hint: " + type);
+                                    m_KnowledgeEventList.Add("MatchIgnoringHint");
                                     m_SkillKnowledge.ManualCheck[type] = true;
 
                                 }
@@ -653,6 +663,8 @@ namespace Unity.MLAgentsExamples
                     break;
                 case State.FillEmpty:
 
+                    var startTime = Time.realtimeSinceStartup;
+
                     switch(generatorType)
                     {
                         case GeneratorType.Random:
@@ -664,6 +676,9 @@ namespace Unity.MLAgentsExamples
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
+
+                    float elapsedTimeSeconds = Time.realtimeSinceStartup - startTime;
+                    LastPCGTime = (int)(elapsedTimeSeconds * 1000f);
 
                     nextState = State.FindMatches;
                     break;
@@ -709,10 +724,6 @@ namespace Unity.MLAgentsExamples
                                 move = m_mouseInput.GetMove();
                                 LastPlayerMove = move;
 
-
-
-                                Board.MakeMove(move);
-
                                 CurrentStepCount += 1;
                                 TotalStepCount += 1;
 
@@ -734,6 +745,11 @@ namespace Unity.MLAgentsExamples
                                 Board.ClearLastSeenPieceLog();
                             
                                 OnPlayerAction();
+
+                                Board.MakeMove(move);
+                                m_KnowledgeEventList.Clear();
+
+
 
                                 m_CntChainEffect = 0;
                                 nextState = State.FindMatches;

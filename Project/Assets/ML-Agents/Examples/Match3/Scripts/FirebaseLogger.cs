@@ -141,7 +141,10 @@ namespace Unity.MLAgentsExamples
             public string InstanceUUID;
             public float DecisionTime;
             public bool HintShown;
+            public (int CellType, int SpecialType)[,] Board;
+            public string[] MatchEvent;
             public SkillKnowledge SkillKnowledge;
+            public int LastPCGTime;
 
             public Dictionary<string, object> ToDict()
             {
@@ -158,6 +161,9 @@ namespace Unity.MLAgentsExamples
                 dict.Add("PlayerAction", PlayerAction);
                 dict.Add("CurrentMatches", SkillKnowledge.CurrentMatchCounts);
                 dict.Add("CurrentLearned", SkillKnowledge.ManualCheck);
+                dict.Add("Board", Board);
+                dict.Add("MatchEvent", MatchEvent);
+                dict.Add("PCGTime", LastPCGTime);
                 dict.Add("SeenMatches", SkillKnowledge.SeenMatches);
                 dict.Add("SeenDestroy", SkillKnowledge.SeenDestroys);
 

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.43632686, g: 0.47470915, b: 0.51471484, a: 1}
+  m_IndirectSpecularColor: {r: 0.43632758, g: 0.47470987, b: 0.5147161, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -4389,7 +4389,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.00018310547}
+  m_AnchoredPosition: {x: 0, y: 0.00024414062}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1197842249
@@ -5278,7 +5278,7 @@ MonoBehaviour:
   generatorType: 1
   generatorRewardType: 1
   PlayerNumber: 11
-  MCTS_Simulation: 200
+  MCTS_Simulation: 400
   CurrentEpisodeCount: 0
   TotalStepCount: 0
   CurrentStepCount: 0
@@ -5304,6 +5304,7 @@ MonoBehaviour:
   MidExperimentMessageBox: {fileID: 204074345}
   PostExperimentMessageBox: {fileID: 523128405}
   m_InitialBoardList: []
+  m_KnowledgeEventList: []
 --- !u!114 &1540485852
 MonoBehaviour:
   m_ObjectHideFlags: 0
