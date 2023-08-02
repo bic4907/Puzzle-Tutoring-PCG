@@ -19,6 +19,8 @@ public class AssetLoader : MonoBehaviour
 
     private IEnumerator GetAssetBundle(string path)
     {
+        Debug.Log("Fecthing:" + path);
+
         UnityWebRequest www = UnityWebRequest.Get(path);
         yield return www.SendWebRequest();
 
