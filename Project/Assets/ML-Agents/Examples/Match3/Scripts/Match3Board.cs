@@ -1063,6 +1063,8 @@ namespace Unity.MLAgentsExamples
             streamFileWrite.Close();
         }
 
+
+
         public bool LoadFrom(string path)
         {
             bool IsSuccess = false;
@@ -1072,31 +1074,16 @@ namespace Unity.MLAgentsExamples
                 if (path.Contains("http"))
                 {
                     // Download the assets
-                    using (UnityWebRequest webRequest = UnityWebRequest.Get(path))
+                    AssetLoader assetLoader = new AssetLoader();
+                    byte[] downloadedData = assetLoader.LoadAssetBundle(path);
+                    if (downloadedData != null)
                     {
-                        webRequest.SendWebRequest();
-
-                        while (!webRequest.isDone)
-                        {
-                            Debug.Log("Downloading...");
-                        }
-
-                        if (webRequest.isNetworkError)
-                        {
-                            Debug.Log("Error: " + webRequest.error);
-                        }
-                        else
-                        {
-                            Debug.Log("Downloaded");
-                            byte[] results = webRequest.downloadHandler.data;
-                            // Convert to serializable board
-                            IFormatter formatter = new BinaryFormatter();
-                            Stream streamFileRead = new MemoryStream(results);
-                            SerializableBoard loadedBoard = (SerializableBoard)formatter.Deserialize(streamFileRead);
-                            m_Cells = ((int CellType, int SpecialType)[,])loadedBoard.m_Cells.Clone();
-                            IsSuccess = true;
-
-                        }
+                        // Create a memory stream from the downloaded data
+                        MemoryStream stream = new MemoryStream(downloadedData);
+                        IFormatter formatter = new BinaryFormatter();
+                        SerializableBoard loadedBoard = (SerializableBoard)formatter.Deserialize(stream);
+                        m_Cells = ((int CellType, int SpecialType)[,])loadedBoard.m_Cells.Clone();
+                        IsSuccess = true;
                     }
                 }
                 else

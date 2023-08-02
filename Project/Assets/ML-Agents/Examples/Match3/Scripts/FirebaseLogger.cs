@@ -105,6 +105,9 @@ namespace Unity.MLAgentsExamples
             using (UnityWebRequest request = UnityWebRequest.Get("https://api.ip.pe.kr/"))
             {
                 request.SetRequestHeader("Access-Control-Allow-Origin", "*");
+                request.SetRequestHeader("Access-Control-Allow-Credentials", "true");
+                request.SetRequestHeader("Access-Control-Allow-Headers", "Accept, X-Access-Token, X-Application-Name, X-Request-Sent-Time");
+                request.SetRequestHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
 
                 yield return request.SendWebRequest();
 
