@@ -5317,12 +5317,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Board: {fileID: 0}
   MoveTime: 0.2
-  MaxMoves: 50
+  MaxMoves: 1
   useForcedFast: 0
   generatorType: 1
   generatorRewardType: 1
   PlayerNumber: 11
-  MCTS_Simulation: 400
+  MCTS_Simulation: 200
   CurrentEpisodeCount: 0
   TotalStepCount: 0
   CurrentStepCount: 0

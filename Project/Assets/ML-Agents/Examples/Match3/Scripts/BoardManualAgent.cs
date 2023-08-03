@@ -470,10 +470,16 @@ namespace Unity.MLAgentsExamples
 
             if (m_CurrentQuiz != null)
             {
+                
+                m_CurrentState = State.WaitForMove;
+
                 m_presetManager.LoadBoard(m_CurrentQuiz.FileName);
                 m_QuizUIManager.SetNumber(m_SolvedQuizList.Count + 1);
                 m_QuizUIManager.SetPieceType(m_CurrentQuiz.PieceType);
                 m_QuizUIManager.SetActive(true);
+
+                m_CurrentState = State.WaitForMove;
+                
             } 
             else
             {
@@ -598,6 +604,9 @@ namespace Unity.MLAgentsExamples
             switch (m_CurrentState)
             {
                 case State.FindMatches:
+                    // Execute only State is not Quiz Mode
+  
+       
                     var hasMatched = Board.MarkMatchedCells();
                     nextState = hasMatched ? State.ClearMatched : State.WaitForMove;
                     if (nextState == State.WaitForMove)
@@ -605,7 +614,11 @@ namespace Unity.MLAgentsExamples
                         m_WaitingStartedTime = Time.realtimeSinceStartup;
                         m_MovesMade++;
                     }
+    
+    
+
                     break;
+       
                 case State.ClearMatched:
                     m_CntChainEffect++;
 
@@ -746,7 +759,10 @@ namespace Unity.MLAgentsExamples
                             
                                 OnPlayerAction();
 
-                                Board.MakeMove(move);
+                                if (ExperimentMode.Quiz != m_ExperimentMode)
+                                {
+                                    Board.MakeMove(move);
+                                }
                                 m_KnowledgeEventList.Clear();
 
 
