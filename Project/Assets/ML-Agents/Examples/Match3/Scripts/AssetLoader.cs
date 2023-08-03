@@ -8,7 +8,7 @@ public class AssetLoader : MonoBehaviour
 {
     byte[] results;
 
-    public byte[] LoadAssetBundle(string path, Action<byte[]> onLoaded)
+    public byte[] LoadAssetBundle(string path, Action<string, byte[]> onLoaded)
     {
         // Start the coroutine using the static method
 
@@ -18,7 +18,7 @@ public class AssetLoader : MonoBehaviour
         return results;
     }
 
-    private IEnumerator GetAssetBundle(string path, Action<byte[]> onLoaded)
+    private IEnumerator GetAssetBundle(string path, Action<string, byte[]> onLoaded)
     {
         Debug.Log("Fecthing:" + path);
 
@@ -36,7 +36,7 @@ public class AssetLoader : MonoBehaviour
             // Or retrieve results as binary data
             results = www.downloadHandler.data;
 
-            onLoaded?.Invoke(results);
+            onLoaded?.Invoke(path, results);
         }
     }
 }

@@ -1075,6 +1075,12 @@ namespace Unity.MLAgentsExamples
             }
         }
 
+        public bool LoadCells((int CellType, int SpecialType)[,] cells)
+        {
+            m_Cells = cells;
+            return true;
+        }
+        /*
         public bool LoadFrom(string path)
         {
             bool IsSuccess = false;
@@ -1107,6 +1113,7 @@ namespace Unity.MLAgentsExamples
             // }
             return IsSuccess;
         }
+        */
     }
 
 
