@@ -891,7 +891,9 @@ namespace Unity.MLAgentsExamples
 
         public void SetDecisionStartTimeToNow()
         {
+            Debug.Log("SetDecisionStartTimeToNow");
             m_WaitingStartedTime = Time.realtimeSinceStartup;
+            GetComponent<Match3Drawer>().StopGlowingTiles();
         }
 
 
