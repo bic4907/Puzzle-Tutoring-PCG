@@ -953,7 +953,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &250204852
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1308,9 +1308,11 @@ MonoBehaviour:
 
 
 
+    [Important]
 
-    3. If you find
-    a chance for matching special block, you can do it without taking a hint.'
+    3.
+    If you find a chance for matching special block, you have to match it without
+    taking a hint.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1741,8 +1743,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -94, y: -173}
-  m_SizeDelta: {x: 120, y: 120}
+  m_AnchoredPosition: {x: 164.99991, y: -173}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &421314883
 MonoBehaviour:
@@ -1887,8 +1889,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 57, y: -173}
-  m_SizeDelta: {x: 120, y: 120}
+  m_AnchoredPosition: {x: 291, y: -173}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &435171419
 MonoBehaviour:
@@ -2699,16 +2701,19 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '1. This experiment aims to enhancing the learning ability though a content
-    generation method.
+  m_text: 'This experiment aims to enhance learning ability through a content generation
+    method.
 
+    
 
-    2. You will learn the match-3 game skills with one of
-    content generation method about 10 mins.
+    1. You will learn match-3 game matching skills using one
+    of the content generation methods, which will take about 10 minutes.
 
+    
 
-    3. Then, you will solve a simple
-    quiz to ask which game skill learned while you learning the game.'
+    2.
+    Afterward, you will be asked to solve a simple quiz to assess whether you have
+    learned the specific matching method while going through the tutorial game.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5062,24 +5067,12 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '1. The match-3 game has basic matching method that match three same color
-    blocks.
-
-
-    2. There are special matching techniques (besides basic matching)
-    to make special blocks in the game.
-
-
-    3. You can make a special block by
-    matching a specific shape of same color blocks. (Note the below sample image)
-
-
-
-
-
-    4.
-    The goal of this task is to learn as many matching methods as possible while
-    playing a game.'
+  m_text: "1. The match-3 game has basic matching method that match three same color
+    blocks.\n2. There are special matching techniques (besides basic matching) to
+    make special blocks in the game.\n\n[Important]\n3. You can make a special block
+    by matching a specific shape of same color blocks. (Note the below example)\n\n\n                                            
+    \u2192 \u2192\n\n\n4. The goal of this task is to learn as many matching methods
+    as possible while playing a game."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5317,7 +5310,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Board: {fileID: 0}
   MoveTime: 0.2
-  MaxMoves: 50
+  MaxMoves: 60
   useForcedFast: 0
   generatorType: 1
   generatorRewardType: 1
@@ -6031,6 +6024,79 @@ MonoBehaviour:
   - {fileID: 2034560141}
   - {fileID: 1642496940}
   CurrentPage: 0
+--- !u!1 &1830182272
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1830182273}
+  - component: {fileID: 1830182275}
+  - component: {fileID: 1830182274}
+  m_Layer: 5
+  m_Name: RawImage (2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1830182273
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830182272}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2034560142}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -108, y: -173}
+  m_SizeDelta: {x: 200, y: 140}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1830182274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830182272}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Texture: {fileID: 2800000, guid: f60da17518d40834285283e18aa10e29, type: 3}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+--- !u!222 &1830182275
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830182272}
+  m_CullTransparentMesh: 1
 --- !u!224 &1831504783 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 224194346362733190, guid: 3ce107b4a79bc4eef83afde434932a68,
@@ -6751,6 +6817,7 @@ RectTransform:
   - {fileID: 1985837514}
   - {fileID: 421314882}
   - {fileID: 435171418}
+  - {fileID: 1830182273}
   m_Father: {fileID: 1786793155}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
