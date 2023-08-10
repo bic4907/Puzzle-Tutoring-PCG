@@ -953,7 +953,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &250204852
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1311,8 +1311,7 @@ MonoBehaviour:
     [Important]
 
     3.
-    If you find a chance for matching special block, you have to match it without
-    taking a hint.'
+    The hint will be only appear if you have chance to learn a new speical matching.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2704,16 +2703,16 @@ MonoBehaviour:
   m_text: 'This experiment aims to enhance learning ability through a content generation
     method.
 
-    
 
-    1. You will learn match-3 game matching skills using one
-    of the content generation methods, which will take about 10 minutes.
 
-    
+    1. You will learn match-3 game matching skills using one of the
+    content generation methods, which will take about 10 minutes.
 
-    2.
-    Afterward, you will be asked to solve a simple quiz to assess whether you have
-    learned the specific matching method while going through the tutorial game.'
+
+
+    2. Afterward,
+    you will be asked to solve a simple quiz to assess whether you have learned the
+    specific matching method while going through the tutorial game.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5335,6 +5334,7 @@ MonoBehaviour:
   SelfMatchingThreshold: 6
   HintStartTime: 5
   m_HintGlowed: 0
+  m_GlowOnlySpecialBlock: 1
   LearningStepCount: 0
   m_ExperimentMode: 1
   PreExperimentMessageBox: {fileID: 1786793154}
@@ -5658,7 +5658,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1642496941
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5945,7 +5945,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1786793155
 RectTransform:
   m_ObjectHideFlags: 0

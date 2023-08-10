@@ -4,17 +4,17 @@ import copy
 
 ENV_ARGS = list()
 
-MCTS_SIMULATION_TIMES = [100, 200, 400, 1000]
+MCTS_SIMULATION_TIMES = [100, 200, 400, 800]
 SAMPLING_NUMS = [10, 20, 30, 40]
-TARGET_PLAYER = list(range(0, 11))
-METHOD = ['ga']
+TARGET_PLAYER = list(range(5, 7)) # 11
+METHOD = ['mcts', 'ga', 'sampling', 'random']
 OBJECTIVE = ['knowledge', 'score']
 TARGET_EPISODE_COUNT = 500
-INCLUDE_SIMPLE_EFFECT = [0]
+INCLUDE_SIMPLE_EFFECT = [1]
 KNOWLEDGE_ALMOST_RATIO = ['1.0']
 GREEDY_RATIO = ['1.0']
 PLAYER_DEPTH = [1]
-GA_EVOLUTION = [2, 4, 8, 16]
+GA_EVOLUTION = [5, 10, 20, 40]
 os.makedirs('generated', exist_ok=True)
 
 
@@ -152,9 +152,6 @@ for simple_effect in INCLUDE_SIMPLE_EFFECT:
 
                         with open(os.path.join('generated', f'{_run_id}.yaml'), 'w') as f:
                             yaml.dump(base_config, f)
-
-
-
 
             else:
                 ENV_ARGS = list()

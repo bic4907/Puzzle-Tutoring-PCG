@@ -133,9 +133,6 @@ namespace Unity.MLAgentsExamples
                     case "knowledge":
                         generatorRewardType = GeneratorReward.Knowledge;
                         break;
-                    case "kp":  // knowledge percentile
-                        generatorRewardType = GeneratorReward.KnowledgePercentile;
-                        break;
                 }
             }
             if(ParameterManagerSingleton.GetInstance().HasParam("mctsSimulation"))
@@ -313,8 +310,6 @@ namespace Unity.MLAgentsExamples
                 GeneratingScores.Add(Math.Max(score, 0.0f));
                 GeneratingRuntimes.Add(Time.realtimeSinceStartup - startTime);
             }
-
-
 
 
             bool isBoardSettled = false;

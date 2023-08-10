@@ -75,6 +75,7 @@ namespace Unity.MLAgentsExamples
         public float SelfMatchingThreshold = 5.0f;
         public float HintStartTime = 5.0f; // Hint will be shown after this time
         public bool m_HintGlowed = false;
+        public bool m_GlowOnlySpecialBlock = false;
 
         private Move LastHintMove;
         private Move LastPlayerMove;
@@ -101,6 +102,7 @@ namespace Unity.MLAgentsExamples
         public List<string> m_KnowledgeEventList;
 
         private int LastPCGTime = 0;
+    
 
         private string GetMethodPostfix()
         {
@@ -129,6 +131,11 @@ namespace Unity.MLAgentsExamples
                     break;
             }
             
+            if (m_GlowOnlySpecialBlock) 
+            {
+                _postfix += "HT";
+            }
+
             return _postfix;
         }
 
@@ -229,7 +236,8 @@ namespace Unity.MLAgentsExamples
             // Randomly select the generation method
             var _random = new System.Random(DateTime.Now.Millisecond);
 
-            string[] _methods = new string[] { "mcts_knowledge", "mcts_score", "random" };
+            // string[] _methods = new string[] { "mcts_knowledge", "mcts_score", "random" };
+            string[] _methods = new string[] { "mcts_knowledge" };
 
             // Sample one of method and write the case
             string _method = _methods[_random.Next() % _methods.Length];
@@ -479,7 +487,6 @@ namespace Unity.MLAgentsExamples
                 m_QuizUIManager.SetActive(true);
 
                 m_CurrentState = State.WaitForMove;
-                
             } 
             else
             {
@@ -721,7 +728,23 @@ namespace Unity.MLAgentsExamples
                     float WaitedTime = Time.realtimeSinceStartup - m_WaitingStartedTime;
                     if (WaitedTime > HintStartTime && m_HintGlowed == false && m_ExperimentMode == ExperimentMode.Learning)
                     {
-                        GlowTiles(GreedyMatch3Solver.GetAction(Board), isTwoWay: true);
+                        Move greedyAction = GreedyMatch3Solver.GetAction(Board);
+                        if (m_GlowOnlySpecialBlock == false)
+                        {
+                            GlowTiles(greedyAction, isTwoWay: true);
+                        }
+                        else
+                        {
+                            PieceType matchablePiece = Board.IsMoveSpecialMatch(greedyAction);
+                            if (matchablePiece != PieceType.NormalPiece && m_SkillKnowledge.ManualCheck[matchablePiece] == false)
+                            {
+                                GlowTiles(greedyAction, isTwoWay: true);
+                            }
+                            else
+                            {
+                                Debug.Log("No Special Block Hint: " + greedyAction.MoveIndex);
+                            }
+                        }
                         m_HintGlowed = true;
                     }
 

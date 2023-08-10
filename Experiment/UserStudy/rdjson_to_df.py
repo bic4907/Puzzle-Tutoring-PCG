@@ -16,6 +16,7 @@ with open('answer.json', 'r') as f:
 # Read google_form.csv file to dataframe
 google_form_df = pd.read_csv('google_form.csv')
 google_form_df = google_form_df.rename(columns={
+    '타임스탬프': 'Timestamp',
     'Please enter the [Survey Code] on the game screen.': 'User',
     'How often do you play games in a week?': 'GF_PlayFrequency',
     ' How long time did you played match-3 game?': 'GF_PlayTime',
@@ -46,7 +47,10 @@ google_form_df['GF_PlayTime'] = google_form_df['GF_PlayTime'].map({
 user_ids = google_form_df['User'].values
 user_ids = [user_id.split('_')[1] for user_id in user_ids]
 google_form_df['User'] = user_ids
-google_form_df.drop(columns=['타임스탬프'], inplace=True)
+google_form_df.sort_values(by='Timestamp', ascending=False, inplace=True)
+google_form_df = google_form_df.groupby('User').first().reset_index()
+
+# google_form_df.drop(columns=['타임스탬프'], inplace=True)
 
 
 cnt = 0
@@ -76,6 +80,8 @@ for key in tqdm(items):
         _learning_dict['Method'] = method
         _learning_dict['L_Step'] = data['TotalStepCount']
         _learning_dict['L_DecisionTime'] = data['DecisionTime']
+        _learning_dict['PCGTime'] = data['PCGTime']
+        _learning_dict['Time'] = data['Time']
         _learning_dict.update(data['CurrentLearned'])
         _learning_list.append(_learning_dict)
 
@@ -99,7 +105,7 @@ for key in tqdm(items):
             return quiz_answer[level][str(action)]
 
         _quiz_dict['Correct'] = is_correct(_quiz_dict['QuizFile'], data['PlayerAction'])
-
+        _quiz_dict['Time'] = data['Time']
         _quiz_list.append(_quiz_dict)
 
     learning_dicts += _learning_list
@@ -118,6 +124,8 @@ def get_replacement(prefix):
 
 
 learning_df = learning_df.rename(columns=get_replacement('L'))
+
+quiz_df.to_csv('quiz_raw.csv')
 
 quiz_df = quiz_df.copy()
 quiz_df['TargetBlock'] = quiz_df['QuizFile'].map(lambda x: x.split('_')[0])
@@ -141,10 +149,16 @@ for col in ['Q_BombPiece', 'Q_CrossPiece', 'Q_HorizontalPiece', 'Q_RainbowPiece'
 
 google_form_df = google_form_df[google_form_df['User'].isin(quiz_df['User'].values)]
 
+values = google_form_df.groupby(['User']).count().reset_index()
+print(values['User'])
+
 # Merge the learnig_df and quiz_df
 all_df = learning_df.merge(quiz_df, on=['User'], how='left')
+print(len(all_df))
 all_df = all_df.merge(google_form_df, on=['User'], how='left')
+print(len(all_df))
 
+print(len(set(all_df['User'])))
 
 all_df.to_csv('all_data.csv')
 learning_df.to_csv('learning.csv')

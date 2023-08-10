@@ -603,6 +603,23 @@ namespace Unity.MLAgentsExamples
             }
         }
 
+        public PieceType IsMoveSpecialMatch(Move move)
+        {
+            Match3Board tmpBoard = this.DeepCopy();
+            tmpBoard.MakeMove(move);
+            tmpBoard.ClearMatchedCells();
+
+            tmpBoard.SpawnSpecialCells();
+
+            var createdPieces = SpecialMatch.GetMatchCount(this.GetLastCreatedPiece());
+            foreach (var (type, count) in createdPieces)
+            {
+                return type;
+            }
+            return PieceType.NormalPiece;
+        }
+
+
         public void ExecuteSpecialEffect()
         {
             foreach (SpecialEffect specialEffect in m_SpecialEffects)
