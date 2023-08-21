@@ -184,7 +184,7 @@ namespace Unity.MLAgentsExamples
                 m_Cells[otherCol, otherRow] = (k_EmptyCell, 0);
 
                 m_SpecialEffects.Add(new SpecialEffect
-                {
+                { 
                     CellType = originalValue.CellType,
                     SpecialType = (PieceType)destinationValue.SpecialType,
                     Row = otherRow,
@@ -193,7 +193,7 @@ namespace Unity.MLAgentsExamples
 
                 return true;
             }
-            else if ((PieceType)destinationValue.SpecialType == PieceType.RocketPiece)
+            else if ((PieceType)originalValue.SpecialType == PieceType.RainbowPiece)
             {
                 m_Cells[move.Column, move.Row] = (k_EmptyCell, 0);
                 m_Cells[otherCol, otherRow] = (k_EmptyCell, 0);
@@ -201,14 +201,44 @@ namespace Unity.MLAgentsExamples
                 m_SpecialEffects.Add(new SpecialEffect
                 {
                     CellType = destinationValue.CellType,
-                    SpecialType = (PieceType)destinationValue.SpecialType,
+                    SpecialType = (PieceType)originalValue.SpecialType,
                     Row = otherRow,
                     Column = otherCol
                 });
 
                 return true;
             }
-            
+
+            // else if ((PieceType)destinationValue.SpecialType == PieceType.RocketPiece)
+            // {
+            //     m_Cells[move.Column, move.Row] = (k_EmptyCell, 0);
+            //     m_Cells[otherCol, otherRow] = (k_EmptyCell, 0);
+
+            //     m_SpecialEffects.Add(new SpecialEffect
+            //     {
+            //         CellType = destinationValue.CellType,
+            //         SpecialType = (PieceType)destinationValue.SpecialType,
+            //         Row = otherRow,
+            //         Column = otherCol
+            //     });
+
+            //     return true;
+            // }
+            // else if ((PieceType)originalValue.SpecialType == PieceType.RocketPiece)
+            // {
+            //     m_Cells[move.Column, move.Row] = (k_EmptyCell, 0);
+            //     m_Cells[otherCol, otherRow] = (k_EmptyCell, 0);
+
+            //     m_SpecialEffects.Add(new SpecialEffect
+            //     {
+            //         CellType = originalValue.CellType,
+            //         SpecialType = (PieceType)originalValue.SpecialType,
+            //         Row = otherRow,
+            //         Column = otherCol
+            //     });
+
+            //     return true;
+            // }
             m_Cells[move.Column, move.Row] = destinationValue;
             m_Cells[otherCol, otherRow] = originalValue;
 
@@ -246,7 +276,9 @@ namespace Unity.MLAgentsExamples
 
             // Check if the move is a special match (rainbow or rocket)
             if ((PieceType)destinationValue.SpecialType == PieceType.RainbowPiece ||
-                (PieceType)destinationValue.SpecialType == PieceType.RocketPiece)
+                (PieceType)originalValue.SpecialType == PieceType.RainbowPiece) // ||
+                // (PieceType)destinationValue.SpecialType == PieceType.RocketPiece ||
+                // (PieceType)originalValue.SpecialType == PieceType.RocketPiece)
             {
                 return true;
             }
@@ -400,7 +432,8 @@ namespace Unity.MLAgentsExamples
                 PieceType.VerticalPiece,
                 PieceType.BombPiece,
                 PieceType.CrossPiece,
-                PieceType.RainbowPiece
+                PieceType.RocketPiece,
+                // PieceType.RainbowPiece
             };
 
             bool madeMatch = false;
@@ -422,9 +455,10 @@ namespace Unity.MLAgentsExamples
                         foreach(int[,] shape in matchShapes)
                         {
 
+                            int targetCellType = -1;
                             PieceType matchedType = pieceType;
                             matchedPositions.Clear();
-
+ 
                             for (var k = 0; k < shape.GetLength(0); k++)
                             {
                                 for (var l = 0; l < shape.GetLength(1); l++)
@@ -434,12 +468,19 @@ namespace Unity.MLAgentsExamples
                                         matchedType = PieceType.None;
                                         break;
                                     }
-                                    if (shape[k, l] == 0) continue;
+                                    if (shape[k, l] == 0) {
+                                        continue;
+                                    }
+                                    else if (shape[k, l] == 1 && targetCellType == -1)
+                                    {
+                                        targetCellType = m_Cells[j + l, i + k].CellType;
+                                    }
 
 
                                     // Check if the special blocks is in matchableBlocks 
-                                    if (m_Cells[j + l, i + k].CellType != cellType
-                                        && Array.IndexOf(matchableBlocks, (PieceType)m_Cells[j + l, i + k].SpecialType) != -1
+                                    // if (m_Cells[j + l, i + k].CellType != cellType
+                                    if (m_Cells[j + l, i + k].CellType != targetCellType
+                                        || Array.IndexOf(matchableBlocks, (PieceType)m_Cells[j + l, i + k].SpecialType) == -1
                                     )
                                     {
                                         matchedType = PieceType.None;
