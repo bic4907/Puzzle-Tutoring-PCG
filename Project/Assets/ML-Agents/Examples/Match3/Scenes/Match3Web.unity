@@ -5334,7 +5334,7 @@ MonoBehaviour:
   SelfMatchingThreshold: 6
   HintStartTime: 5
   m_HintGlowed: 0
-  m_GlowOnlySpecialBlock: 1
+  m_GlowOnlySpecialBlock: 0
   LearningStepCount: 0
   m_ExperimentMode: 1
   PreExperimentMessageBox: {fileID: 1786793154}
