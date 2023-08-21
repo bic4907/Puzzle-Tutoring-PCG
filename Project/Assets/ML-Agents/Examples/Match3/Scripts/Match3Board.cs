@@ -422,9 +422,10 @@ namespace Unity.MLAgentsExamples
                         foreach(int[,] shape in matchShapes)
                         {
 
+                            int targetCellType = -1;
                             PieceType matchedType = pieceType;
                             matchedPositions.Clear();
-
+ 
                             for (var k = 0; k < shape.GetLength(0); k++)
                             {
                                 for (var l = 0; l < shape.GetLength(1); l++)
@@ -434,12 +435,19 @@ namespace Unity.MLAgentsExamples
                                         matchedType = PieceType.None;
                                         break;
                                     }
-                                    if (shape[k, l] == 0) continue;
+                                    if (shape[k, l] == 0) {
+                                        continue;
+                                    }
+                                    else if (shape[k, l] == 1 && targetCellType == -1)
+                                    {
+                                        targetCellType = m_Cells[j + l, i + k].CellType;
+                                    }
 
 
                                     // Check if the special blocks is in matchableBlocks 
-                                    if (m_Cells[j + l, i + k].CellType != cellType
-                                        && Array.IndexOf(matchableBlocks, (PieceType)m_Cells[j + l, i + k].SpecialType) != -1
+                                    // if (m_Cells[j + l, i + k].CellType != cellType
+                                    if (m_Cells[j + l, i + k].CellType != targetCellType
+                                        || Array.IndexOf(matchableBlocks, (PieceType)m_Cells[j + l, i + k].SpecialType) == -1
                                     )
                                     {
                                         matchedType = PieceType.None;

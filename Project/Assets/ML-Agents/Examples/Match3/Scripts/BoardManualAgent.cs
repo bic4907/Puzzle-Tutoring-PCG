@@ -782,7 +782,7 @@ namespace Unity.MLAgentsExamples
                             
                                 OnPlayerAction();
 
-                                Debug.Log(move.MoveIndex);
+                                // Debug.Log(move.MoveIndex);
                                 if (ExperimentMode.Quiz != m_ExperimentMode)
                                 {
                                     Board.MakeMove(move);
