@@ -785,7 +785,11 @@ namespace Unity.MLAgentsExamples
                                 // Debug.Log(move.MoveIndex);
                                 if (ExperimentMode.Quiz != m_ExperimentMode)
                                 {
-                                    Board.MakeMove(move);
+                                    bool isMatched = Board.MakeMove(move);
+                                    if (isMatched)
+                                    {
+                                        Board.ExecuteSpecialEffect();
+                                    }
                                 }
                                 m_KnowledgeEventList.Clear();
 
