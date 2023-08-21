@@ -294,10 +294,10 @@ namespace Unity.MLAgentsExamples
             m_QuizList.Add(new Quiz("bomb_1", PieceType.BombPiece));
 
             m_QuizList.Add(new Quiz("rocket_0", PieceType.RocketPiece));
-            m_QuizList.Add(new Quiz("rocket_0", PieceType.RocketPiece));
+            m_QuizList.Add(new Quiz("rocket_1", PieceType.RocketPiece));
 
             m_QuizList.Add(new Quiz("rainbow_0", PieceType.RainbowPiece));
-            m_QuizList.Add(new Quiz("rainbow_0", PieceType.RainbowPiece));
+            m_QuizList.Add(new Quiz("rainbow_1", PieceType.RainbowPiece));
 
             // Shuffle m_QuizList
             m_QuizList = m_QuizList.OrderBy(x => Guid.NewGuid()).ToList();
@@ -767,7 +767,7 @@ namespace Unity.MLAgentsExamples
 
 
                                 /* Log */
-                                      
+
                                 foreach (var (type, count) in SpecialMatch.GetMatchCount(Board.GetLastSeenCreatedPiece(), true))
                                 {
                                     m_SkillKnowledge.IncreaseSeenMatches(type, count);
@@ -782,6 +782,7 @@ namespace Unity.MLAgentsExamples
                             
                                 OnPlayerAction();
 
+                                Debug.Log(move.MoveIndex);
                                 if (ExperimentMode.Quiz != m_ExperimentMode)
                                 {
                                     Board.MakeMove(move);
