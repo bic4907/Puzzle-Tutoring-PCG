@@ -813,6 +813,7 @@ namespace Unity.MLAgentsExamples
                         {
                             foreach (int[] position in nearestPositions)
                             {
+                                m_Matched[position[0], position[1]] = true;
                                 m_Cells[position[0], position[1]] = (k_EmptyCell, 0);
                             }
                         }

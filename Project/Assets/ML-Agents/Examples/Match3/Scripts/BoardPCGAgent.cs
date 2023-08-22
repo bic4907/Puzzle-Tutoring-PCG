@@ -268,7 +268,14 @@ namespace Unity.MLAgentsExamples
                 var hasMatched = Board.MarkMatchedCells();
                 if (!hasMatched)
                 {
-                    break;
+                    if (Board.GetEmptyCellCount() > 0)
+                    {
+
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
                 var pointsEarned = Board.ClearMatchedCells();
                 AddReward(k_RewardMultiplier * pointsEarned);
