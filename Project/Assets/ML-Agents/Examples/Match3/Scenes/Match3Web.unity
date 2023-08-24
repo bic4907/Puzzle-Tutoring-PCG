@@ -5331,7 +5331,7 @@ MonoBehaviour:
   m_mouseInput: {fileID: 1540485852}
   m_WaitingStartedTime: 0
   LastDecisionTime: 32767
-  SelfMatchingThreshold: 6
+  SelfMatchingThreshold: 5.5
   HintStartTime: 5
   m_HintGlowed: 0
   m_GlowOnlySpecialBlock: 0
