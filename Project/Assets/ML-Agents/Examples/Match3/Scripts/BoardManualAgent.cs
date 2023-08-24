@@ -236,8 +236,8 @@ namespace Unity.MLAgentsExamples
             // Randomly select the generation method
             var _random = new System.Random(DateTime.Now.Millisecond);
 
-            // string[] _methods = new string[] { "mcts_knowledge", "mcts_score", "random" };
-            string[] _methods = new string[] { "mcts_knowledge" };
+            string[] _methods = new string[] { "mcts_knowledge", "mcts_score", "random" };
+            // string[] _methods = new string[] { "mcts_knowledge" };
 
             // Sample one of method and write the case
             string _method = _methods[_random.Next() % _methods.Length];
@@ -294,10 +294,10 @@ namespace Unity.MLAgentsExamples
             m_QuizList.Add(new Quiz("bomb_1", PieceType.BombPiece));
 
             m_QuizList.Add(new Quiz("rocket_0", PieceType.RocketPiece));
-            m_QuizList.Add(new Quiz("rocket_0", PieceType.RocketPiece));
+            m_QuizList.Add(new Quiz("rocket_1", PieceType.RocketPiece));
 
             m_QuizList.Add(new Quiz("rainbow_0", PieceType.RainbowPiece));
-            m_QuizList.Add(new Quiz("rainbow_0", PieceType.RainbowPiece));
+            m_QuizList.Add(new Quiz("rainbow_1", PieceType.RainbowPiece));
 
             // Shuffle m_QuizList
             m_QuizList = m_QuizList.OrderBy(x => Guid.NewGuid()).ToList();

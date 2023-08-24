@@ -14,7 +14,7 @@ namespace Unity.MLAgentsExamples
     public class FirebaseLogger: MonoBehaviour
     {
         // Start is called before the first frame update
-        private const string FirebaseUrl = "https://tutoringpcg-default-rtdb.firebaseio.com/0804/{playerId}/";
+        private const string FirebaseUrl = "https://tutoringpcg-default-rtdb.firebaseio.com/0824/{playerId}/";
         private const string LearningSessionUrl = "Learning.json";
         private const string QuizSessionUrl = "Quiz.json";
         private const string DoneUrl = "Done.json";
