@@ -541,7 +541,14 @@ namespace Unity.MLAgentsExamples
                 var hasMatched = Board.MarkMatchedCells();
                 if (!hasMatched)
                 {
-                    break;
+                    if (Board.GetEmptyCellCount() > 0)
+                    {
+
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
                 var pointsEarned = Board.ClearMatchedCells();
                 // AddReward(k_RewardMultiplier * pointsEarned);
@@ -612,17 +619,23 @@ namespace Unity.MLAgentsExamples
             {
                 case State.FindMatches:
                     // Execute only State is not Quiz Mode
-  
-       
-                    var hasMatched = Board.MarkMatchedCells();
-                    nextState = hasMatched ? State.ClearMatched : State.WaitForMove;
-                    if (nextState == State.WaitForMove)
+                    if (Board.GetEmptyCellCount() > 0)
                     {
-                        m_WaitingStartedTime = Time.realtimeSinceStartup;
-                        m_MovesMade++;
+                        nextState = State.ClearMatched;
+                        
                     }
-    
-    
+                    else
+                    {
+       
+                        var hasMatched = Board.MarkMatchedCells();
+                        nextState = hasMatched ? State.ClearMatched : State.WaitForMove;
+                        if (nextState == State.WaitForMove)
+                        {
+                            m_WaitingStartedTime = Time.realtimeSinceStartup;
+                            m_MovesMade++;
+                        }
+        
+                    }
 
                     break;
        
@@ -767,7 +780,7 @@ namespace Unity.MLAgentsExamples
 
 
                                 /* Log */
-                                      
+
                                 foreach (var (type, count) in SpecialMatch.GetMatchCount(Board.GetLastSeenCreatedPiece(), true))
                                 {
                                     m_SkillKnowledge.IncreaseSeenMatches(type, count);
@@ -782,9 +795,14 @@ namespace Unity.MLAgentsExamples
                             
                                 OnPlayerAction();
 
+                                // Debug.Log(move.MoveIndex);
                                 if (ExperimentMode.Quiz != m_ExperimentMode)
                                 {
-                                    Board.MakeMove(move);
+                                    bool isMatched = Board.MakeMove(move);
+                                    if (isMatched)
+                                    {
+                                        Board.ExecuteSpecialEffect();
+                                    }
                                 }
                                 m_KnowledgeEventList.Clear();
 
