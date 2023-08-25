@@ -17,7 +17,7 @@
 15,2ef9e3fc,False,False,False,False,False,False
 16,32e399ef,False,False,False,False,False,False
 17,3307613a,True,False,False,True,False,False
-18,33667271,True,False,False,False,False,True
+18,33667271,True,True,False,False,False,True
 19,372045dd,False,False,False,True,False,False
 20,3896c8d1,True,True,False,False,False,False
 21,399c05ac,False,False,False,True,False,False
@@ -67,7 +67,7 @@
 65,bdad55ea,True,False,False,False,False,False
 66,bdefdf74,False,False,False,False,False,False
 67,bf3330de,False,False,False,True,False,True
-68,cb2679f5,False,False,False,False,False,False
+68,cb2679f5,False,True,False,False,False,False
 69,cd7e2c34,False,False,False,True,False,False
 70,cfb52f3e,False,False,False,False,False,True
 71,d60101ee,True,False,True,False,False,False
@@ -77,7 +77,7 @@
 75,dd6325cf,False,False,False,False,False,True
 76,e1c56623,False,False,False,True,False,False
 77,e251b4cb,False,False,False,False,False,False
-78,e303a9fd,False,False,False,False,False,True
+78,e303a9fd,False,True,False,False,False,True
 79,e30a3a35,True,True,False,False,False,True
 80,e39a4439,True,False,True,True,False,True
 81,e76665a7,True,False,False,False,False,False

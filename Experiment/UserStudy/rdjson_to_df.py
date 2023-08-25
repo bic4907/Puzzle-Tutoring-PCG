@@ -65,6 +65,27 @@ def conv_method(short):
     return _conv[short]
 
 
+def get_replacement(prefix):
+    # Change L to prefix
+    return {f'{key}': f'{prefix}_{key}' for key in ['BombPiece', 'CrossPiece', 'HorizontalPiece', 'RainbowPiece', 'RocketPiece', 'VerticalPiece']}
+
+
+def update_dict_keys(d, key_map):
+    new_dict = {}
+
+    for old_key, new_key in key_map.items():
+        if old_key in d:
+            new_dict[new_key] = d[old_key]
+        else:
+            raise KeyError(f"Key '{old_key}' not found in the dictionary.")
+
+    for key, value in d.items():
+        if key not in key_map:
+            new_dict[key] = value
+
+    return new_dict
+
+
 for key in tqdm(items):
     learning_dict, quiz_dict = dict(), dict()
     user = key.split('_')[1]
@@ -82,8 +103,19 @@ for key in tqdm(items):
         _learning_dict['L_DecisionTime'] = data['DecisionTime']
         _learning_dict['PCGTime'] = data['PCGTime']
         _learning_dict['Time'] = data['Time']
+
         _learning_dict.update(data['CurrentLearned'])
+        _learning_dict = update_dict_keys(_learning_dict, get_replacement('L'))
+        _learning_dict.update(data['CurrentMatches'])
+        _learning_dict = update_dict_keys(_learning_dict, get_replacement('CM'))
         _learning_list.append(_learning_dict)
+
+        _learning_dict['EVT_MatchNoHint'] = False
+        _learning_dict['EVT_MatchIgnoringHint'] = False
+
+        if 'MatchEvent' in data.keys():
+            _learning_dict['EVT_MatchNoHint'] = 'MatchNoHint' in data['MatchEvent']
+            _learning_dict['EVT_MatchIgnoringHint'] = 'MatchIgnoringHint' in data['MatchEvent']
 
     if 'Quiz' not in item.keys():
         continue
@@ -117,10 +149,6 @@ quiz_df = pd.DataFrame(quiz_dicts)
 
 learning_df = learning_df[learning_df['User'].isin(user_ids)]
 quiz_df = quiz_df[quiz_df['User'].isin(user_ids)]
-
-def get_replacement(prefix):
-    # Change L to prefix
-    return {f'{key}': f'{prefix}_{key}' for key in ['BombPiece', 'CrossPiece', 'HorizontalPiece', 'RainbowPiece', 'RocketPiece', 'VerticalPiece']}
 
 
 learning_df = learning_df.rename(columns=get_replacement('L'))
@@ -160,7 +188,31 @@ print(len(all_df))
 
 print(len(set(all_df['User'])))
 
+def get_match_event(row, col):
+    if row['L_Step'] == 1: return 0
+
+    comp_row = all_df[(all_df['User'] == row['User']) & (all_df['L_Step'] == row['L_Step'] - 1)]
+
+    assert comp_row is not None
+
+    diff = row[col] - comp_row[col]
+
+    return int(diff.values[0])
+
+
+for column in ['CM_BombPiece', 'CM_CrossPiece', 'CM_HorizontalPiece', 'CM_RainbowPiece', 'CM_RocketPiece', 'CM_VerticalPiece']:
+   all_df['Diff_' + column] = all_df.apply(lambda row: get_match_event(row, column), axis=1)
+
+for column in ['BombPiece', 'CrossPiece', 'HorizontalPiece', 'RainbowPiece', 'RocketPiece', 'VerticalPiece']:
+    for match_event in ['MatchNoHint', 'MatchIgnoringHint']:
+        all_df[f'EVT_{match_event}_{column}'] = all_df.apply(lambda row: (row[f'Diff_CM_{column}']) * (row[f'EVT_{match_event}']), axis=1)
+
+# all_df['Diff_' + column] = all_df.apply(lambda row: get_match_event(row, column), axis=1)
+
+
 all_df.to_csv('all_data.csv')
 learning_df.to_csv('learning.csv')
 quiz_df.to_csv('quiz.csv')
+
+
 

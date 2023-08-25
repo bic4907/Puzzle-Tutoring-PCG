@@ -5,9 +5,11 @@ import copy
 ENV_ARGS = list()
 
 MCTS_SIMULATION_TIMES = [100, 200, 400, 800]
+# MCTS_SIMULATION_TIMES = [200]
 SAMPLING_NUMS = [10, 20, 30, 40]
-TARGET_PLAYER = list(range(5, 7)) # 11
+TARGET_PLAYER = list(range(1, 11))  # 11
 METHOD = ['mcts', 'ga', 'sampling', 'random']
+# METHOD = ['mcts', 'random']
 OBJECTIVE = ['knowledge', 'score']
 TARGET_EPISODE_COUNT = 500
 INCLUDE_SIMPLE_EFFECT = [1]

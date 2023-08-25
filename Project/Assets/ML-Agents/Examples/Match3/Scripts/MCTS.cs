@@ -137,12 +137,12 @@ namespace Unity.MLAgentsExamples
             // Reversed number of rarity
             // 0.747835102	0.823021655	0.96658129	0.538003526	0.967900742	0.956657686
             PieceScoreWeight = new Dictionary<PieceType, float>();
-            PieceScoreWeight.Add(PieceType.HorizontalPiece, 0.74f);
-            PieceScoreWeight.Add(PieceType.VerticalPiece, 0.82f);
-            PieceScoreWeight.Add(PieceType.CrossPiece, 0.96f);
-            PieceScoreWeight.Add(PieceType.BombPiece, 0.53f);
-            PieceScoreWeight.Add(PieceType.RocketPiece, 0.96f);
-            PieceScoreWeight.Add(PieceType.RainbowPiece, 0.95f);
+            PieceScoreWeight.Add(PieceType.HorizontalPiece, 1.0f);
+            PieceScoreWeight.Add(PieceType.VerticalPiece, 1.0f);
+            PieceScoreWeight.Add(PieceType.CrossPiece, 1.0f);
+            PieceScoreWeight.Add(PieceType.BombPiece, 1.0f);
+            PieceScoreWeight.Add(PieceType.RocketPiece, 1.0f);
+            PieceScoreWeight.Add(PieceType.RainbowPiece, 1.0f);
         }
 
         public void PrepareRootNode()
@@ -414,7 +414,13 @@ namespace Unity.MLAgentsExamples
                         case GeneratorReward.Score:
                             if (!node.IsSimulated)
                             {
-                                score += node.createdPieces.Count;
+                                foreach ((int CellType, int SpecialType) piece in node.createdPieces)
+                                {
+                                    score += (float)Math.Pow(PieceScoreWeight[(PieceType)piece.SpecialType], 1);
+                                    node.playerKnowledge.IncreaseMatchCount((PieceType)piece.SpecialType);
+                                }
+
+                                // score += node.createdPieces.Count;
                                 node.IsSimulated = true;
                             }
                             break;
@@ -426,27 +432,9 @@ namespace Unity.MLAgentsExamples
                                     bool isReached = node.playerKnowledge.IsMatchCountAlmostReachedTarget((PieceType)piece.SpecialType, KnowledgeAlmostRatio);
                                     if (!isReached) // Have to learn
                                     {
-                                        score += (float)Math.Pow(PieceScoreWeight[(PieceType)piece.SpecialType], 1 / node.playerActionCount);
+                                        score += (float)Math.Pow(PieceScoreWeight[(PieceType)piece.SpecialType], 1);
                                         node.playerKnowledge.IncreaseMatchCount((PieceType)piece.SpecialType);
                                     }
-                                }
-
-                                node.IsSimulated = true;
-                            }
-                            break;
-                        case GeneratorReward.KnowledgePercentile:
-                            if (!node.IsSimulated)
-                            {
-                                // Get Percentiles for each piece
-
-                                Dictionary<PieceType, float> piecePercentiles = new Dictionary<PieceType, float>();
-                                
-                                foreach ((int CellType, int SpecialType) piece in node.createdPieces)
-                                {
-                                    float matchPercentile = node.playerKnowledge.GetMatchPercentile((PieceType)piece.SpecialType);
-
-                                    score += 1 - matchPercentile;
-                                    node.playerKnowledge.IncreaseMatchCount((PieceType)piece.SpecialType);
                                 }
 
                                 node.IsSimulated = true;
