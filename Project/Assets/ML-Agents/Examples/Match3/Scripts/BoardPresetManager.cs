@@ -13,7 +13,7 @@ namespace Unity.MLAgentsExamples
 
     public class BoardPresetManager : MonoBehaviour
     {
-        private Match3Board board;
+        public Match3Board board;
         
         private Dictionary<string, SerializableBoard> loadedBoards = new Dictionary<string, SerializableBoard>();
 
@@ -26,6 +26,10 @@ namespace Unity.MLAgentsExamples
             if (GetComponent<BoardPCGAgent>() != null)
             {
                 board = GetComponent<BoardPCGAgent>().Board;
+            }
+            if (board == null)
+            {
+                board = GetComponent<Match3Board>();
             }
             // Debug.Log("BoardPresetManager: " + board);
             PreloadData();
@@ -134,9 +138,12 @@ namespace Unity.MLAgentsExamples
                 var m_Cells = ((int CellType, int SpecialType)[,])loadedBoard.m_Cells.Clone();
                 
                 var _path = path.Replace("file://", "");
-                loadedBoards.Add(_path, loadedBoard);
-                Debug.Log("BoardPresetManager: Board loaded and cached");
-
+                
+                if (!IsCached(_path)) 
+                {
+                    loadedBoards.Add(_path, loadedBoard);
+                    Debug.Log("BoardPresetManager: Board loaded and cached");
+                }
             }
         }
 

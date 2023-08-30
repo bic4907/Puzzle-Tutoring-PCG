@@ -47,10 +47,9 @@ namespace Unity.MLAgentsExamples
             {
                 currentAgentType = GetComponent<BoardPCGAgent>().agentType;
             }
-            else
+            if  (GetComponent<BoardManualAgent>() != null)
             {
                 currentAgentType = GetComponent<BoardManualAgent>().agentType;
-
             }
         }
 
